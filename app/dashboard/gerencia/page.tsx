@@ -17,6 +17,7 @@ export default function GerenciaPage() {
   const [filtroTecnico, setFiltroTecnico] = useState('')
   const [filtroCentro, setFiltroCentro] = useState('')
   const [submenuOpen, setSubmenuOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const [modalRegistro, setModalRegistro] = useState<any>(null)
   const [editando, setEditando] = useState(false)
   const [editRepuestos, setEditRepuestos] = useState<{nombre:string,cantidad:number}[]>([])
@@ -45,21 +46,18 @@ export default function GerenciaPage() {
   }, [user])
 
   const handleLogout = async () => { await signOut(auth); router.push('/') }
-
   const cambiarEstado = async (id: string, nuevoEstado: string) => {
     await updateDoc(doc(db, 'visitas', id), { estado: nuevoEstado })
   }
-
   const irARevisiones = (estado: string) => {
     setFiltroEstado(estado); setFiltroTecnico(''); setFiltroCentro('')
     setTab('registros'); setSubmenuOpen(true)
   }
 
-  // Parsear repuestos — pueden ser string[] o {nombre,cantidad}[]
-  const parsearRepuestos = (repuestos: any[]): {nombre:string,cantidad:number}[] => {
-    if (!repuestos || repuestos.length === 0) return []
-    if (typeof repuestos[0] === 'string') return repuestos.map(r => ({nombre:r, cantidad:1}))
-    return repuestos
+  const parsearRepuestos = (reps: any[]): {nombre:string,cantidad:number}[] => {
+    if (!reps || reps.length === 0) return []
+    if (typeof reps[0] === 'string') return reps.map(r => ({nombre:r, cantidad:1}))
+    return reps
   }
 
   const abrirModal = (r: any) => {
@@ -88,18 +86,12 @@ export default function GerenciaPage() {
   const guardarEdicion = async () => {
     if (!modalRegistro) return
     setGuardandoEdit(true)
-    const repuestosGuardar = editUsaRepuestos
-      ? editRepuestos.filter(r => r.nombre.trim()).map(r => ({nombre:r.nombre, cantidad:r.cantidad}))
-      : []
+    const repsGuardar = editUsaRepuestos ? editRepuestos.filter(r => r.nombre.trim()) : []
     await updateDoc(doc(db, 'visitas', modalRegistro.id), {
-      repuestos: repuestosGuardar,
-      observaciones: editObservaciones,
-      estado: editEstado,
-      usaRepuestos: editUsaRepuestos,
+      repuestos: repsGuardar, observaciones: editObservaciones, estado: editEstado, usaRepuestos: editUsaRepuestos,
     })
-    setGuardandoEdit(false)
-    setEditando(false)
-    setModalRegistro({...modalRegistro, repuestos: repuestosGuardar, observaciones: editObservaciones, estado: editEstado})
+    setGuardandoEdit(false); setEditando(false)
+    setModalRegistro({...modalRegistro, repuestos: repsGuardar, observaciones: editObservaciones, estado: editEstado})
   }
 
   const registrosFiltrados = registros.filter(r => {
@@ -125,9 +117,7 @@ export default function GerenciaPage() {
   }, 0)
 
   const centroCount: Record<string,number> = {}
-  registros.forEach(r => {
-    if (r.repuestos) centroCount[r.centro] = (centroCount[r.centro] || 0) + r.repuestos.length
-  })
+  registros.forEach(r => { if (r.repuestos) centroCount[r.centro] = (centroCount[r.centro] || 0) + r.repuestos.length })
   const top5 = Object.entries(centroCount).sort((a,b) => b[1]-a[1]).slice(0,5).map(([name,value]) => ({name,value}))
 
   const now = new Date()
@@ -149,6 +139,11 @@ export default function GerenciaPage() {
   const tecnicosUnicos = [...new Set(registros.map(r => r.tecnico))].filter(Boolean)
   const centrosUnicos = [...new Set(registros.map(r => r.centro))].filter(Boolean)
 
+  const formatRepuestos = (reps: any[]) => {
+    if (!reps || reps.length === 0) return 'Sin repuestos'
+    return reps.map(r => typeof r === 'object' ? `${r.nombre} (x${r.cantidad})` : r).join(', ')
+  }
+
   const badge = (estado: string) => ({
     display:'inline-block',padding:'3px 10px',borderRadius:20,fontSize:11,fontWeight:600,
     background:estado==='Pendiente'?'#FCEBEB':estado==='Cobrado'?'#EAF3DE':'#FAEEDA',
@@ -159,13 +154,16 @@ export default function GerenciaPage() {
     display:'flex',alignItems:'center',gap:10,padding:'12px 1rem',
     color:active?'#fff':'rgba(255,255,255,0.8)',fontSize:14,cursor:'pointer',
     background:active?'rgba(255,255,255,0.18)':'transparent',
-    borderLeft:active?'3px solid #fff':'3px solid transparent'
+    borderLeft:active?'3px solid #fff':'3px solid transparent',
+    whiteSpace:'nowrap' as const,overflow:'hidden'
   })
+
   const subItem = (active: boolean) => ({
     display:'flex',alignItems:'center',gap:8,padding:'9px 1rem 9px 2.5rem',
     color:active?'#fff':'rgba(255,255,255,0.65)',fontSize:13,cursor:'pointer',
     background:active?'rgba(255,255,255,0.12)':'transparent',
-    borderLeft:active?'3px solid #fff':'3px solid transparent'
+    borderLeft:active?'3px solid #fff':'3px solid transparent',
+    whiteSpace:'nowrap' as const,overflow:'hidden'
   })
 
   const kpis = [
@@ -175,12 +173,6 @@ export default function GerenciaPage() {
     {label:'Repuestos cobrados este mes', value:cobrados, sub:'Ver cobrados →', subColor:'#27ae60', icon:'/icon-cobrados.png', cursor:true, onClick:() => irARevisiones('Cobrado')},
     {label:'Centros visitados este mes', value:[...new Set(registrosMes.map((r:any)=>r.centro))].length, sub:'Todas las visitas del mes', subColor:'#2196f3', icon:'/icon-centros.png', cursor:false, onClick:undefined},
   ]
-
-  // Formatear repuestos para mostrar en tabla
-  const formatRepuestos = (repuestos: any[]) => {
-    if (!repuestos || repuestos.length === 0) return 'Sin repuestos'
-    return repuestos.map(r => typeof r === 'object' ? `${r.nombre} (x${r.cantidad})` : r).join(', ')
-  }
 
   const TablaRegistros = ({lista}: {lista:any[]}) => (
     <table style={{width:'100%',borderCollapse:'collapse',fontSize:12}}>
@@ -201,7 +193,7 @@ export default function GerenciaPage() {
               </select>
             </td>
             <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>
-              <button onClick={() => abrirModal(r)} style={{padding:'4px 10px',background:'#1a6fa8',color:'#fff',border:'none',borderRadius:6,fontSize:11,cursor:'pointer'}}>
+              <button onClick={() => abrirModal(r)} style={{padding:'4px 10px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:6,fontSize:11,cursor:'pointer'}}>
                 Ver detalle
               </button>
             </td>
@@ -219,7 +211,6 @@ export default function GerenciaPage() {
       {modalRegistro && (
         <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center'}} onClick={cerrarModal}>
           <div style={{background:'#fff',borderRadius:16,padding:'2rem',width:540,maxWidth:'90vw',maxHeight:'88vh',overflowY:'auto',boxShadow:'0 20px 60px rgba(0,0,0,0.2)'}} onClick={e => e.stopPropagation()}>
-
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1.5rem'}}>
               <div>
                 <h2 style={{fontSize:18,fontWeight:700,color:'#1a1a2e',marginBottom:2}}>Detalle de visita</h2>
@@ -227,7 +218,6 @@ export default function GerenciaPage() {
               </div>
               <button onClick={cerrarModal} style={{background:'none',border:'none',fontSize:24,cursor:'pointer',color:'#aaa'}}>×</button>
             </div>
-
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:'1.25rem'}}>
               <div style={{background:'#f7f9fc',borderRadius:10,padding:'12px'}}>
                 <div style={{fontSize:11,color:'#aaa',marginBottom:4}}>Técnico</div>
@@ -238,39 +228,27 @@ export default function GerenciaPage() {
                 <div style={{fontSize:14,fontWeight:600,color:'#1a1a2e'}}>{modalRegistro.centro}</div>
               </div>
             </div>
-
-            {/* Estado */}
             <div style={{marginBottom:'1.25rem'}}>
               <div style={{fontSize:12,color:'#555',marginBottom:6,fontWeight:500}}>Estado</div>
               {editando ? (
                 <select value={editEstado} onChange={e => setEditEstado(e.target.value)} style={{width:'100%',padding:'9px 10px',border:'1.5px solid #2196f3',borderRadius:8,fontSize:13}}>
                   {ESTADOS.map(e => <option key={e} value={e}>{e}</option>)}
                 </select>
-              ) : (
-                <span style={badge(editEstado)}>{editEstado}</span>
-              )}
+              ) : <span style={badge(editEstado)}>{editEstado}</span>}
             </div>
-
-            {/* ¿Se usaron repuestos? */}
             {editando && (
               <div style={{marginBottom:'1.25rem'}}>
                 <div style={{fontSize:12,color:'#555',marginBottom:8,fontWeight:500}}>¿Se utilizaron repuestos?</div>
                 <div style={{display:'flex',gap:10}}>
-                  <button onClick={() => handleUsaRepuestosChange(true)} style={{flex:1,padding:'9px',border:`2px solid ${editUsaRepuestos?'#2196f3':'#ddd'}`,borderRadius:8,background:editUsaRepuestos?'#e8f4fd':'#fff',color:editUsaRepuestos?'#1a6fa8':'#666',fontSize:13,cursor:'pointer',fontWeight:editUsaRepuestos?600:400}}>
-                    ✅ Sí, se utilizaron
-                  </button>
-                  <button onClick={() => handleUsaRepuestosChange(false)} style={{flex:1,padding:'9px',border:`2px solid ${!editUsaRepuestos?'#ef5350':'#ddd'}`,borderRadius:8,background:!editUsaRepuestos?'#FCEBEB':'#fff',color:!editUsaRepuestos?'#c0392b':'#666',fontSize:13,cursor:'pointer',fontWeight:!editUsaRepuestos?600:400}}>
-                    ❌ No se utilizaron
-                  </button>
+                  <button onClick={() => handleUsaRepuestosChange(true)} style={{flex:1,padding:'9px',border:`2px solid ${editUsaRepuestos?'#2196f3':'#ddd'}`,borderRadius:8,background:editUsaRepuestos?'#e8f4fd':'#fff',color:editUsaRepuestos?'#1a6fa8':'#666',fontSize:13,cursor:'pointer',fontWeight:editUsaRepuestos?600:400}}>✅ Sí</button>
+                  <button onClick={() => handleUsaRepuestosChange(false)} style={{flex:1,padding:'9px',border:`2px solid ${!editUsaRepuestos?'#ef5350':'#ddd'}`,borderRadius:8,background:!editUsaRepuestos?'#FCEBEB':'#fff',color:!editUsaRepuestos?'#c0392b':'#666',fontSize:13,cursor:'pointer',fontWeight:!editUsaRepuestos?600:400}}>❌ No</button>
                 </div>
               </div>
             )}
-
-            {/* Repuestos */}
-            {!editando && (
-              <div style={{marginBottom:'1.25rem'}}>
-                <div style={{fontSize:12,color:'#555',marginBottom:6,fontWeight:500}}>Repuestos utilizados</div>
-                {modalRegistro.repuestos && modalRegistro.repuestos.length > 0 ? (
+            <div style={{marginBottom:'1.25rem'}}>
+              <div style={{fontSize:12,color:'#555',marginBottom:6,fontWeight:500}}>Repuestos utilizados</div>
+              {!editando ? (
+                modalRegistro.repuestos && modalRegistro.repuestos.length > 0 ? (
                   <div style={{display:'flex',flexDirection:'column',gap:6}}>
                     {parsearRepuestos(modalRegistro.repuestos).map((r,i) => (
                       <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',background:'#f0f7ff',borderRadius:8,padding:'8px 12px'}}>
@@ -279,33 +257,27 @@ export default function GerenciaPage() {
                       </div>
                     ))}
                   </div>
-                ) : (
-                  <div style={{background:'#f7f9fc',borderRadius:8,padding:'10px 12px',fontSize:13,color:'#aaa'}}>Sin repuestos utilizados</div>
-                )}
-              </div>
-            )}
-
-            {editando && editUsaRepuestos && (
-              <div style={{marginBottom:'1.25rem'}}>
-                <div style={{fontSize:12,color:'#555',marginBottom:6,fontWeight:500}}>Repuestos utilizados</div>
-                {editRepuestos.map((r,i) => (
-                  <div key={i} style={{display:'flex',gap:8,marginBottom:6,alignItems:'center'}}>
-                    <input value={r.nombre} onChange={e => { const arr=[...editRepuestos]; arr[i]={...arr[i],nombre:e.target.value}; setEditRepuestos(arr) }}
-                      placeholder="Nombre del repuesto"
-                      style={{flex:2,padding:'8px 10px',border:'1.5px solid #2196f3',borderRadius:8,fontSize:13}} />
-                    <input type="number" min={1} value={r.cantidad} onChange={e => { const arr=[...editRepuestos]; arr[i]={...arr[i],cantidad:parseInt(e.target.value)||1}; setEditRepuestos(arr) }}
-                      placeholder="Cant."
-                      style={{flex:1,padding:'8px 10px',border:'1.5px solid #2196f3',borderRadius:8,fontSize:13}} />
-                    <button onClick={() => setEditRepuestos(editRepuestos.filter((_,idx)=>idx!==i))}
-                      style={{padding:'8px 12px',border:'1px solid #ddd',borderRadius:8,background:'#fff',cursor:'pointer',color:'#888'}}>✕</button>
+                ) : <div style={{background:'#f7f9fc',borderRadius:8,padding:'10px 12px',fontSize:13,color:'#aaa'}}>Sin repuestos utilizados</div>
+              ) : editUsaRepuestos ? (
+                <div>
+                  <div style={{display:'flex',gap:8,marginBottom:4}}>
+                    <span style={{flex:2,fontSize:11,color:'#aaa'}}>Nombre</span>
+                    <span style={{flex:1,fontSize:11,color:'#aaa'}}>Cantidad</span>
+                    <span style={{width:38}}></span>
                   </div>
-                ))}
-                <button onClick={() => setEditRepuestos([...editRepuestos,{nombre:'',cantidad:1}])}
-                  style={{fontSize:13,color:'#1a6fa8',background:'none',border:'none',cursor:'pointer',padding:'4px 0'}}>+ Agregar repuesto</button>
-              </div>
-            )}
-
-            {/* Observaciones */}
+                  {editRepuestos.map((r,i) => (
+                    <div key={i} style={{display:'flex',gap:8,marginBottom:6,alignItems:'center'}}>
+                      <input value={r.nombre} onChange={e => { const arr=[...editRepuestos]; arr[i]={...arr[i],nombre:e.target.value}; setEditRepuestos(arr) }}
+                        placeholder="Nombre" style={{flex:2,padding:'8px 10px',border:'1.5px solid #2196f3',borderRadius:8,fontSize:13}} />
+                      <input type="number" min={1} value={r.cantidad} onChange={e => { const arr=[...editRepuestos]; arr[i]={...arr[i],cantidad:parseInt(e.target.value)||1}; setEditRepuestos(arr) }}
+                        style={{flex:1,padding:'8px 10px',border:'1.5px solid #2196f3',borderRadius:8,fontSize:13}} />
+                      <button onClick={() => setEditRepuestos(editRepuestos.filter((_,idx)=>idx!==i))} style={{width:38,height:38,border:'1px solid #ddd',borderRadius:8,background:'#fff',cursor:'pointer',color:'#888'}}>✕</button>
+                    </div>
+                  ))}
+                  <button onClick={() => setEditRepuestos([...editRepuestos,{nombre:'',cantidad:1}])} style={{fontSize:13,color:'#1a6fa8',background:'none',border:'none',cursor:'pointer',padding:'4px 0'}}>+ Agregar</button>
+                </div>
+              ) : null}
+            </div>
             <div style={{marginBottom:'1.5rem'}}>
               <div style={{fontSize:12,color:'#555',marginBottom:6,fontWeight:500}}>Observaciones</div>
               {editando ? (
@@ -317,19 +289,18 @@ export default function GerenciaPage() {
                 </div>
               )}
             </div>
-
             <div style={{display:'flex',gap:10,justifyContent:'flex-end'}}>
               {editando ? (
                 <>
                   <button onClick={() => setEditando(false)} style={{padding:'9px 20px',border:'1px solid #ddd',borderRadius:8,background:'#fff',fontSize:13,cursor:'pointer',color:'#666'}}>Cancelar</button>
-                  <button onClick={guardarEdicion} disabled={guardandoEdit} style={{padding:'9px 20px',background:'#1a6fa8',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:600,cursor:'pointer'}}>
+                  <button onClick={guardarEdicion} disabled={guardandoEdit} style={{padding:'9px 20px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:600,cursor:'pointer'}}>
                     {guardandoEdit ? 'Guardando...' : '✅ Guardar cambios'}
                   </button>
                 </>
               ) : (
                 <>
                   <button onClick={cerrarModal} style={{padding:'9px 20px',border:'1px solid #ddd',borderRadius:8,background:'#fff',fontSize:13,cursor:'pointer',color:'#666'}}>Cerrar</button>
-                  <button onClick={() => setEditando(true)} style={{padding:'9px 20px',background:'#1a6fa8',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:600,cursor:'pointer'}}>✏️ Editar</button>
+                  <button onClick={() => setEditando(true)} style={{padding:'9px 20px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:600,cursor:'pointer'}}>✏️ Editar</button>
                 </>
               )}
             </div>
@@ -338,31 +309,48 @@ export default function GerenciaPage() {
       )}
 
       {/* SIDEBAR */}
-      <div style={{width:220,background:'linear-gradient(180deg, #1a3a6b 0%, #2196f3 100%)',display:'flex',flexDirection:'column'}}>
-        <div style={{padding:'1rem',borderBottom:'1px solid rgba(255,255,255,0.15)',display:'flex',alignItems:'center',gap:10}}>
-          <img src="/logo.png" alt="SIAC" style={{width:42,height:42,borderRadius:10,background:'#fff',padding:3,objectFit:'contain'}} />
-          <div>
-            <div style={{color:'#fff',fontSize:15,fontWeight:700,lineHeight:1}}>SIAC</div>
-            <div style={{color:'rgba(255,255,255,0.6)',fontSize:10}}>INGENIERÍA</div>
-          </div>
+      <div style={{width:sidebarOpen?220:64,background:'linear-gradient(180deg, #1a3a6b 0%, #2196f3 100%)',display:'flex',flexDirection:'column',transition:'width 0.3s ease',overflow:'hidden'}}>
+        <div style={{padding:'1rem',borderBottom:'1px solid rgba(255,255,255,0.15)',display:'flex',alignItems:'center',justifyContent:sidebarOpen?'space-between':'center'}}>
+          {sidebarOpen && (
+            <div style={{display:'flex',alignItems:'center',gap:10}}>
+              <img src="/logo.png" alt="SIAC" style={{width:42,height:42,borderRadius:10,background:'#fff',padding:3,objectFit:'contain'}} />
+              <div>
+                <div style={{color:'#fff',fontSize:15,fontWeight:700,lineHeight:1}}>SIAC</div>
+                <div style={{color:'rgba(255,255,255,0.6)',fontSize:10}}>INGENIERÍA</div>
+              </div>
+            </div>
+          )}
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{background:'none',border:'none',cursor:'pointer',color:'#fff',fontSize:20,padding:4,display:'flex',flexDirection:'column',gap:4,alignItems:'center'}}>
+            <span style={{display:'block',width:22,height:2,background:'#fff',borderRadius:2}}></span>
+            <span style={{display:'block',width:22,height:2,background:'#fff',borderRadius:2}}></span>
+            <span style={{display:'block',width:22,height:2,background:'#fff',borderRadius:2}}></span>
+          </button>
         </div>
-        <div style={navItem(tab==='inicio')} onClick={() => setTab('inicio')}>🏠 Inicio</div>
+
+        <div style={navItem(tab==='inicio')} onClick={() => setTab('inicio')}>
+          <span style={{fontSize:18,flexShrink:0}}>🏠</span>
+          {sidebarOpen && <span>Inicio</span>}
+        </div>
         <div style={navItem(tab==='registros')} onClick={() => { setSubmenuOpen(!submenuOpen); setTab('registros'); setFiltroEstado('') }}>
-          🔍 Revisiones <span style={{marginLeft:'auto',fontSize:11}}>{submenuOpen?'▲':'▼'}</span>
+          <span style={{fontSize:18,flexShrink:0}}>🔍</span>
+          {sidebarOpen && <><span>Revisiones</span><span style={{marginLeft:'auto',fontSize:11}}>{submenuOpen?'▲':'▼'}</span></>}
         </div>
-        {submenuOpen && <>
+        {submenuOpen && sidebarOpen && <>
           <div style={subItem(tab==='registros'&&filtroEstado==='')} onClick={() => irARevisiones('')}>📋 Todos</div>
           <div style={subItem(tab==='registros'&&filtroEstado==='Pendiente')} onClick={() => irARevisiones('Pendiente')}>⏳ Pendientes</div>
           <div style={subItem(tab==='registros'&&filtroEstado==='En revisión')} onClick={() => irARevisiones('En revisión')}>🔎 En revisión</div>
           <div style={subItem(tab==='registros'&&filtroEstado==='Cobrado')} onClick={() => irARevisiones('Cobrado')}>✅ Cobrados</div>
         </>}
+
         <div style={{marginTop:'auto',padding:'1rem',borderTop:'1px solid rgba(255,255,255,0.15)'}}>
-          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}>
-            <div style={{width:32,height:32,borderRadius:'50%',background:'rgba(255,255,255,0.2)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:600,color:'#fff'}}>GO</div>
-            <div style={{color:'rgba(255,255,255,0.9)',fontSize:12}}>Jefe de Operaciones</div>
-          </div>
+          {sidebarOpen && (
+            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}>
+              <div style={{width:32,height:32,borderRadius:'50%',background:'rgba(255,255,255,0.2)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:600,color:'#fff'}}>GO</div>
+              <div style={{color:'rgba(255,255,255,0.9)',fontSize:12}}>Jefe de Operaciones</div>
+            </div>
+          )}
           <button onClick={handleLogout} style={{width:'100%',padding:'7px',background:'transparent',border:'1px solid rgba(255,255,255,0.3)',borderRadius:8,color:'rgba(255,255,255,0.8)',fontSize:12,cursor:'pointer'}}>
-            ← Cerrar sesión
+            {sidebarOpen ? '← Cerrar sesión' : '←'}
           </button>
         </div>
       </div>
@@ -371,10 +359,9 @@ export default function GerenciaPage() {
       <div style={{flex:1,padding:'1.5rem',background:'#f7f9fc',overflowY:'auto'}}>
         {tab === 'inicio' && <>
           <div style={{marginBottom:'1.5rem'}}>
-            <h1 style={{fontSize:26,fontWeight:700,color:'#1a1a2e',marginBottom:2}}>Inicio</h1>
+            <h1 style={{fontSize:26,fontWeight:700,color:'#1a1a2e',marginBottom:2}}>Dashboard</h1>
             <p style={{color:'#888',fontSize:14}}>Resumen general de repuestos y visitas</p>
           </div>
-
           <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:12,marginBottom:'1.5rem'}}>
             {kpis.map((k,i) => (
               <div key={i} onClick={k.onClick} style={{background:'#fff',borderRadius:12,padding:'1rem',border:'1px solid #eef0f5',cursor:k.cursor?'pointer':'default',boxShadow:'0 1px 4px rgba(0,0,0,0.04)'}}>
@@ -387,7 +374,6 @@ export default function GerenciaPage() {
               </div>
             ))}
           </div>
-
           <div style={{display:'grid',gridTemplateColumns:'1.5fr 1.5fr 1fr',gap:12,marginBottom:'1rem'}}>
             <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5'}}>
               <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem'}}>Repuestos utilizados últimos 6 meses</div>
@@ -429,7 +415,6 @@ export default function GerenciaPage() {
               )}
             </div>
           </div>
-
           <div style={{display:'grid',gridTemplateColumns:'2fr 1fr',gap:12}}>
             <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5'}}>
               <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1rem'}}>
@@ -441,27 +426,19 @@ export default function GerenciaPage() {
             <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5'}}>
               <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem'}}>Pendientes importantes</div>
               <div style={{display:'flex',flexDirection:'column',gap:12}}>
-                <div onClick={() => irARevisiones('Pendiente')} style={{display:'flex',alignItems:'flex-start',gap:10,padding:'10px',background:'#fff9f9',borderRadius:8,border:'1px solid #fce4e4',cursor:'pointer'}}>
-                  <img src="/icon-pendientes.png" alt="" style={{width:60,height:60,borderRadius:8,objectFit:'cover'}} />
-                  <div>
-                    <div style={{fontSize:13,fontWeight:600,color:'#c0392b'}}>{pendientes} repuestos pendientes</div>
-                    <div style={{fontSize:11,color:'#888'}}>Requieren atención</div>
+                {[
+                  {icon:'/icon-pendientes.png',count:pendientes,label:'repuestos pendientes',color:'#c0392b',bg:'#fff9f9',border:'#fce4e4',estado:'Pendiente'},
+                  {icon:'/icon-visitas.png',count:enRevision,label:'en revisión',color:'#e67e22',bg:'#fffbf0',border:'#fde8a0',estado:'En revisión'},
+                  {icon:'/icon-cobrados.png',count:cobrados,label:'cobrados',color:'#27ae60',bg:'#f0fbf8',border:'#b2dfdb',estado:'Cobrado'},
+                ].map((item,i) => (
+                  <div key={i} onClick={() => irARevisiones(item.estado)} style={{display:'flex',alignItems:'flex-start',gap:10,padding:'10px',background:item.bg,borderRadius:8,border:`1px solid ${item.border}`,cursor:'pointer'}}>
+                    <img src={item.icon} alt="" style={{width:60,height:60,borderRadius:8,objectFit:'cover'}} />
+                    <div>
+                      <div style={{fontSize:13,fontWeight:600,color:item.color}}>{item.count} {item.label}</div>
+                      <div style={{fontSize:11,color:'#888'}}>Ver detalle →</div>
+                    </div>
                   </div>
-                </div>
-                <div onClick={() => irARevisiones('En revisión')} style={{display:'flex',alignItems:'flex-start',gap:10,padding:'10px',background:'#fffbf0',borderRadius:8,border:'1px solid #fde8a0',cursor:'pointer'}}>
-                  <img src="/icon-visitas.png" alt="" style={{width:60,height:60,borderRadius:8,objectFit:'cover'}} />
-                  <div>
-                    <div style={{fontSize:13,fontWeight:600,color:'#e67e22'}}>{enRevision} en revisión</div>
-                    <div style={{fontSize:11,color:'#888'}}>Revisar detalle</div>
-                  </div>
-                </div>
-                <div onClick={() => irARevisiones('Cobrado')} style={{display:'flex',alignItems:'flex-start',gap:10,padding:'10px',background:'#f0fbf8',borderRadius:8,border:'1px solid #b2dfdb',cursor:'pointer'}}>
-                  <img src="/icon-cobrados.png" alt="" style={{width:60,height:60,borderRadius:8,objectFit:'cover'}} />
-                  <div>
-                    <div style={{fontSize:13,fontWeight:600,color:'#27ae60'}}>{cobrados} cobrados</div>
-                    <div style={{fontSize:11,color:'#888'}}>Todo en orden</div>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>

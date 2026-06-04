@@ -47,6 +47,7 @@ export default function TecnicoPage() {
   const [exito, setExito] = useState(false)
   const [filtroMes, setFiltroMes] = useState('')
   const [filtroCentroH, setFiltroCentroH] = useState('')
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const [modalRegistro, setModalRegistro] = useState<any>(null)
   const [editando, setEditando] = useState(false)
   const [editRepuestos, setEditRepuestos] = useState<{nombre:string,cantidad:number}[]>([])
@@ -66,11 +67,7 @@ export default function TecnicoPage() {
 
   useEffect(() => {
     if (!user) return
-    const q = query(
-      collection(db, 'visitas'),
-      where('uid', '==', user.uid),
-      orderBy('fecha', 'desc')
-    )
+    const q = query(collection(db, 'visitas'), where('uid', '==', user.uid), orderBy('fecha', 'desc'))
     const unsub = onSnapshot(q, (snap) => {
       setRegistros(snap.docs.map(d => ({ id: d.id, ...d.data() })))
     })
@@ -99,22 +96,14 @@ export default function TecnicoPage() {
   const handleSubmit = async () => {
     if (!centro) { alert('Por favor selecciona un centro'); return }
     if (usaRepuestos === null) { alert('Por favor indica si se utilizaron repuestos'); return }
-    if (usaRepuestos && repuestos.filter(r => r.nombre.trim()).length === 0) {
-      alert('Por favor agrega al menos un repuesto'); return
-    }
+    if (usaRepuestos && repuestos.filter(r => r.nombre.trim()).length === 0) { alert('Por favor agrega al menos un repuesto'); return }
     setGuardando(true)
     try {
       await addDoc(collection(db, 'visitas'), {
-        uid: user.uid,
-        tecnico: TECNICOS[user.email] || user.email,
-        email: user.email,
-        centro,
+        uid: user.uid, tecnico: TECNICOS[user.email] || user.email, email: user.email, centro,
         fecha: Timestamp.fromDate(new Date(fecha + 'T12:00:00')),
         repuestos: usaRepuestos ? repuestos.filter(r => r.nombre.trim()) : [],
-        usaRepuestos,
-        observaciones,
-        estado: 'Pendiente',
-        creadoEn: Timestamp.now()
+        usaRepuestos, observaciones, estado: 'Pendiente', creadoEn: Timestamp.now()
       })
       setExito(true)
       setCentro(''); setRepuestos([{nombre:'',cantidad:1}]); setObservaciones('')
@@ -160,32 +149,23 @@ export default function TecnicoPage() {
     setGuardandoEdit(true)
     const repsGuardar = editUsaRepuestos ? editRepuestos.filter(r => r.nombre.trim()) : []
     await updateDoc(doc(db, 'visitas', modalRegistro.id), {
-      repuestos: repsGuardar,
-      observaciones: editObservaciones,
-      usaRepuestos: editUsaRepuestos,
+      repuestos: repsGuardar, observaciones: editObservaciones, usaRepuestos: editUsaRepuestos,
     })
-    setGuardandoEdit(false)
-    setEditando(false)
+    setGuardandoEdit(false); setEditando(false)
     setModalRegistro({...modalRegistro, repuestos: repsGuardar, observaciones: editObservaciones})
   }
 
   const nombreTecnico = user ? (TECNICOS[user.email] || user.email) : ''
   const iniciales = nombreTecnico.split(' ').map((n:string) => n[0]).join('').slice(0,2).toUpperCase()
-
   const mesActual = new Date().getMonth()
   const mesYear = new Date().getFullYear()
-  const registrosMes = registros.filter(r => {
-    const fd = r.fecha?.toDate()
-    return fd && fd.getMonth()===mesActual && fd.getFullYear()===mesYear
-  })
+  const registrosMes = registros.filter(r => { const fd = r.fecha?.toDate(); return fd && fd.getMonth()===mesActual && fd.getFullYear()===mesYear })
   const registrosMesConRepuestos = registrosMes.filter(r => r.repuestos && r.repuestos.length > 0)
-
   const registrosFiltrados = registros.filter(r => {
     if (filtroMes !== '' && new Date(r.fecha?.toDate()).getMonth() !== parseInt(filtroMes)) return false
     if (filtroCentroH && r.centro !== filtroCentroH) return false
     return true
   })
-
   const centrosUnicos = [...new Set(registros.map(r => r.centro))].filter(Boolean)
 
   const formatRepuestos = (reps: any[]) => {
@@ -203,7 +183,8 @@ export default function TecnicoPage() {
     display:'flex',alignItems:'center',gap:10,padding:'12px 1rem',
     color:active?'#fff':'rgba(255,255,255,0.8)',fontSize:14,cursor:'pointer',
     background:active?'rgba(255,255,255,0.18)':'transparent',
-    borderLeft:active?'3px solid #fff':'3px solid transparent'
+    borderLeft:active?'3px solid #fff':'3px solid transparent',
+    whiteSpace:'nowrap' as const, overflow:'hidden'
   })
 
   const btnPrimario = {padding:'7px 14px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:12,cursor:'pointer',fontWeight:500}
@@ -222,7 +203,6 @@ export default function TecnicoPage() {
               </div>
               <button onClick={cerrarModal} style={{background:'none',border:'none',fontSize:24,cursor:'pointer',color:'#aaa'}}>×</button>
             </div>
-
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:'1.25rem'}}>
               <div style={{background:'#f7f9fc',borderRadius:10,padding:'12px'}}>
                 <div style={{fontSize:11,color:'#aaa',marginBottom:4}}>Centro</div>
@@ -233,21 +213,15 @@ export default function TecnicoPage() {
                 <span style={badge(modalRegistro.estado)}>{modalRegistro.estado}</span>
               </div>
             </div>
-
             {editando && (
               <div style={{marginBottom:'1.25rem'}}>
                 <div style={{fontSize:12,color:'#555',marginBottom:8,fontWeight:500}}>¿Se utilizaron repuestos?</div>
                 <div style={{display:'flex',gap:10}}>
-                  <button onClick={() => handleEditUsaRepuestos(true)} style={{flex:1,padding:'9px',border:`2px solid ${editUsaRepuestos?'#2196f3':'#ddd'}`,borderRadius:8,background:editUsaRepuestos?'#e8f4fd':'#fff',color:editUsaRepuestos?'#1a6fa8':'#666',fontSize:13,cursor:'pointer',fontWeight:editUsaRepuestos?600:400}}>
-                    ✅ Sí, se utilizaron
-                  </button>
-                  <button onClick={() => handleEditUsaRepuestos(false)} style={{flex:1,padding:'9px',border:`2px solid ${!editUsaRepuestos?'#ef5350':'#ddd'}`,borderRadius:8,background:!editUsaRepuestos?'#FCEBEB':'#fff',color:!editUsaRepuestos?'#c0392b':'#666',fontSize:13,cursor:'pointer',fontWeight:!editUsaRepuestos?600:400}}>
-                    ❌ No se utilizaron
-                  </button>
+                  <button onClick={() => handleEditUsaRepuestos(true)} style={{flex:1,padding:'9px',border:`2px solid ${editUsaRepuestos?'#2196f3':'#ddd'}`,borderRadius:8,background:editUsaRepuestos?'#e8f4fd':'#fff',color:editUsaRepuestos?'#1a6fa8':'#666',fontSize:13,cursor:'pointer',fontWeight:editUsaRepuestos?600:400}}>✅ Sí</button>
+                  <button onClick={() => handleEditUsaRepuestos(false)} style={{flex:1,padding:'9px',border:`2px solid ${!editUsaRepuestos?'#ef5350':'#ddd'}`,borderRadius:8,background:!editUsaRepuestos?'#FCEBEB':'#fff',color:!editUsaRepuestos?'#c0392b':'#666',fontSize:13,cursor:'pointer',fontWeight:!editUsaRepuestos?600:400}}>❌ No</button>
                 </div>
               </div>
             )}
-
             <div style={{marginBottom:'1.25rem'}}>
               <div style={{fontSize:12,color:'#555',marginBottom:6,fontWeight:500}}>Repuestos utilizados</div>
               {!editando ? (
@@ -260,33 +234,22 @@ export default function TecnicoPage() {
                       </div>
                     ))}
                   </div>
-                ) : (
-                  <div style={{background:'#f7f9fc',borderRadius:8,padding:'10px 12px',fontSize:13,color:'#aaa'}}>Sin repuestos utilizados</div>
-                )
+                ) : <div style={{background:'#f7f9fc',borderRadius:8,padding:'10px 12px',fontSize:13,color:'#aaa'}}>Sin repuestos</div>
               ) : editUsaRepuestos ? (
                 <div>
-                  <div style={{display:'flex',gap:8,marginBottom:4}}>
-                    <span style={{flex:2,fontSize:11,color:'#aaa'}}>Nombre</span>
-                    <span style={{flex:1,fontSize:11,color:'#aaa'}}>Cantidad</span>
-                    <span style={{width:38}}></span>
-                  </div>
                   {editRepuestos.map((r,i) => (
                     <div key={i} style={{display:'flex',gap:8,marginBottom:6,alignItems:'center'}}>
                       <input value={r.nombre} onChange={e => { const arr=[...editRepuestos]; arr[i]={...arr[i],nombre:e.target.value}; setEditRepuestos(arr) }}
-                        placeholder="Nombre del repuesto"
-                        style={{flex:2,padding:'8px 10px',border:'1.5px solid #2196f3',borderRadius:8,fontSize:13}} />
+                        placeholder="Nombre" style={{flex:2,padding:'8px 10px',border:'1.5px solid #2196f3',borderRadius:8,fontSize:13}} />
                       <input type="number" min={1} value={r.cantidad} onChange={e => { const arr=[...editRepuestos]; arr[i]={...arr[i],cantidad:parseInt(e.target.value)||1}; setEditRepuestos(arr) }}
                         style={{flex:1,padding:'8px 10px',border:'1.5px solid #2196f3',borderRadius:8,fontSize:13}} />
-                      <button onClick={() => setEditRepuestos(editRepuestos.filter((_,idx)=>idx!==i))}
-                        style={{width:38,height:38,border:'1px solid #ddd',borderRadius:8,background:'#fff',cursor:'pointer',color:'#888'}}>✕</button>
+                      <button onClick={() => setEditRepuestos(editRepuestos.filter((_,idx)=>idx!==i))} style={{width:38,height:38,border:'1px solid #ddd',borderRadius:8,background:'#fff',cursor:'pointer',color:'#888'}}>✕</button>
                     </div>
                   ))}
-                  <button onClick={() => setEditRepuestos([...editRepuestos,{nombre:'',cantidad:1}])}
-                    style={{fontSize:13,color:'#1a6fa8',background:'none',border:'none',cursor:'pointer',padding:'4px 0'}}>+ Agregar repuesto</button>
+                  <button onClick={() => setEditRepuestos([...editRepuestos,{nombre:'',cantidad:1}])} style={{fontSize:13,color:'#1a6fa8',background:'none',border:'none',cursor:'pointer'}}>+ Agregar</button>
                 </div>
               ) : null}
             </div>
-
             <div style={{marginBottom:'1.5rem'}}>
               <div style={{fontSize:12,color:'#555',marginBottom:6,fontWeight:500}}>Observaciones</div>
               {editando ? (
@@ -298,13 +261,12 @@ export default function TecnicoPage() {
                 </div>
               )}
             </div>
-
             <div style={{display:'flex',gap:10,justifyContent:'flex-end'}}>
               {editando ? (
                 <>
                   <button onClick={() => setEditando(false)} style={{padding:'9px 20px',border:'1px solid #ddd',borderRadius:8,background:'#fff',fontSize:13,cursor:'pointer',color:'#666'}}>Cancelar</button>
                   <button onClick={guardarEdicion} disabled={guardandoEdit} style={{padding:'9px 20px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:600,cursor:'pointer'}}>
-                    {guardandoEdit ? 'Guardando...' : '✅ Guardar cambios'}
+                    {guardandoEdit ? 'Guardando...' : '✅ Guardar'}
                   </button>
                 </>
               ) : (
@@ -319,31 +281,50 @@ export default function TecnicoPage() {
       )}
 
       {/* SIDEBAR */}
-      <div style={{width:220,background:'linear-gradient(180deg, #1a3a6b 0%, #2196f3 100%)',display:'flex',flexDirection:'column'}}>
-        <div style={{padding:'1rem',borderBottom:'1px solid rgba(255,255,255,0.15)',display:'flex',alignItems:'center',gap:10}}>
-          <img src="/logo.png" alt="SIAC" style={{width:42,height:42,borderRadius:10,background:'#fff',padding:3,objectFit:'contain'}} />
-          <div>
-            <div style={{color:'#fff',fontSize:15,fontWeight:700,lineHeight:1}}>SIAC</div>
-            <div style={{color:'rgba(255,255,255,0.6)',fontSize:10}}>INGENIERÍA</div>
-          </div>
+      <div style={{width:sidebarOpen?220:64,background:'linear-gradient(180deg, #1a3a6b 0%, #2196f3 100%)',display:'flex',flexDirection:'column',transition:'width 0.3s ease',overflow:'hidden'}}>
+        <div style={{padding:'1rem',borderBottom:'1px solid rgba(255,255,255,0.15)',display:'flex',alignItems:'center',justifyContent:sidebarOpen?'space-between':'center'}}>
+          {sidebarOpen && (
+            <div style={{display:'flex',alignItems:'center',gap:10}}>
+              <img src="/logo.png" alt="SIAC" style={{width:42,height:42,borderRadius:10,background:'#fff',padding:3,objectFit:'contain'}} />
+              <div>
+                <div style={{color:'#fff',fontSize:15,fontWeight:700,lineHeight:1}}>SIAC</div>
+                <div style={{color:'rgba(255,255,255,0.6)',fontSize:10}}>INGENIERÍA</div>
+              </div>
+            </div>
+          )}
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{background:'none',border:'none',cursor:'pointer',color:'#fff',padding:4,display:'flex',flexDirection:'column',gap:4,alignItems:'center'}}>
+            <span style={{display:'block',width:22,height:2,background:'#fff',borderRadius:2}}></span>
+            <span style={{display:'block',width:22,height:2,background:'#fff',borderRadius:2}}></span>
+            <span style={{display:'block',width:22,height:2,background:'#fff',borderRadius:2}}></span>
+          </button>
         </div>
-        <div style={navItem(tab==='inicio')} onClick={() => setTab('inicio')}>🏠 Inicio</div>
-        <div style={navItem(tab==='registro')} onClick={() => setTab('registro')}>➕ Registrar visita</div>
-        <div style={navItem(tab==='historial')} onClick={() => setTab('historial')}>📋 Mis registros</div>
+        <div style={navItem(tab==='inicio')} onClick={() => setTab('inicio')}>
+          <span style={{fontSize:18,flexShrink:0}}>🏠</span>
+          {sidebarOpen && <span>Inicio</span>}
+        </div>
+        <div style={navItem(tab==='registro')} onClick={() => setTab('registro')}>
+          <span style={{fontSize:18,flexShrink:0}}>➕</span>
+          {sidebarOpen && <span>Registrar visita</span>}
+        </div>
+        <div style={navItem(tab==='historial')} onClick={() => setTab('historial')}>
+          <span style={{fontSize:18,flexShrink:0}}>📋</span>
+          {sidebarOpen && <span>Mis registros</span>}
+        </div>
         <div style={{marginTop:'auto',padding:'1rem',borderTop:'1px solid rgba(255,255,255,0.15)'}}>
-          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}>
-            <div style={{width:32,height:32,borderRadius:'50%',background:'rgba(255,255,255,0.2)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:600,color:'#fff'}}>{iniciales}</div>
-            <div style={{color:'rgba(255,255,255,0.9)',fontSize:12}}>{nombreTecnico}</div>
-          </div>
+          {sidebarOpen && (
+            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}>
+              <div style={{width:32,height:32,borderRadius:'50%',background:'rgba(255,255,255,0.2)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:600,color:'#fff'}}>{iniciales}</div>
+              <div style={{color:'rgba(255,255,255,0.9)',fontSize:12}}>{nombreTecnico}</div>
+            </div>
+          )}
           <button onClick={handleLogout} style={{width:'100%',padding:'7px',background:'transparent',border:'1px solid rgba(255,255,255,0.3)',borderRadius:8,color:'rgba(255,255,255,0.8)',fontSize:12,cursor:'pointer'}}>
-            ← Cerrar sesión
+            {sidebarOpen ? '← Cerrar sesión' : '←'}
           </button>
         </div>
       </div>
 
       {/* MAIN */}
       <div style={{flex:1,padding:'1.5rem',background:'#f7f9fc',overflowY:'auto'}}>
-
         {tab === 'inicio' && <>
           <h1 style={{fontSize:22,fontWeight:700,marginBottom:4,color:'#1a1a2e'}}>Bienvenido, {nombreTecnico.split(' ')[0]}</h1>
           <p style={{color:'#888',marginBottom:'1.5rem',fontSize:14}}>Resumen de tus visitas y repuestos</p>
@@ -408,7 +389,6 @@ export default function TecnicoPage() {
                 <input type="date" value={fecha} onChange={e => setFecha(e.target.value)} style={{width:'100%',padding:'10px',border:'1.5px solid #ddd',borderRadius:8,fontSize:13}} />
               </div>
             </div>
-
             <div style={{marginBottom:'1.25rem'}}>
               <label style={{fontSize:13,color:'#555',display:'block',marginBottom:8,fontWeight:500}}>¿Se utilizaron repuestos en esta visita?</label>
               <div style={{display:'flex',gap:10}}>
@@ -420,7 +400,6 @@ export default function TecnicoPage() {
                 </button>
               </div>
             </div>
-
             {usaRepuestos === true && (
               <div style={{marginBottom:'1.25rem'}}>
                 <label style={{fontSize:13,color:'#555',display:'block',marginBottom:8,fontWeight:500}}>Repuestos utilizados</label>
@@ -431,8 +410,7 @@ export default function TecnicoPage() {
                 </div>
                 {repuestos.map((r,i) => (
                   <div key={i} style={{display:'flex',gap:8,marginBottom:8,alignItems:'center'}}>
-                    <input type="text" value={r.nombre} onChange={e => updateRepuesto(i,'nombre',e.target.value)}
-                      placeholder="Ej: Membrana RO"
+                    <input type="text" value={r.nombre} onChange={e => updateRepuesto(i,'nombre',e.target.value)} placeholder="Ej: Membrana RO"
                       style={{flex:2,padding:'9px 10px',border:'1.5px solid #ddd',borderRadius:8,fontSize:13}} />
                     <input type="number" min={1} value={r.cantidad} onChange={e => updateRepuesto(i,'cantidad',parseInt(e.target.value)||1)}
                       style={{flex:1,padding:'9px 10px',border:'1.5px solid #ddd',borderRadius:8,fontSize:13}} />
@@ -442,7 +420,6 @@ export default function TecnicoPage() {
                 <button onClick={addRepuesto} style={{fontSize:13,color:'#1a6fa8',background:'none',border:'none',cursor:'pointer',padding:'4px 0'}}>+ Agregar otro repuesto</button>
               </div>
             )}
-
             {usaRepuestos !== null && (
               <div style={{marginBottom:'1.5rem'}}>
                 <label style={{fontSize:13,color:'#555',display:'block',marginBottom:4,fontWeight:500}}>Observaciones</label>
@@ -451,7 +428,6 @@ export default function TecnicoPage() {
                   rows={4} style={{width:'100%',padding:'10px',border:'1.5px solid #ddd',borderRadius:8,fontSize:13,resize:'vertical'}} />
               </div>
             )}
-
             {usaRepuestos !== null && (
               <button onClick={handleSubmit} disabled={guardando} style={{padding:'11px 28px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:14,fontWeight:600,cursor:'pointer'}}>
                 {guardando ? 'Guardando...' : 'Guardar registro'}
