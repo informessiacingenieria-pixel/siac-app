@@ -313,7 +313,7 @@ export default function GerenciaPage() {
         <div style={{padding:'1rem',borderBottom:'1px solid rgba(255,255,255,0.15)',display:'flex',alignItems:'center',justifyContent:sidebarOpen?'space-between':'center'}}>
           {sidebarOpen && (
             <div style={{display:'flex',alignItems:'center',gap:10}}>
-              <img src="/logo.png" alt="SIAC" style={{width:42,height:42,borderRadius:10,background:'#fff',padding:3,objectFit:'contain'}} />
+              <img src="/logo.png" alt="SIAC" style={{width:42,height:42,borderRadius:10,objectFit:'contain',mixBlendMode:'screen'}} />
               <div>
                 <div style={{color:'#fff',fontSize:15,fontWeight:700,lineHeight:1}}>SIAC</div>
                 <div style={{color:'rgba(255,255,255,0.6)',fontSize:10}}>INGENIERÍA</div>
