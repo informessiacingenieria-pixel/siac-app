@@ -5,7 +5,7 @@ export const metadata = {
   description: 'Servicios de Ingeniería en Aguas Clínicas',
 }
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
       <body>{children}</body>
