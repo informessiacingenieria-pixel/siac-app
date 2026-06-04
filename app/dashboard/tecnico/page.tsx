@@ -169,6 +169,10 @@ export default function TecnicoPage() {
   const mesYear = new Date().getFullYear()
   const registrosMes = registros.filter(r => { const fd = r.fecha?.toDate(); return fd && fd.getMonth()===mesActual && fd.getFullYear()===mesYear })
   const registrosMesConRepuestos = registrosMes.filter(r => r.repuestos && r.repuestos.length > 0)
+  
+  const totalRepuestosMes = registrosMesConRepuestos.reduce((acc, r) => 
+    acc + r.repuestos.reduce((a: number, rep: any) => a + (typeof rep === 'object' ? (rep.cantidad || 1) : 1), 0), 0)
+
   const registrosFiltrados = registros.filter(r => {
     if (filtroMes !== '' && new Date(r.fecha?.toDate()).getMonth() !== parseInt(filtroMes)) return false
     if (filtroCentroH && r.centro !== filtroCentroH) return false
@@ -195,8 +199,14 @@ export default function TecnicoPage() {
 
   const goTab = (t: string) => { setTab(t); if(isMobile) setSidebarOpen(false) }
 
+  const kpis = [
+    {icon:'/icon-repuestos.png', label:'Repuestos este mes', value: totalRepuestosMes, sub:'Suma de cantidades'},
+    {icon:'/icon-visitas.png', label:'Visitas con repuestos este mes', value: registrosMesConRepuestos.length, sub:'Con repuestos utilizados'},
+    {icon:'/icon-centros.png', label:'Total registros', value: registros.length, sub:'Con y sin repuestos'},
+  ]
+
   return (
-    <div style={{display:'flex',minHeight:'100vh',flexDirection: isMobile?'column':'row'}}>
+    <div style={{display:'flex',minHeight:'100vh',flexDirection:isMobile?'column':'row'}}>
 
       {/* MODAL */}
       {modalRegistro && (
@@ -341,23 +351,19 @@ export default function TecnicoPage() {
         </div>
       )}
 
-      {/* MAIN CONTENT */}
+      {/* MAIN */}
       <div style={{flex:1,padding:isMobile?'1rem':'1.5rem',background:'#f7f9fc',overflowY:'auto',paddingBottom:isMobile?'80px':'1.5rem'}}>
 
         {tab === 'inicio' && <>
           <h1 style={{fontSize:isMobile?20:22,fontWeight:700,marginBottom:4,color:'#1a1a2e'}}>Bienvenido, {nombreTecnico.split(' ')[0]}</h1>
           <p style={{color:'#888',marginBottom:'1.25rem',fontSize:14}}>Resumen de tus visitas y repuestos</p>
           <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'repeat(3,1fr)',gap:10,marginBottom:'1.25rem'}}>
-            {[
-              {icon:'/icon-repuestos.png', label:'Repuestos este mes', value:registrosMesConRepuestos.reduce((acc,r) => acc+(r.repuestos?.length||0),0), sub:'Solo visitas con repuestos'},
-              {icon:'/icon-visitas.png', label:'Visitas con repuestos este mes', value:registrosMesConRepuestos.length, sub:'Con repuestos utilizados'},
-              {icon:'/icon-centros.png', label:'Total registros', value:registros.length, sub:'Con y sin repuestos'},
-            ].map((k,i) => (
+            {kpis.map((k,i) => (
               <div key={i} onClick={() => setTab('historial')} style={{background:'#fff',borderRadius:12,padding:'1rem',border:'1px solid #eef0f5',boxShadow:'0 1px 4px rgba(0,0,0,0.04)',cursor:'pointer',display:'flex',alignItems:'center',gap:12}}>
-                <img src={k.icon} alt="" style={{width:60,height:60,borderRadius:10,objectFit:'cover',flexShrink:0}} />
+                <img src={k.icon} alt="" style={{width:isMobile?52:42,height:isMobile?52:42,borderRadius:12,objectFit:'cover',flexShrink:0}} />
                 <div style={{flex:1}}>
                   <div style={{fontSize:12,color:'#888',marginBottom:4}}>{k.label}</div>
-                  <div style={{fontSize:24,fontWeight:700,color:'#1a1a2e'}}>{k.value}</div>
+                  <div style={{fontSize:isMobile?22:24,fontWeight:700,color:'#1a1a2e'}}>{k.value}</div>
                   <div style={{fontSize:11,color:'#2196f3',marginTop:2}}>{k.sub} →</div>
                 </div>
               </div>
@@ -439,13 +445,18 @@ export default function TecnicoPage() {
             {usaRepuestos === true && (
               <div style={{marginBottom:'1rem'}}>
                 <label style={{fontSize:13,color:'#555',display:'block',marginBottom:8,fontWeight:500}}>Repuestos utilizados</label>
+                <div style={{display:'flex',gap:8,marginBottom:6}}>
+                  <span style={{flex:2,fontSize:11,color:'#aaa'}}>Nombre del repuesto</span>
+                  <span style={{width:80,fontSize:11,color:'#aaa'}}>Cantidad</span>
+                  <span style={{width:40}}></span>
+                </div>
                 {repuestos.map((r,i) => (
                   <div key={i} style={{display:'flex',gap:8,marginBottom:8,alignItems:'center'}}>
-                    <input type="text" value={r.nombre} onChange={e => updateRepuesto(i,'nombre',e.target.value)} placeholder="Nombre del repuesto"
+                    <input type="text" value={r.nombre} onChange={e => updateRepuesto(i,'nombre',e.target.value)} placeholder="Ej: Membrana RO"
                       style={{flex:2,padding:'11px 10px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14}} />
                     <input type="number" min={1} value={r.cantidad} onChange={e => updateRepuesto(i,'cantidad',parseInt(e.target.value)||1)}
-                      style={{width:70,padding:'11px 8px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14}} />
-                    <button onClick={() => removeRepuesto(i)} style={{width:40,height:40,border:'1px solid #ddd',borderRadius:8,background:'#fff',cursor:'pointer',color:'#888',fontSize:18,flexShrink:0}}>✕</button>
+                      style={{width:80,padding:'11px 8px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14}} />
+                    <button onClick={() => removeRepuesto(i)} style={{width:40,height:44,border:'1px solid #ddd',borderRadius:8,background:'#fff',cursor:'pointer',color:'#888',fontSize:18,flexShrink:0}}>✕</button>
                   </div>
                 ))}
                 <button onClick={addRepuesto} style={{fontSize:13,color:'#1a6fa8',background:'none',border:'none',cursor:'pointer',padding:'4px 0'}}>+ Agregar otro repuesto</button>
