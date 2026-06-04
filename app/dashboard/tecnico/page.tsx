@@ -126,8 +126,44 @@ export default function TecnicoPage() {
 
   const parsearRepuestos = (reps: any[]): {nombre:string,cantidad:number}[] => {
     if (!reps || reps.length === 0) return []
-    if (typeof reps[0] === 'string') return reps.map(r => ({nombre:r, cantidad:1}))
-    return reps
+
+    return reps.map((r: any) => {
+      if (typeof r === 'string') {
+        const match = r.match(/\(x(\d+)\)/i)
+
+        return {
+          nombre: r.replace(/\s*\(x\d+\)/i, '').trim(),
+          cantidad: match ? Number(match[1]) : 1
+        }
+      }
+
+      return {
+        nombre: r.nombre || '',
+        cantidad: Number(r.cantidad) || 1
+      }
+    })
+  }
+
+  const obtenerCantidadRepuesto = (rep: any) => {
+    if (typeof rep === 'object' && rep !== null) {
+      return Number(rep.cantidad) || 1
+    }
+
+    if (typeof rep === 'string') {
+      const match = rep.match(/\(x(\d+)\)/i)
+      return match ? Number(match[1]) : 1
+    }
+
+    return 1
+  }
+
+  const totalRepuestosRegistro = (registro: any) => {
+    if (!registro.repuestos || registro.repuestos.length === 0) return 0
+
+    return registro.repuestos.reduce(
+      (acc: number, rep: any) => acc + obtenerCantidadRepuesto(rep),
+      0
+    )
   }
 
   const abrirModal = (r: any) => {
@@ -157,9 +193,12 @@ export default function TecnicoPage() {
     setGuardandoEdit(true)
     const repsGuardar = editUsaRepuestos ? editRepuestos.filter(r => r.nombre.trim()) : []
     await updateDoc(doc(db, 'visitas', modalRegistro.id), {
-      repuestos: repsGuardar, observaciones: editObservaciones, usaRepuestos: editUsaRepuestos,
+      repuestos: repsGuardar,
+      observaciones: editObservaciones,
+      usaRepuestos: editUsaRepuestos,
     })
-    setGuardandoEdit(false); setEditando(false)
+    setGuardandoEdit(false)
+    setEditando(false)
     setModalRegistro({...modalRegistro, repuestos: repsGuardar, observaciones: editObservaciones})
   }
 
@@ -167,22 +206,33 @@ export default function TecnicoPage() {
   const iniciales = nombreTecnico.split(' ').map((n:string) => n[0]).join('').slice(0,2).toUpperCase()
   const mesActual = new Date().getMonth()
   const mesYear = new Date().getFullYear()
-  const registrosMes = registros.filter(r => { const fd = r.fecha?.toDate(); return fd && fd.getMonth()===mesActual && fd.getFullYear()===mesYear })
-  const registrosMesConRepuestos = registrosMes.filter(r => r.repuestos && r.repuestos.length > 0)
-  
-  const totalRepuestosMes = registrosMesConRepuestos.reduce((acc, r) => 
-    acc + r.repuestos.reduce((a: number, rep: any) => a + (typeof rep === 'object' ? (rep.cantidad || 1) : 1), 0), 0)
+
+  const registrosMes = registros.filter(r => {
+    const fd = r.fecha?.toDate()
+    return fd && fd.getMonth() === mesActual && fd.getFullYear() === mesYear
+  })
+
+  const registrosMesConRepuestos = registrosMes.filter(r => totalRepuestosRegistro(r) > 0)
+
+  const totalRepuestosMes = registrosMes.reduce(
+    (acc: number, r: any) => acc + totalRepuestosRegistro(r),
+    0
+  )
 
   const registrosFiltrados = registros.filter(r => {
     if (filtroMes !== '' && new Date(r.fecha?.toDate()).getMonth() !== parseInt(filtroMes)) return false
     if (filtroCentroH && r.centro !== filtroCentroH) return false
     return true
   })
+
   const centrosUnicos = [...new Set(registros.map(r => r.centro))].filter(Boolean)
 
   const formatRepuestos = (reps: any[]) => {
     if (!reps || reps.length === 0) return 'Sin repuestos'
-    return reps.map(r => typeof r === 'object' ? `${r.nombre} (x${r.cantidad})` : r).join(', ')
+
+    return parsearRepuestos(reps)
+      .map(r => `${r.nombre} (x${r.cantidad})`)
+      .join(', ')
   }
 
   const badge = (estado: string) => ({
