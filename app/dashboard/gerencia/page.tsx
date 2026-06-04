@@ -359,7 +359,7 @@ export default function GerenciaPage() {
       <div style={{flex:1,padding:'1.5rem',background:'#f7f9fc',overflowY:'auto'}}>
         {tab === 'inicio' && <>
           <div style={{marginBottom:'1.5rem'}}>
-            <h1 style={{fontSize:26,fontWeight:700,color:'#1a1a2e',marginBottom:2}}>Dashboard</h1>
+            <h1 style={{fontSize:26,fontWeight:700,color:'#1a1a2e',marginBottom:2}}>Inicio</h1>
             <p style={{color:'#888',fontSize:14}}>Resumen general de repuestos y visitas</p>
           </div>
           <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:12,marginBottom:'1.5rem'}}>
