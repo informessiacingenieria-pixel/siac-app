@@ -1,65 +1,74 @@
-import Image from "next/image";
+'use client'
+import { useState } from 'react'
+import { signInWithEmailAndPassword } from 'firebase/auth'
+import { auth } from '../lib/firebase'
+import { useRouter } from 'next/navigation'
 
-export default function Home() {
+export default function LoginPage() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const router = useRouter()
+
+  const handleLogin = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+    try {
+      await signInWithEmailAndPassword(auth, email, password)
+      if (email === 'informessiacingenieria@gmail.com') {
+        router.push('/dashboard/gerencia')
+      } else {
+        router.push('/dashboard/tecnico')
+      }
+    } catch (err) {
+      setError('Correo o contraseña incorrectos')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div style={{minHeight:'100vh',background:'linear-gradient(135deg, #1a6fa8 0%, #1a3a6b 100%)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+      <div style={{background:'#fff',borderRadius:20,padding:'2.5rem 2rem',width:380,boxShadow:'0 8px 32px rgba(0,0,0,0.18)'}}>
+        <div style={{textAlign:'center',marginBottom:'2rem'}}>
+          <img src="/logo.png" alt="SIAC" style={{width:140,height:'auto',marginBottom:12}} />
+          <p style={{fontSize:13,color:'#888',marginTop:4}}>Sistema de gestión de repuestos</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+        <form onSubmit={handleLogin}>
+          <div style={{marginBottom:'1rem'}}>
+            <label style={{fontSize:13,color:'#555',display:'block',marginBottom:4}}>Correo electrónico</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="correo@siac-ingenieria.cl"
+              required
+              style={{width:'100%',padding:'11px 14px',border:'1.5px solid #d0e8f5',borderRadius:10,fontSize:14,outline:'none',background:'#f7fbff',color:'#222'}}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          </div>
+          <div style={{marginBottom:'1.2rem'}}>
+            <label style={{fontSize:13,color:'#555',display:'block',marginBottom:4}}>Contraseña</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+              style={{width:'100%',padding:'11px 14px',border:'1.5px solid #d0e8f5',borderRadius:10,fontSize:14,outline:'none',background:'#f7fbff',color:'#222'}}
+            />
+          </div>
+          {error && <p style={{color:'#c0392b',fontSize:13,marginBottom:'0.8rem',textAlign:'center'}}>{error}</p>}
+          <button
+            type="submit"
+            disabled={loading}
+            style={{width:'100%',padding:13,background:'linear-gradient(135deg, #2196f3 0%, #1a6fa8 100%)',color:'#fff',border:'none',borderRadius:10,fontSize:15,fontWeight:600,cursor:'pointer'}}
           >
-            Documentation
-          </a>
-        </div>
-      </main>
+            {loading ? 'Ingresando...' : 'Iniciar sesión'}
+          </button>
+        </form>
+      </div>
     </div>
-  );
+  )
 }
