@@ -439,7 +439,7 @@ export default function GerenciaPage() {
                 {(pendientes+enRevision+cobrados)===0 ? <p style={{color:'#aaa',textAlign:'center',padding:'2rem 0'}}>Sin datos</p> : (
                   <ResponsiveContainer width="100%" height={180}>
                     <PieChart>
-                      <Pie data={dataPie} cx="50%" cy="45%" innerRadius={45} outerRadius:={70} paddingAngle={3} dataKey="value">
+                      <Pie data={dataPie} cx="50%" cy="45%" innerRadius={45} outerRadius={70} paddingAngle={3} dataKey="value">
                         {dataPie.map((e,i) => <Cell key={i} fill={e.color} />)}
                       </Pie>
                       <Tooltip />
