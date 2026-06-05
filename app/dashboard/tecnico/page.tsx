@@ -33,6 +33,8 @@ const TECNICOS: Record<string,string> = {
 }
 
 const MESES_NOMBRE = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+const CLOUDINARY_CLOUD = 'dhozxnzre'
+const CLOUDINARY_PRESET = 'siac_uploads'
 
 export default function TecnicoPage() {
   const [user, setUser] = useState<any>(null)
@@ -43,6 +45,8 @@ export default function TecnicoPage() {
   const [usaRepuestos, setUsaRepuestos] = useState<boolean|null>(null)
   const [repuestos, setRepuestos] = useState<{nombre:string,cantidad:number}[]>([{nombre:'',cantidad:1}])
   const [observaciones, setObservaciones] = useState('')
+  const [fotos, setFotos] = useState<string[]>([])
+  const [subiendoFotos, setSubiendoFotos] = useState(false)
   const [guardando, setGuardando] = useState(false)
   const [exito, setExito] = useState(false)
   const [filtroMes, setFiltroMes] = useState('')
@@ -54,7 +58,9 @@ export default function TecnicoPage() {
   const [editRepuestos, setEditRepuestos] = useState<{nombre:string,cantidad:number}[]>([])
   const [editObservaciones, setEditObservaciones] = useState('')
   const [editUsaRepuestos, setEditUsaRepuestos] = useState(true)
+  const [editFotos, setEditFotos] = useState<string[]>([])
   const [guardandoEdit, setGuardandoEdit] = useState(false)
+  const [fotoVisor, setFotoVisor] = useState<string|null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -84,6 +90,46 @@ export default function TecnicoPage() {
 
   const handleLogout = async () => { await signOut(auth); router.push('/') }
 
+  const subirFoto = async (file: File): Promise<string> => {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('upload_preset', CLOUDINARY_PRESET)
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
+      method: 'POST',
+      body: formData,
+    })
+    const data = await res.json()
+    return data.secure_url
+  }
+
+  const handleFotos = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return
+    setSubiendoFotos(true)
+    try {
+      const archivos = Array.from(e.target.files)
+      const urls = await Promise.all(archivos.map(f => subirFoto(f)))
+      setFotos(prev => [...prev, ...urls])
+    } catch (err) {
+      alert('Error al subir fotos, intenta de nuevo')
+    } finally {
+      setSubiendoFotos(false)
+    }
+  }
+
+  const handleFotosEdit = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return
+    setSubiendoFotos(true)
+    try {
+      const archivos = Array.from(e.target.files)
+      const urls = await Promise.all(archivos.map(f => subirFoto(f)))
+      setEditFotos(prev => [...prev, ...urls])
+    } catch (err) {
+      alert('Error al subir fotos')
+    } finally {
+      setSubiendoFotos(false)
+    }
+  }
+
   const handleUsaRepuestos = (val: boolean) => {
     setUsaRepuestos(val)
     if (!val) {
@@ -111,11 +157,11 @@ export default function TecnicoPage() {
         uid: user.uid, tecnico: TECNICOS[user.email] || user.email, email: user.email, centro,
         fecha: Timestamp.fromDate(new Date(fecha + 'T12:00:00')),
         repuestos: usaRepuestos ? repuestos.filter(r => r.nombre.trim()) : [],
-        usaRepuestos, observaciones, estado: 'Pendiente', creadoEn: Timestamp.now()
+        usaRepuestos, observaciones, fotos, estado: 'Pendiente', creadoEn: Timestamp.now()
       })
       setExito(true)
       setCentro(''); setRepuestos([{nombre:'',cantidad:1}]); setObservaciones('')
-      setFecha(new Date().toISOString().split('T')[0]); setUsaRepuestos(null)
+      setFecha(new Date().toISOString().split('T')[0]); setUsaRepuestos(null); setFotos([])
       setTimeout(() => { setExito(false); setTab('historial') }, 1500)
     } catch (e) {
       alert('Error al guardar, intenta de nuevo')
@@ -136,10 +182,11 @@ export default function TecnicoPage() {
     setEditRepuestos(parsed.length > 0 ? parsed : [{nombre:'',cantidad:1}])
     setEditObservaciones(r.observaciones || '')
     setEditUsaRepuestos(r.repuestos && r.repuestos.length > 0)
+    setEditFotos(r.fotos || [])
     setEditando(false)
   }
 
-  const cerrarModal = () => { setModalRegistro(null); setEditando(false) }
+  const cerrarModal = () => { setModalRegistro(null); setEditando(false); setFotoVisor(null) }
 
   const handleEditUsaRepuestos = (usa: boolean) => {
     setEditUsaRepuestos(usa)
@@ -157,10 +204,11 @@ export default function TecnicoPage() {
     setGuardandoEdit(true)
     const repsGuardar = editUsaRepuestos ? editRepuestos.filter(r => r.nombre.trim()) : []
     await updateDoc(doc(db, 'visitas', modalRegistro.id), {
-      repuestos: repsGuardar, observaciones: editObservaciones, usaRepuestos: editUsaRepuestos,
+      repuestos: repsGuardar, observaciones: editObservaciones,
+      usaRepuestos: editUsaRepuestos, fotos: editFotos,
     })
     setGuardandoEdit(false); setEditando(false)
-    setModalRegistro({...modalRegistro, repuestos: repsGuardar, observaciones: editObservaciones})
+    setModalRegistro({...modalRegistro, repuestos: repsGuardar, observaciones: editObservaciones, fotos: editFotos})
   }
 
   const nombreTecnico = user ? (TECNICOS[user.email] || user.email) : ''
@@ -169,10 +217,8 @@ export default function TecnicoPage() {
   const mesYear = new Date().getFullYear()
   const registrosMes = registros.filter(r => { const fd = r.fecha?.toDate(); return fd && fd.getMonth()===mesActual && fd.getFullYear()===mesYear })
   const registrosMesConRepuestos = registrosMes.filter(r => r.repuestos && r.repuestos.length > 0)
-  
-  const totalRepuestosMes = registrosMesConRepuestos.reduce((acc, r) => 
+  const totalRepuestosMes = registrosMesConRepuestos.reduce((acc, r) =>
     acc + r.repuestos.reduce((a: number, rep: any) => a + (typeof rep === 'object' ? (rep.cantidad || 1) : 1), 0), 0)
-
   const registrosFiltrados = registros.filter(r => {
     if (filtroMes !== '' && new Date(r.fecha?.toDate()).getMonth() !== parseInt(filtroMes)) return false
     if (filtroCentroH && r.centro !== filtroCentroH) return false
@@ -208,6 +254,14 @@ export default function TecnicoPage() {
   return (
     <div style={{display:'flex',minHeight:'100vh',flexDirection:isMobile?'column':'row'}}>
 
+      {/* VISOR FOTO */}
+      {fotoVisor && (
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.9)',zIndex:2000,display:'flex',alignItems:'center',justifyContent:'center'}} onClick={() => setFotoVisor(null)}>
+          <img src={fotoVisor} alt="foto" style={{maxWidth:'95vw',maxHeight:'90vh',borderRadius:8,objectFit:'contain'}} />
+          <button onClick={() => setFotoVisor(null)} style={{position:'absolute',top:20,right:20,background:'none',border:'none',color:'#fff',fontSize:32,cursor:'pointer'}}>×</button>
+        </div>
+      )}
+
       {/* MODAL */}
       {modalRegistro && (
         <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:'1rem'}} onClick={cerrarModal}>
@@ -229,6 +283,7 @@ export default function TecnicoPage() {
                 <span style={badge(modalRegistro.estado)}>{modalRegistro.estado}</span>
               </div>
             </div>
+
             {editando && (
               <div style={{marginBottom:'1rem'}}>
                 <div style={{fontSize:12,color:'#555',marginBottom:8,fontWeight:500}}>¿Se utilizaron repuestos?</div>
@@ -238,6 +293,7 @@ export default function TecnicoPage() {
                 </div>
               </div>
             )}
+
             <div style={{marginBottom:'1rem'}}>
               <div style={{fontSize:12,color:'#555',marginBottom:6,fontWeight:500}}>Repuestos utilizados</div>
               {!editando ? (
@@ -266,7 +322,8 @@ export default function TecnicoPage() {
                 </div>
               ) : null}
             </div>
-            <div style={{marginBottom:'1.25rem'}}>
+
+            <div style={{marginBottom:'1rem'}}>
               <div style={{fontSize:12,color:'#555',marginBottom:6,fontWeight:500}}>Observaciones</div>
               {editando ? (
                 <textarea value={editObservaciones} onChange={e => setEditObservaciones(e.target.value)} rows={3}
@@ -277,11 +334,38 @@ export default function TecnicoPage() {
                 </div>
               )}
             </div>
+
+            {/* FOTOS */}
+            <div style={{marginBottom:'1.25rem'}}>
+              <div style={{fontSize:12,color:'#555',marginBottom:8,fontWeight:500}}>Fotografías</div>
+              <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+                {(editando ? editFotos : (modalRegistro.fotos || [])).map((url: string, i: number) => (
+                  <div key={i} style={{position:'relative'}}>
+                    <img src={url} alt={`foto ${i+1}`} onClick={() => setFotoVisor(url)}
+                      style={{width:80,height:80,objectFit:'cover',borderRadius:8,cursor:'pointer',border:'2px solid #e0eaf2'}} />
+                    {editando && (
+                      <button onClick={() => setEditFotos(editFotos.filter((_,idx)=>idx!==i))}
+                        style={{position:'absolute',top:-6,right:-6,width:20,height:20,borderRadius:'50%',background:'#ef5350',border:'none',color:'#fff',fontSize:12,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>×</button>
+                    )}
+                  </div>
+                ))}
+                {editando && (
+                  <label style={{width:80,height:80,border:'2px dashed #d0e8f5',borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',flexDirection:'column',gap:4,color:'#1a6fa8',fontSize:11}}>
+                    {subiendoFotos ? '⏳' : <>📷<span>Agregar</span></>}
+                    <input type="file" accept="image/*" multiple onChange={handleFotosEdit} style={{display:'none'}} disabled={subiendoFotos} />
+                  </label>
+                )}
+                {!editando && (!modalRegistro.fotos || modalRegistro.fotos.length === 0) && (
+                  <div style={{fontSize:13,color:'#aaa'}}>Sin fotografías</div>
+                )}
+              </div>
+            </div>
+
             <div style={{display:'flex',gap:10,justifyContent:'flex-end'}}>
               {editando ? (
                 <>
                   <button onClick={() => setEditando(false)} style={{padding:'9px 16px',border:'1px solid #ddd',borderRadius:8,background:'#fff',fontSize:13,cursor:'pointer',color:'#666'}}>Cancelar</button>
-                  <button onClick={guardarEdicion} disabled={guardandoEdit} style={{padding:'9px 16px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:600,cursor:'pointer'}}>
+                  <button onClick={guardarEdicion} disabled={guardandoEdit||subiendoFotos} style={{padding:'9px 16px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:600,cursor:'pointer'}}>
                     {guardandoEdit ? 'Guardando...' : '✅ Guardar'}
                   </button>
                 </>
@@ -431,6 +515,7 @@ export default function TecnicoPage() {
                 <input type="date" value={fecha} onChange={e => setFecha(e.target.value)} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14}} />
               </div>
             </div>
+
             <div style={{marginBottom:'1rem'}}>
               <label style={{fontSize:13,color:'#555',display:'block',marginBottom:8,fontWeight:500}}>¿Se utilizaron repuestos en esta visita?</label>
               <div style={{display:'flex',gap:10}}>
@@ -442,6 +527,7 @@ export default function TecnicoPage() {
                 </button>
               </div>
             </div>
+
             {usaRepuestos === true && (
               <div style={{marginBottom:'1rem'}}>
                 <label style={{fontSize:13,color:'#555',display:'block',marginBottom:8,fontWeight:500}}>Repuestos utilizados</label>
@@ -462,17 +548,40 @@ export default function TecnicoPage() {
                 <button onClick={addRepuesto} style={{fontSize:13,color:'#1a6fa8',background:'none',border:'none',cursor:'pointer',padding:'4px 0'}}>+ Agregar otro repuesto</button>
               </div>
             )}
+
             {usaRepuestos !== null && (
-              <div style={{marginBottom:'1.25rem'}}>
+              <div style={{marginBottom:'1rem'}}>
                 <label style={{fontSize:13,color:'#555',display:'block',marginBottom:4,fontWeight:500}}>Observaciones</label>
                 <textarea value={observaciones} onChange={e => setObservaciones(e.target.value)}
                   placeholder="Describe el trabajo realizado, condiciones del equipo, etc."
                   rows={4} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
+
             {usaRepuestos !== null && (
-              <button onClick={handleSubmit} disabled={guardando} style={{width:isMobile?'100%':'auto',padding:'12px 28px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>
-                {guardando ? 'Guardando...' : 'Guardar registro'}
+              <div style={{marginBottom:'1.25rem'}}>
+                <label style={{fontSize:13,color:'#555',display:'block',marginBottom:8,fontWeight:500}}>📷 Fotografías <span style={{color:'#aaa',fontWeight:400}}>(opcional)</span></label>
+                <div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:8}}>
+                  {fotos.map((url,i) => (
+                    <div key={i} style={{position:'relative'}}>
+                      <img src={url} alt={`foto ${i+1}`} onClick={() => setFotoVisor(url)}
+                        style={{width:80,height:80,objectFit:'cover',borderRadius:8,cursor:'pointer',border:'2px solid #e0eaf2'}} />
+                      <button onClick={() => setFotos(fotos.filter((_,idx)=>idx!==i))}
+                        style={{position:'absolute',top:-6,right:-6,width:20,height:20,borderRadius:'50%',background:'#ef5350',border:'none',color:'#fff',fontSize:12,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>×</button>
+                    </div>
+                  ))}
+                  <label style={{width:80,height:80,border:'2px dashed #d0e8f5',borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',flexDirection:'column',gap:4,color:'#1a6fa8',fontSize:11}}>
+                    {subiendoFotos ? '⏳ Subiendo...' : <>📷<span>Agregar foto</span></>}
+                    <input type="file" accept="image/*" multiple capture="environment" onChange={handleFotos} style={{display:'none'}} disabled={subiendoFotos} />
+                  </label>
+                </div>
+                {subiendoFotos && <p style={{fontSize:12,color:'#1a6fa8'}}>Subiendo fotos...</p>}
+              </div>
+            )}
+
+            {usaRepuestos !== null && (
+              <button onClick={handleSubmit} disabled={guardando||subiendoFotos} style={{width:isMobile?'100%':'auto',padding:'12px 28px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>
+                {guardando ? 'Guardando...' : subiendoFotos ? 'Subiendo fotos...' : 'Guardar registro'}
               </button>
             )}
           </div>
@@ -509,6 +618,9 @@ export default function TecnicoPage() {
                     </div>
                     <div style={{fontSize:12,color:'#888',marginBottom:4}}>{r.fecha?.toDate().toLocaleDateString('es-CL')}</div>
                     <div style={{fontSize:12,color:'#555',marginBottom:4}}>{formatRepuestos(r.repuestos)}</div>
+                    {r.fotos && r.fotos.length > 0 && (
+                      <div style={{fontSize:11,color:'#1a6fa8',marginBottom:6}}>📷 {r.fotos.length} foto(s)</div>
+                    )}
                     {r.observaciones && <div style={{fontSize:12,color:'#888',marginBottom:8,fontStyle:'italic'}}>{r.observaciones}</div>}
                     <button onClick={() => abrirModal(r)} style={{width:'100%',padding:'7px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:6,fontSize:12,cursor:'pointer'}}>Ver detalle</button>
                   </div>
@@ -517,7 +629,7 @@ export default function TecnicoPage() {
               </div>
             ) : (
               <table style={{width:'100%',borderCollapse:'collapse',fontSize:13}}>
-                <thead><tr>{['Fecha','Centro','Repuestos','Observaciones','Estado',''].map(h => (
+                <thead><tr>{['Fecha','Centro','Repuestos','Fotos','Estado',''].map(h => (
                   <th key={h} style={{textAlign:'left',padding:'8px',color:'#aaa',borderBottom:'1px solid #f0f0f0',fontWeight:500}}>{h}</th>
                 ))}</tr></thead>
                 <tbody>
@@ -526,7 +638,7 @@ export default function TecnicoPage() {
                       <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8',whiteSpace:'nowrap'}}>{r.fecha?.toDate().toLocaleDateString('es-CL')}</td>
                       <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{r.centro}</td>
                       <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{formatRepuestos(r.repuestos)}</td>
-                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8',color:'#888',maxWidth:180}}>{r.observaciones || '-'}</td>
+                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8',color:'#1a6fa8'}}>{r.fotos?.length > 0 ? `📷 ${r.fotos.length}` : '-'}</td>
                       <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}><span style={badge(r.estado)}>{r.estado}</span></td>
                       <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>
                         <button onClick={() => abrirModal(r)} style={{padding:'4px 10px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:6,fontSize:11,cursor:'pointer'}}>Ver detalle</button>
