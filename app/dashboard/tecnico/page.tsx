@@ -43,7 +43,7 @@ export default function TecnicoPage() {
   const [centro, setCentro] = useState('')
   const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0])
   const [usaRepuestos, setUsaRepuestos] = useState<boolean|null>(null)
-  const [repuestos, setRepuestos] = useState<{nombre:string,cantidad:number}[]>([{nombre:'',cantidad:1}])
+  const [repuestos, setRepuestos] = useState<any[]>([{nombre:'',cantidad:1}])
   const [observaciones, setObservaciones] = useState('')
   const [fotos, setFotos] = useState<string[]>([])
   const [subiendoFotos, setSubiendoFotos] = useState(false)
@@ -55,7 +55,7 @@ export default function TecnicoPage() {
   const [isMobile, setIsMobile] = useState(false)
   const [modalRegistro, setModalRegistro] = useState<any>(null)
   const [editando, setEditando] = useState(false)
-  const [editRepuestos, setEditRepuestos] = useState<{nombre:string,cantidad:number}[]>([])
+  const [editRepuestos, setEditRepuestos] = useState<any[]>([])
   const [editObservaciones, setEditObservaciones] = useState('')
   const [editUsaRepuestos, setEditUsaRepuestos] = useState(true)
   const [editFotos, setEditFotos] = useState<string[]>([])
@@ -143,7 +143,7 @@ export default function TecnicoPage() {
 
   const addRepuesto = () => setRepuestos([...repuestos, {nombre:'',cantidad:1}])
   const removeRepuesto = (i: number) => { if (repuestos.length > 1) setRepuestos(repuestos.filter((_,idx) => idx !== i)) }
-  const updateRepuesto = (i: number, field: string, val: string|number) => {
+  const updateRepuesto = (i: number, field: string, val: any) => {
     const r = [...repuestos]; r[i] = {...r[i],[field]:val}; setRepuestos(r)
   }
 
@@ -153,10 +153,13 @@ export default function TecnicoPage() {
     if (usaRepuestos && repuestos.filter(r => r.nombre.trim()).length === 0) { alert('Por favor agrega al menos un repuesto'); return }
     setGuardando(true)
     try {
+      const repuestosFinal = repuestos
+        .filter(r => r.nombre.trim())
+        .map(r => ({ nombre: r.nombre, cantidad: parseInt(String(r.cantidad)) || 1 }))
       await addDoc(collection(db, 'visitas'), {
         uid: user.uid, tecnico: TECNICOS[user.email] || user.email, email: user.email, centro,
         fecha: Timestamp.fromDate(new Date(fecha + 'T12:00:00')),
-        repuestos: usaRepuestos ? repuestos.filter(r => r.nombre.trim()) : [],
+        repuestos: usaRepuestos ? repuestosFinal : [],
         usaRepuestos, observaciones, fotos, estado: 'Pendiente', creadoEn: Timestamp.now()
       })
       setExito(true)
@@ -202,7 +205,9 @@ export default function TecnicoPage() {
   const guardarEdicion = async () => {
     if (!modalRegistro) return
     setGuardandoEdit(true)
-    const repsGuardar = editUsaRepuestos ? editRepuestos.filter(r => r.nombre.trim()) : []
+    const repsGuardar = editUsaRepuestos
+      ? editRepuestos.filter(r => r.nombre.trim()).map(r => ({ nombre: r.nombre, cantidad: parseInt(String(r.cantidad)) || 1 }))
+      : []
     await updateDoc(doc(db, 'visitas', modalRegistro.id), {
       repuestos: repsGuardar, observaciones: editObservaciones,
       usaRepuestos: editUsaRepuestos, fotos: editFotos,
@@ -312,9 +317,26 @@ export default function TecnicoPage() {
                   {editRepuestos.map((r,i) => (
                     <div key={i} style={{display:'flex',gap:8,marginBottom:6,alignItems:'center'}}>
                       <input value={r.nombre} onChange={e => { const arr=[...editRepuestos]; arr[i]={...arr[i],nombre:e.target.value}; setEditRepuestos(arr) }}
-                        placeholder="Nombre" style={{flex:2,padding:'8px 10px',border:'1.5px solid #2196f3',borderRadius:8,fontSize:13}} />
-                      <input type="number" min={1} value={r.cantidad} onChange={e => { const arr=[...editRepuestos]; arr[i]={...arr[i],cantidad:parseInt(e.target.value)||1}; setEditRepuestos(arr) }}
-                        style={{flex:1,padding:'8px 10px',border:'1.5px solid #2196f3',borderRadius:8,fontSize:13}} />
+                        placeholder="Nombre" style={{flex:2,padding:'8px 10px',border:'1.5px solid #2196f3',borderRadius:8,fontSize:13,color:'#222',background:'#fff'}} />
+                      <input
+                        type="number"
+                        min={1}
+                        value={r.cantidad}
+                        onFocus={e => e.target.select()}
+                        onChange={e => {
+                          const val = e.target.value
+                          const arr = [...editRepuestos]
+                          arr[i] = { ...arr[i], cantidad: val === '' ? '' : parseInt(val) || 1 }
+                          setEditRepuestos(arr)
+                        }}
+                        onBlur={e => {
+                          if (e.target.value === '') {
+                            const arr = [...editRepuestos]
+                            arr[i] = { ...arr[i], cantidad: 1 }
+                            setEditRepuestos(arr)
+                          }
+                        }}
+                        style={{flex:1,padding:'8px 10px',border:'1.5px solid #2196f3',borderRadius:8,fontSize:13,color:'#222',background:'#fff'}} />
                       <button onClick={() => setEditRepuestos(editRepuestos.filter((_,idx)=>idx!==i))} style={{width:36,height:36,border:'1px solid #ddd',borderRadius:8,background:'#fff',cursor:'pointer',color:'#888'}}>✕</button>
                     </div>
                   ))}
@@ -539,9 +561,20 @@ export default function TecnicoPage() {
                 {repuestos.map((r,i) => (
                   <div key={i} style={{display:'flex',gap:8,marginBottom:8,alignItems:'center'}}>
                     <input type="text" value={r.nombre} onChange={e => updateRepuesto(i,'nombre',e.target.value)} placeholder="Ej: Membrana RO"
-                      style={{flex:2,padding:'11px 10px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14}} />
-                    <input type="number" min={1} value={r.cantidad} onChange={e => updateRepuesto(i,'cantidad',parseInt(e.target.value)||1)}
-                      style={{width:80,padding:'11px 8px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14}} />
+                      style={{flex:2,padding:'11px 10px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,color:'#222',background:'#fff'}} />
+                    <input
+                      type="number"
+                      min={1}
+                      value={r.cantidad}
+                      onFocus={e => e.target.select()}
+                      onChange={e => {
+                        const val = e.target.value
+                        updateRepuesto(i, 'cantidad', val === '' ? '' : (parseInt(val) || 1))
+                      }}
+                      onBlur={e => {
+                        if (e.target.value === '') updateRepuesto(i, 'cantidad', 1)
+                      }}
+                      style={{width:80,padding:'11px 8px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,color:'#222',background:'#fff'}} />
                     <button onClick={() => removeRepuesto(i)} style={{width:40,height:44,border:'1px solid #ddd',borderRadius:8,background:'#fff',cursor:'pointer',color:'#888',fontSize:18,flexShrink:0}}>✕</button>
                   </div>
                 ))}
