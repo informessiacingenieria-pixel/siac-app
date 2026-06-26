@@ -2,12 +2,33 @@
 import { useState, useEffect } from 'react'
 import { auth, db } from '../../../lib/firebase'
 import { signOut, onAuthStateChanged } from 'firebase/auth'
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore'
+import { collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
 import { PieChart, Pie, Cell, Tooltip, Legend, LineChart, Line, BarChart, Bar, XAxis, YAxis, ResponsiveContainer, CartesianGrid } from 'recharts'
 
+const CENTROS = [
+  'CD Cendial Salamanca','CD Chacabuco','CD Dialsur','CD Interdial','CD La Reina',
+  'CD Lampa','CD Los Andes','CD Mendoza','CD Nueva Vida Huepil','CD Nueva Vida Los Angeles',
+  'CD Ñuñoa','CD Ñuñoa Pudahuel','CD Ñuñoa Quinta Normal','CD Pacifico','CD Padre Hurtado',
+  'CD Rancagua Dial','CD San Lucas','CD Tabancura','CD Unidial','CD Urodial San Vicente',
+  'CD Vespucio','CD Vidacare','CD Vidadial Collipulli','CD Vidadial Lanco','CD Vidadial Paillaco',
+  'Ctro. Nefro. Puerto Montt','DAM Santiago','DAM Quilpué','Davila Cron','Davila UCI','Diamar',
+  'HBTL Alimentación','HBTL Diálisis','HBTL Endoscopia','HBTL Esterilización','HBTL Sedile',
+  'HBTL UTI 1','HCUCH Abla. y Panta Estéril','HCUCH Calderas','HCUCH DAN','HCUCH Diálisis',
+  'Hemodiálisis Curicó','Hosp. Calbuco','Hosp. La Florida Esterelizacion',
+  'Hosp. La Florida Farmacia y Laboratorio','Hosp. La Florida Anatomia Patologica',
+  'Hosp. La Florida Odontologia','Hosp. La Florida SEDILE','Hosp. Curacautin','Hosp. Lautaro Antiguo',
+  'Hosp. Lautaro Nuevo','Hosp. Luis Calvo Mackenna Diálisis','Hosp. Luis Calvo Mackenna Estéril',
+  'Hosp. Maipú','Hosp. Nueva Imperial','Hosp. Osorno Diálisis','Hosp. Osorno Esterelización',
+  'Hosp. Puerto Montt','Hosp. Purranque','Hosp. Salvador Diálisis','Hosp. Salvador Estéril',
+  'Hosp. San Camilo','Hosp. San Jose','Hosp. Valdivia','Nefrodial Linares','Nefrodial Molina',
+  'Nefrodial San Javier','Municipalidad Puerto Montt','Premio Nobel','Red Dialisis'
+]
+
 const ESTADOS = ['Pendiente', 'En revisión', 'Cobrado']
 const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+const CLOUDINARY_CLOUD = 'dhozxnzre'
+const CLOUDINARY_PRESET = 'siac_uploads'
 
 export default function GerenciaPage() {
   const [user, setUser] = useState<any>(null)
@@ -21,12 +42,25 @@ export default function GerenciaPage() {
   const [isMobile, setIsMobile] = useState(false)
   const [modalRegistro, setModalRegistro] = useState<any>(null)
   const [editando, setEditando] = useState(false)
-  const [editRepuestos, setEditRepuestos] = useState<{nombre:string,cantidad:number}[]>([])
+  const [editRepuestos, setEditRepuestos] = useState<any[]>([])
   const [editObservaciones, setEditObservaciones] = useState('')
   const [editEstado, setEditEstado] = useState('')
   const [editUsaRepuestos, setEditUsaRepuestos] = useState(true)
+  const [editFotos, setEditFotos] = useState<string[]>([])
   const [guardandoEdit, setGuardandoEdit] = useState(false)
   const [fotoVisor, setFotoVisor] = useState<string|null>(null)
+
+  // Estado para nueva visita (gerencia)
+  const [centro, setCentro] = useState('')
+  const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0])
+  const [usaRepuestos, setUsaRepuestos] = useState<boolean|null>(null)
+  const [repuestos, setRepuestos] = useState<any[]>([{nombre:'',cantidad:1}])
+  const [observaciones, setObservaciones] = useState('')
+  const [fotos, setFotos] = useState<string[]>([])
+  const [subiendoFotos, setSubiendoFotos] = useState(false)
+  const [guardando, setGuardando] = useState(false)
+  const [exito, setExito] = useState(false)
+
   const router = useRouter()
 
   useEffect(() => {
@@ -84,6 +118,7 @@ export default function GerenciaPage() {
     setEditObservaciones(r.observaciones || '')
     setEditEstado(r.estado || 'Pendiente')
     setEditUsaRepuestos(r.repuestos && r.repuestos.length > 0)
+    setEditFotos(r.fotos || [])
     setEditando(false)
   }
 
@@ -103,12 +138,99 @@ export default function GerenciaPage() {
   const guardarEdicion = async () => {
     if (!modalRegistro) return
     setGuardandoEdit(true)
-    const repsGuardar = editUsaRepuestos ? editRepuestos.filter(r => r.nombre.trim()) : []
+    const repsGuardar = editUsaRepuestos
+      ? editRepuestos.filter(r => r.nombre.trim()).map(r => ({ nombre: r.nombre, cantidad: parseInt(String(r.cantidad)) || 1 }))
+      : []
     await updateDoc(doc(db, 'visitas', modalRegistro.id), {
-      repuestos: repsGuardar, observaciones: editObservaciones, estado: editEstado, usaRepuestos: editUsaRepuestos,
+      repuestos: repsGuardar, observaciones: editObservaciones, estado: editEstado,
+      usaRepuestos: editUsaRepuestos, fotos: editFotos,
     })
     setGuardandoEdit(false); setEditando(false)
-    setModalRegistro({...modalRegistro, repuestos: repsGuardar, observaciones: editObservaciones, estado: editEstado})
+    setModalRegistro({...modalRegistro, repuestos: repsGuardar, observaciones: editObservaciones, estado: editEstado, fotos: editFotos})
+  }
+
+  // ---- Subida de fotos (Cloudinary) ----
+  const subirFoto = async (file: File): Promise<string> => {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('upload_preset', CLOUDINARY_PRESET)
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
+      method: 'POST', body: formData,
+    })
+    const data = await res.json()
+    return data.secure_url
+  }
+
+  const handleFotos = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return
+    setSubiendoFotos(true)
+    try {
+      const archivos = Array.from(e.target.files)
+      const urls = await Promise.all(archivos.map(f => subirFoto(f)))
+      setFotos(prev => [...prev, ...urls])
+    } catch (err) {
+      alert('Error al subir fotos, intenta de nuevo')
+    } finally {
+      setSubiendoFotos(false)
+    }
+  }
+
+  const handleFotosEdit = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return
+    setSubiendoFotos(true)
+    try {
+      const archivos = Array.from(e.target.files)
+      const urls = await Promise.all(archivos.map(f => subirFoto(f)))
+      setEditFotos(prev => [...prev, ...urls])
+    } catch (err) {
+      alert('Error al subir fotos')
+    } finally {
+      setSubiendoFotos(false)
+    }
+  }
+
+  // ---- Nueva visita (gerencia) ----
+  const handleUsaRepuestos = (val: boolean) => {
+    setUsaRepuestos(val)
+    if (!val) {
+      setRepuestos([])
+      setObservaciones(prev => prev || 'No se utilizaron repuestos en esta visita')
+    } else {
+      setRepuestos([{nombre:'',cantidad:1}])
+      if (observaciones === 'No se utilizaron repuestos en esta visita') setObservaciones('')
+    }
+  }
+
+  const addRepuesto = () => setRepuestos([...repuestos, {nombre:'',cantidad:1}])
+  const removeRepuesto = (i: number) => { if (repuestos.length > 1) setRepuestos(repuestos.filter((_,idx) => idx !== i)) }
+  const updateRepuesto = (i: number, field: string, val: any) => {
+    const r = [...repuestos]; r[i] = {...r[i],[field]:val}; setRepuestos(r)
+  }
+
+  const handleSubmitNuevaVisita = async () => {
+    if (!centro) { alert('Por favor selecciona un centro'); return }
+    if (usaRepuestos === null) { alert('Por favor indica si se utilizaron repuestos'); return }
+    if (usaRepuestos && repuestos.filter(r => r.nombre.trim()).length === 0) { alert('Por favor agrega al menos un repuesto'); return }
+    setGuardando(true)
+    try {
+      const repuestosFinal = repuestos
+        .filter(r => r.nombre.trim())
+        .map(r => ({ nombre: r.nombre, cantidad: parseInt(String(r.cantidad)) || 1 }))
+      await addDoc(collection(db, 'visitas'), {
+        uid: 'gerencia', tecnico: 'Baldomero Urriola', email: user.email, centro,
+        fecha: Timestamp.fromDate(new Date(fecha + 'T12:00:00')),
+        repuestos: usaRepuestos ? repuestosFinal : [],
+        usaRepuestos, observaciones, fotos, estado: 'Pendiente', creadoEn: Timestamp.now()
+      })
+      setExito(true)
+      setCentro(''); setRepuestos([{nombre:'',cantidad:1}]); setObservaciones('')
+      setFecha(new Date().toISOString().split('T')[0]); setUsaRepuestos(null); setFotos([])
+      setTimeout(() => { setExito(false); irARevisiones('') }, 1500)
+    } catch (e) {
+      alert('Error al guardar, intenta de nuevo')
+    } finally {
+      setGuardando(false)
+    }
   }
 
   const registrosFiltrados = registros.filter(r => {
@@ -246,7 +368,7 @@ export default function GerenciaPage() {
         </div>
       )}
 
-      {/* MODAL */}
+      {/* MODAL DETALLE */}
       {modalRegistro && (
         <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:'1rem'}} onClick={cerrarModal}>
           <div style={{background:'#fff',borderRadius:16,padding:'1.5rem',width:'100%',maxWidth:520,maxHeight:'88vh',overflowY:'auto',boxShadow:'0 20px 60px rgba(0,0,0,0.2)'}} onClick={e => e.stopPropagation()}>
@@ -306,9 +428,22 @@ export default function GerenciaPage() {
                   {editRepuestos.map((r,i) => (
                     <div key={i} style={{display:'flex',gap:8,marginBottom:6,alignItems:'center'}}>
                       <input value={r.nombre} onChange={e => { const arr=[...editRepuestos]; arr[i]={...arr[i],nombre:e.target.value}; setEditRepuestos(arr) }}
-                        placeholder="Nombre" style={{flex:2,padding:'8px',border:'1.5px solid #2196f3',borderRadius:8,fontSize:13}} />
-                      <input type="number" min={1} value={r.cantidad} onChange={e => { const arr=[...editRepuestos]; arr[i]={...arr[i],cantidad:parseInt(e.target.value)||1}; setEditRepuestos(arr) }}
-                        style={{flex:1,padding:'8px',border:'1.5px solid #2196f3',borderRadius:8,fontSize:13}} />
+                        placeholder="Nombre" style={{flex:2,padding:'8px',border:'1.5px solid #2196f3',borderRadius:8,fontSize:13,color:'#222',background:'#fff'}} />
+                      <input
+                        type="number" min={1} value={r.cantidad}
+                        onFocus={e => e.target.select()}
+                        onChange={e => {
+                          const val = e.target.value
+                          const arr = [...editRepuestos]
+                          arr[i] = { ...arr[i], cantidad: val === '' ? '' : parseInt(val) || 1 }
+                          setEditRepuestos(arr)
+                        }}
+                        onBlur={e => {
+                          if (e.target.value === '') {
+                            const arr = [...editRepuestos]; arr[i] = { ...arr[i], cantidad: 1 }; setEditRepuestos(arr)
+                          }
+                        }}
+                        style={{flex:1,padding:'8px',border:'1.5px solid #2196f3',borderRadius:8,fontSize:13,color:'#222',background:'#fff'}} />
                       <button onClick={() => setEditRepuestos(editRepuestos.filter((_,idx)=>idx!==i))} style={{width:36,height:36,border:'1px solid #ddd',borderRadius:8,background:'#fff',cursor:'pointer',color:'#888'}}>✕</button>
                     </div>
                   ))}
@@ -329,15 +464,26 @@ export default function GerenciaPage() {
               )}
             </div>
 
-            {/* FOTOS */}
             <div style={{marginBottom:'1.25rem'}}>
               <div style={{fontSize:12,color:'#555',marginBottom:8,fontWeight:500}}>Fotografías</div>
               <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
-                {(modalRegistro.fotos || []).map((url: string, i: number) => (
-                  <img key={i} src={url} alt={`foto ${i+1}`} onClick={() => setFotoVisor(url)}
-                    style={{width:80,height:80,objectFit:'cover',borderRadius:8,cursor:'pointer',border:'2px solid #e0eaf2'}} />
+                {(editando ? editFotos : (modalRegistro.fotos || [])).map((url: string, i: number) => (
+                  <div key={i} style={{position:'relative'}}>
+                    <img src={url} alt={`foto ${i+1}`} onClick={() => setFotoVisor(url)}
+                      style={{width:80,height:80,objectFit:'cover',borderRadius:8,cursor:'pointer',border:'2px solid #e0eaf2'}} />
+                    {editando && (
+                      <button onClick={() => setEditFotos(editFotos.filter((_,idx)=>idx!==i))}
+                        style={{position:'absolute',top:-6,right:-6,width:20,height:20,borderRadius:'50%',background:'#ef5350',border:'none',color:'#fff',fontSize:12,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>×</button>
+                    )}
+                  </div>
                 ))}
-                {(!modalRegistro.fotos || modalRegistro.fotos.length === 0) && (
+                {editando && (
+                  <label style={{width:80,height:80,border:'2px dashed #d0e8f5',borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',flexDirection:'column',gap:4,color:'#1a6fa8',fontSize:11}}>
+                    {subiendoFotos ? '⏳' : <>📷<span>Agregar</span></>}
+                    <input type="file" accept="image/*" multiple onChange={handleFotosEdit} style={{display:'none'}} disabled={subiendoFotos} />
+                  </label>
+                )}
+                {!editando && (!modalRegistro.fotos || modalRegistro.fotos.length === 0) && (
                   <div style={{fontSize:13,color:'#aaa'}}>Sin fotografías</div>
                 )}
               </div>
@@ -351,7 +497,7 @@ export default function GerenciaPage() {
                 {editando ? (
                   <>
                     <button onClick={() => setEditando(false)} style={{padding:'9px 16px',border:'1px solid #ddd',borderRadius:8,background:'#fff',fontSize:13,cursor:'pointer',color:'#666'}}>Cancelar</button>
-                    <button onClick={guardarEdicion} disabled={guardandoEdit} style={{padding:'9px 16px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:600,cursor:'pointer'}}>
+                    <button onClick={guardarEdicion} disabled={guardandoEdit||subiendoFotos} style={{padding:'9px 16px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:600,cursor:'pointer'}}>
                       {guardandoEdit ? 'Guardando...' : '✅ Guardar'}
                     </button>
                   </>
@@ -388,6 +534,9 @@ export default function GerenciaPage() {
           </div>
           <div onClick={() => goTab('inicio')} style={{display:'flex',alignItems:'center',gap:10,padding:'12px 1rem',color:tab==='inicio'?'#fff':'rgba(255,255,255,0.8)',fontSize:14,cursor:'pointer',background:tab==='inicio'?'rgba(255,255,255,0.18)':'transparent',borderLeft:tab==='inicio'?'3px solid #fff':'3px solid transparent',whiteSpace:'nowrap',overflow:'hidden'}}>
             <span style={{fontSize:18,flexShrink:0}}>🏠</span>{sidebarOpen && <span>Inicio</span>}
+          </div>
+          <div onClick={() => goTab('registro')} style={{display:'flex',alignItems:'center',gap:10,padding:'12px 1rem',color:tab==='registro'?'#fff':'rgba(255,255,255,0.8)',fontSize:14,cursor:'pointer',background:tab==='registro'?'rgba(255,255,255,0.18)':'transparent',borderLeft:tab==='registro'?'3px solid #fff':'3px solid transparent',whiteSpace:'nowrap',overflow:'hidden'}}>
+            <span style={{fontSize:18,flexShrink:0}}>➕</span>{sidebarOpen && <span>Registrar visita</span>}
           </div>
           <div onClick={() => { setSubmenuOpen(!submenuOpen); goTab('registros'); setFiltroEstado('') }} style={{display:'flex',alignItems:'center',gap:10,padding:'12px 1rem',color:tab==='registros'?'#fff':'rgba(255,255,255,0.8)',fontSize:14,cursor:'pointer',background:tab==='registros'?'rgba(255,255,255,0.18)':'transparent',borderLeft:tab==='registros'?'3px solid #fff':'3px solid transparent',whiteSpace:'nowrap',overflow:'hidden'}}>
             <span style={{fontSize:18,flexShrink:0}}>🔍</span>{sidebarOpen && <><span>Revisiones</span><span style={{marginLeft:'auto',fontSize:11}}>{submenuOpen?'▲':'▼'}</span></>}
@@ -524,6 +673,106 @@ export default function GerenciaPage() {
           </div>
         </>}
 
+        {/* REGISTRAR VISITA (gerencia) */}
+        {tab === 'registro' && <>
+          <h1 style={{fontSize:isMobile?20:22,fontWeight:700,marginBottom:4,color:'#1a1a2e'}}>Registrar visita</h1>
+          <p style={{color:'#888',marginBottom:'1.25rem',fontSize:14}}>Se registrará a nombre de Baldomero Urriola</p>
+          {exito && <div style={{background:'#EAF3DE',color:'#3B6D11',padding:'12px 16px',borderRadius:8,marginBottom:'1rem',fontWeight:500}}>✅ Registro guardado correctamente</div>}
+          <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5'}}>
+            <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:'1rem',marginBottom:'1rem'}}>
+              <div>
+                <label style={{fontSize:13,color:'#555',display:'block',marginBottom:4,fontWeight:500}}>Centro de diálisis</label>
+                <select value={centro} onChange={e => setCentro(e.target.value)} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14}}>
+                  <option value="">— Seleccionar centro —</option>
+                  {CENTROS.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{fontSize:13,color:'#555',display:'block',marginBottom:4,fontWeight:500}}>Fecha de visita</label>
+                <input type="date" value={fecha} onChange={e => setFecha(e.target.value)} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14}} />
+              </div>
+            </div>
+
+            <div style={{marginBottom:'1rem'}}>
+              <label style={{fontSize:13,color:'#555',display:'block',marginBottom:8,fontWeight:500}}>¿Se utilizaron repuestos en esta visita?</label>
+              <div style={{display:'flex',gap:10}}>
+                <button onClick={() => handleUsaRepuestos(true)} style={{flex:1,padding:'11px',border:`2px solid ${usaRepuestos===true?'#1a6fa8':'#ddd'}`,borderRadius:8,background:usaRepuestos===true?'#e8f4fd':'#fff',color:usaRepuestos===true?'#1a6fa8':'#666',fontSize:13,cursor:'pointer',fontWeight:usaRepuestos===true?600:400}}>
+                  ✅ Sí, se utilizaron
+                </button>
+                <button onClick={() => handleUsaRepuestos(false)} style={{flex:1,padding:'11px',border:`2px solid ${usaRepuestos===false?'#ef5350':'#ddd'}`,borderRadius:8,background:usaRepuestos===false?'#FCEBEB':'#fff',color:usaRepuestos===false?'#c0392b':'#666',fontSize:13,cursor:'pointer',fontWeight:usaRepuestos===false?600:400}}>
+                  ❌ No se utilizaron
+                </button>
+              </div>
+            </div>
+
+            {usaRepuestos === true && (
+              <div style={{marginBottom:'1rem'}}>
+                <label style={{fontSize:13,color:'#555',display:'block',marginBottom:8,fontWeight:500}}>Repuestos utilizados</label>
+                <div style={{display:'flex',gap:8,marginBottom:6}}>
+                  <span style={{flex:2,fontSize:11,color:'#aaa'}}>Nombre del repuesto</span>
+                  <span style={{width:80,fontSize:11,color:'#aaa'}}>Cantidad</span>
+                  <span style={{width:40}}></span>
+                </div>
+                {repuestos.map((r,i) => (
+                  <div key={i} style={{display:'flex',gap:8,marginBottom:8,alignItems:'center'}}>
+                    <input type="text" value={r.nombre} onChange={e => updateRepuesto(i,'nombre',e.target.value)} placeholder="Ej: Membrana RO"
+                      style={{flex:2,padding:'11px 10px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,color:'#222',background:'#fff'}} />
+                    <input
+                      type="number" min={1} value={r.cantidad}
+                      onFocus={e => e.target.select()}
+                      onChange={e => {
+                        const val = e.target.value
+                        updateRepuesto(i, 'cantidad', val === '' ? '' : (parseInt(val) || 1))
+                      }}
+                      onBlur={e => {
+                        if (e.target.value === '') updateRepuesto(i, 'cantidad', 1)
+                      }}
+                      style={{width:80,padding:'11px 8px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,color:'#222',background:'#fff'}} />
+                    <button onClick={() => removeRepuesto(i)} style={{width:40,height:44,border:'1px solid #ddd',borderRadius:8,background:'#fff',cursor:'pointer',color:'#888',fontSize:18,flexShrink:0}}>✕</button>
+                  </div>
+                ))}
+                <button onClick={addRepuesto} style={{fontSize:13,color:'#1a6fa8',background:'none',border:'none',cursor:'pointer',padding:'4px 0'}}>+ Agregar otro repuesto</button>
+              </div>
+            )}
+
+            {usaRepuestos !== null && (
+              <div style={{marginBottom:'1rem'}}>
+                <label style={{fontSize:13,color:'#555',display:'block',marginBottom:4,fontWeight:500}}>Observaciones</label>
+                <textarea value={observaciones} onChange={e => setObservaciones(e.target.value)}
+                  placeholder="Describe el trabajo realizado, condiciones del equipo, etc."
+                  rows={4} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
+              </div>
+            )}
+
+            {usaRepuestos !== null && (
+              <div style={{marginBottom:'1.25rem'}}>
+                <label style={{fontSize:13,color:'#555',display:'block',marginBottom:8,fontWeight:500}}>📷 Fotografías <span style={{color:'#aaa',fontWeight:400}}>(opcional)</span></label>
+                <div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:8}}>
+                  {fotos.map((url,i) => (
+                    <div key={i} style={{position:'relative'}}>
+                      <img src={url} alt={`foto ${i+1}`} onClick={() => setFotoVisor(url)}
+                        style={{width:80,height:80,objectFit:'cover',borderRadius:8,cursor:'pointer',border:'2px solid #e0eaf2'}} />
+                      <button onClick={() => setFotos(fotos.filter((_,idx)=>idx!==i))}
+                        style={{position:'absolute',top:-6,right:-6,width:20,height:20,borderRadius:'50%',background:'#ef5350',border:'none',color:'#fff',fontSize:12,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>×</button>
+                    </div>
+                  ))}
+                  <label style={{width:80,height:80,border:'2px dashed #d0e8f5',borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',flexDirection:'column',gap:4,color:'#1a6fa8',fontSize:11}}>
+                    {subiendoFotos ? '⏳ Subiendo...' : <>📷<span>Agregar foto</span></>}
+                    <input type="file" accept="image/*" multiple capture="environment" onChange={handleFotos} style={{display:'none'}} disabled={subiendoFotos} />
+                  </label>
+                </div>
+                {subiendoFotos && <p style={{fontSize:12,color:'#1a6fa8'}}>Subiendo fotos...</p>}
+              </div>
+            )}
+
+            {usaRepuestos !== null && (
+              <button onClick={handleSubmitNuevaVisita} disabled={guardando||subiendoFotos} style={{width:isMobile?'100%':'auto',padding:'12px 28px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>
+                {guardando ? 'Guardando...' : subiendoFotos ? 'Subiendo fotos...' : 'Guardar registro'}
+              </button>
+            )}
+          </div>
+        </>}
+
         {tab === 'registros' && <>
           <h1 style={{fontSize:isMobile?20:22,fontWeight:700,marginBottom:4,color:'#1a1a2e'}}>
             {filtroEstado===''?'Todos los registros':filtroEstado==='Pendiente'?'⏳ Pendientes':filtroEstado==='En revisión'?'🔎 En revisión':'✅ Cobrados'}
@@ -565,14 +814,14 @@ export default function GerenciaPage() {
           <div onClick={() => goTab('inicio')} style={navTab(tab==='inicio')}>
             <span style={{fontSize:22}}>🏠</span><span>Inicio</span>
           </div>
+          <div onClick={() => goTab('registro')} style={navTab(tab==='registro')}>
+            <span style={{fontSize:22}}>➕</span><span>Registrar</span>
+          </div>
           <div onClick={() => { goTab('registros'); setFiltroEstado('') }} style={navTab(tab==='registros'&&filtroEstado==='')}>
             <span style={{fontSize:22}}>📋</span><span>Todos</span>
           </div>
           <div onClick={() => irARevisiones('Pendiente')} style={navTab(tab==='registros'&&filtroEstado==='Pendiente')}>
             <span style={{fontSize:22}}>⏳</span><span>Pendientes</span>
-          </div>
-          <div onClick={() => irARevisiones('Cobrado')} style={navTab(tab==='registros'&&filtroEstado==='Cobrado')}>
-            <span style={{fontSize:22}}>✅</span><span>Cobrados</span>
           </div>
         </div>
       )}
