@@ -5,7 +5,7 @@ import { signOut, onAuthStateChanged } from 'firebase/auth'
 import { collection, addDoc, query, where, orderBy, onSnapshot, Timestamp, doc, updateDoc } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
 import { generarPdfBlob } from '../../../lib/InformePDF'
-import { TECNICOS_INFORME, LUGARES_SERVICIO, CINTAS_REACTIVAS, CONCENTRACIONES_ACIDO_REF } from '../../../lib/informesConfig'
+import { LUGARES_SERVICIO, CINTAS_REACTIVAS } from '../../../lib/informesConfig'
 
 const CENTROS = [
   'CD Cendial Salamanca','CD Chacabuco','CD Dialsur','CD Interdial','CD La Reina',
@@ -37,6 +37,8 @@ const TECNICOS: Record<string,string> = {
 }
 
 const MESES_NOMBRE = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+const ANIOS_DISPONIBLES = [2026, 2027, 2028, 2029, 2030]
+const DIAS_DISPONIBLES = Array.from({length: 31}, (_, i) => i + 1)
 const CLOUDINARY_CLOUD = 'dhozxnzre'
 const CLOUDINARY_PRESET = 'siac_uploads'
 
@@ -55,7 +57,6 @@ const informeVacio = {
   haySalasReuso: null,
   monitoresPresencia: '', salaReparacionPresencia: '',
   monitoresAusencia: '', salaReparacionAusencia: '',
-  tecnicoResponsable: '',
 }
 
 export default function TecnicoPage() {
@@ -283,7 +284,6 @@ export default function TecnicoPage() {
     if (!informe.horaInicio || !informe.tiempoEstadia || !informe.tiempoEnjuague) return 'Completa los tiempos del servicio'
     if (informe.haySalasReuso === null) return 'Indica si hay salas de reuso'
     if (informe.haySalasReuso && (!informe.monitoresPresencia || !informe.salaReparacionPresencia || !informe.monitoresAusencia || !informe.salaReparacionAusencia)) return 'Completa los puntos de muestreo'
-    if (!informe.tecnicoResponsable) return 'Selecciona el técnico responsable'
     return null
   }
 
@@ -294,6 +294,7 @@ export default function TecnicoPage() {
     try {
       const datosPdf = {
         ...informe,
+        tecnicoResponsable: nombreTecnico,
         puntosPresencia: { monitores: informe.monitoresPresencia, salaReparacion: informe.salaReparacionPresencia },
         puntosAusencia: { monitores: informe.monitoresAusencia, salaReparacion: informe.salaReparacionAusencia },
       }
@@ -304,11 +305,11 @@ export default function TecnicoPage() {
 
       await addDoc(collection(db, 'informes'), {
         uid: user.uid,
-        tecnico: TECNICOS[user.email] || user.email,
+        tecnico: nombreTecnico,
         email: user.email,
         cliente: informe.cliente,
         fechaServicio: fechaServicioTexto,
-        tecnicoResponsable: informe.tecnicoResponsable,
+        tecnicoResponsable: nombreTecnico,
         pdfUrl,
         creadoEn: Timestamp.now(),
       })
@@ -319,7 +320,7 @@ export default function TecnicoPage() {
         body: JSON.stringify({
           pdfUrl,
           tecnicoEmail: user.email,
-          tecnicoNombre: informe.tecnicoResponsable,
+          tecnicoNombre: nombreTecnico,
           cliente: informe.cliente,
           fechaServicio: fechaServicioTexto,
         }),
@@ -328,9 +329,9 @@ export default function TecnicoPage() {
       setExitoInforme(true)
       setInforme(informeVacio)
       setTimeout(() => setExitoInforme(false), 3000)
-    } catch (e) {
-      console.error(e)
-      alert('Error al generar el informe, intenta de nuevo')
+    } catch (e: any) {
+      console.error('ERROR DETALLE:', e)
+      alert('Error al generar el informe: ' + (e?.message || 'Error desconocido') + '\n\nRevisa la consola para más detalles.')
     } finally {
       setGenerandoInforme(false)
     }
@@ -796,7 +797,7 @@ export default function TecnicoPage() {
         {/* TAB INFORMES DE DESINFECCIÓN */}
         {tab === 'informes' && <>
           <h1 style={{fontSize:isMobile?20:22,fontWeight:700,marginBottom:4,color:'#1a1a2e'}}>Informe de Desinfección</h1>
-          <p style={{color:'#888',marginBottom:'1.25rem',fontSize:14}}>Completa los datos para generar el informe en PDF</p>
+          <p style={{color:'#888',marginBottom:'1.25rem',fontSize:14}}>Técnico responsable: <strong>{nombreTecnico}</strong></p>
           {exitoInforme && <div style={{background:'#EAF3DE',color:'#3B6D11',padding:'12px 16px',borderRadius:8,marginBottom:'1rem',fontWeight:500}}>✅ Informe generado y enviado por correo correctamente</div>}
 
           <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
@@ -813,17 +814,35 @@ export default function TecnicoPage() {
               <div>
                 <label style={labelStyle}>Fecha del Informe</label>
                 <div style={{display:'flex',gap:6}}>
-                  <input type="number" placeholder="Día" value={informe.fechaInformeDia} onChange={e => setI('fechaInformeDia', e.target.value)} style={{...inputStyle, width:'33%'}} />
-                  <input type="number" placeholder="Mes" value={informe.fechaInformeMes} onChange={e => setI('fechaInformeMes', e.target.value)} style={{...inputStyle, width:'33%'}} />
-                  <input type="number" placeholder="Año" value={informe.fechaInformeAnio} onChange={e => setI('fechaInformeAnio', e.target.value)} style={{...inputStyle, width:'34%'}} />
+                  <select value={informe.fechaInformeDia} onChange={e => setI('fechaInformeDia', e.target.value)} style={{...inputStyle, width:'30%'}}>
+                    <option value="">Día</option>
+                    {DIAS_DISPONIBLES.map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                  <select value={informe.fechaInformeMes} onChange={e => setI('fechaInformeMes', e.target.value)} style={{...inputStyle, width:'40%'}}>
+                    <option value="">Mes</option>
+                    {MESES_NOMBRE.map((m,i) => <option key={i} value={i+1}>{m}</option>)}
+                  </select>
+                  <select value={informe.fechaInformeAnio} onChange={e => setI('fechaInformeAnio', e.target.value)} style={{...inputStyle, width:'30%'}}>
+                    <option value="">Año</option>
+                    {ANIOS_DISPONIBLES.map(a => <option key={a} value={a}>{a}</option>)}
+                  </select>
                 </div>
               </div>
               <div>
                 <label style={labelStyle}>Fecha del Servicio</label>
                 <div style={{display:'flex',gap:6}}>
-                  <input type="number" placeholder="Día" value={informe.fechaServicioDia} onChange={e => setI('fechaServicioDia', e.target.value)} style={{...inputStyle, width:'33%'}} />
-                  <input type="number" placeholder="Mes" value={informe.fechaServicioMes} onChange={e => setI('fechaServicioMes', e.target.value)} style={{...inputStyle, width:'33%'}} />
-                  <input type="number" placeholder="Año" value={informe.fechaServicioAnio} onChange={e => setI('fechaServicioAnio', e.target.value)} style={{...inputStyle, width:'34%'}} />
+                  <select value={informe.fechaServicioDia} onChange={e => setI('fechaServicioDia', e.target.value)} style={{...inputStyle, width:'30%'}}>
+                    <option value="">Día</option>
+                    {DIAS_DISPONIBLES.map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                  <select value={informe.fechaServicioMes} onChange={e => setI('fechaServicioMes', e.target.value)} style={{...inputStyle, width:'40%'}}>
+                    <option value="">Mes</option>
+                    {MESES_NOMBRE.map((m,i) => <option key={i} value={i+1}>{m}</option>)}
+                  </select>
+                  <select value={informe.fechaServicioAnio} onChange={e => setI('fechaServicioAnio', e.target.value)} style={{...inputStyle, width:'30%'}}>
+                    <option value="">Año</option>
+                    {ANIOS_DISPONIBLES.map(a => <option key={a} value={a}>{a}</option>)}
+                  </select>
                 </div>
               </div>
             </div>
@@ -995,14 +1014,6 @@ export default function TecnicoPage() {
                 </div>
               </>
             )}
-          </div>
-
-          <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
-            <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Técnico responsable</div>
-            <select value={informe.tecnicoResponsable} onChange={e => setI('tecnicoResponsable', e.target.value)} style={inputStyle}>
-              <option value="">— Seleccionar técnico —</option>
-              {TECNICOS_INFORME.map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
           </div>
 
           <button onClick={handleGenerarInforme} disabled={generandoInforme} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
