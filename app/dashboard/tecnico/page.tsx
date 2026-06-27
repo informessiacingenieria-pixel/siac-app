@@ -4,6 +4,8 @@ import { auth, db } from '../../../lib/firebase'
 import { signOut, onAuthStateChanged } from 'firebase/auth'
 import { collection, addDoc, query, where, orderBy, onSnapshot, Timestamp, doc, updateDoc } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
+import { generarPdfBlob } from '../../../lib/InformePDF'
+import { TECNICOS_INFORME, LUGARES_SERVICIO, CINTAS_REACTIVAS, CONCENTRACIONES_ACIDO_REF } from '../../../lib/informesConfig'
 
 const CENTROS = [
   'CD Cendial Salamanca','CD Chacabuco','CD Dialsur','CD Interdial','CD La Reina',
@@ -38,6 +40,24 @@ const MESES_NOMBRE = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','
 const CLOUDINARY_CLOUD = 'dhozxnzre'
 const CLOUDINARY_PRESET = 'siac_uploads'
 
+const informeVacio = {
+  cliente: '',
+  fechaInformeDia: '', fechaInformeMes: '', fechaInformeAnio: '',
+  fechaServicioDia: '', fechaServicioMes: '', fechaServicioAnio: '',
+  lugarServicio: '',
+  quimico: '',
+  concentracionCloro: '', fechaExpiracionCloro: '',
+  concentracionAcido: '', loteAcido: '', fechaVencimientoAcido: '',
+  cintaPresencia: '', cintaAusencia: '',
+  ltAguaTratada: '', ltQuimicoUtilizado: '',
+  hay2doEstanque: null, ltAguaTratada2: '', ltQuimicoUtilizado2: '',
+  horaInicio: '', tiempoEstadia: '', tiempoEnjuague: '',
+  haySalasReuso: null,
+  monitoresPresencia: '', salaReparacionPresencia: '',
+  monitoresAusencia: '', salaReparacionAusencia: '',
+  tecnicoResponsable: '',
+}
+
 export default function TecnicoPage() {
   const [user, setUser] = useState<any>(null)
   const [tab, setTab] = useState('inicio')
@@ -63,6 +83,12 @@ export default function TecnicoPage() {
   const [editFotos, setEditFotos] = useState<string[]>([])
   const [guardandoEdit, setGuardandoEdit] = useState(false)
   const [fotoVisor, setFotoVisor] = useState<string|null>(null)
+
+  const [informe, setInforme] = useState<any>(informeVacio)
+  const [generandoInforme, setGenerandoInforme] = useState(false)
+  const [exitoInforme, setExitoInforme] = useState(false)
+  const [misInformes, setMisInformes] = useState<any[]>([])
+
   const router = useRouter()
 
   useEffect(() => {
@@ -90,11 +116,32 @@ export default function TecnicoPage() {
     return () => unsub()
   }, [user])
 
+  useEffect(() => {
+    if (!user) return
+    const q = query(collection(db, 'informes'), where('uid', '==', user.uid), orderBy('creadoEn', 'desc'))
+    const unsub = onSnapshot(q, (snap) => {
+      setMisInformes(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+    })
+    return () => unsub()
+  }, [user])
+
   const handleLogout = async () => { await signOut(auth); router.push('/') }
 
   const subirFoto = async (file: File): Promise<string> => {
     const formData = new FormData()
     formData.append('file', file)
+    formData.append('upload_preset', CLOUDINARY_PRESET)
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
+      method: 'POST',
+      body: formData,
+    })
+    const data = await res.json()
+    return data.secure_url
+  }
+
+  const subirPdf = async (blob: Blob): Promise<string> => {
+    const formData = new FormData()
+    formData.append('file', blob)
     formData.append('upload_preset', CLOUDINARY_PRESET)
     const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
       method: 'POST',
@@ -218,6 +265,77 @@ export default function TecnicoPage() {
     setModalRegistro({...modalRegistro, repuestos: repsGuardar, observaciones: editObservaciones, fotos: editFotos})
   }
 
+  // ---- Lógica del formulario de Informe de Desinfección ----
+  const setI = (field: string, val: any) => setInforme((prev: any) => ({ ...prev, [field]: val }))
+
+  const validarInforme = () => {
+    if (!informe.cliente) return 'Selecciona un cliente'
+    if (!informe.fechaInformeDia || !informe.fechaInformeMes || !informe.fechaInformeAnio) return 'Completa la fecha del informe'
+    if (!informe.fechaServicioDia || !informe.fechaServicioMes || !informe.fechaServicioAnio) return 'Completa la fecha del servicio'
+    if (!informe.lugarServicio) return 'Selecciona el lugar de servicio'
+    if (!informe.quimico) return 'Selecciona el químico utilizado'
+    if (informe.quimico === 'Cloro comercial' && (!informe.concentracionCloro || !informe.fechaExpiracionCloro)) return 'Completa los datos del cloro'
+    if (informe.quimico === 'Ácido peracético' && (!informe.concentracionAcido || !informe.loteAcido || !informe.fechaVencimientoAcido)) return 'Completa los datos del ácido'
+    if (!informe.cintaPresencia || !informe.cintaAusencia) return 'Selecciona las cintas reactivas'
+    if (!informe.ltAguaTratada || !informe.ltQuimicoUtilizado) return 'Completa la dilución de trabajo'
+    if (informe.hay2doEstanque === null) return 'Indica si hay segundo estanque'
+    if (informe.hay2doEstanque && (!informe.ltAguaTratada2 || !informe.ltQuimicoUtilizado2)) return 'Completa la dilución del 2do estanque'
+    if (!informe.horaInicio || !informe.tiempoEstadia || !informe.tiempoEnjuague) return 'Completa los tiempos del servicio'
+    if (informe.haySalasReuso === null) return 'Indica si hay salas de reuso'
+    if (informe.haySalasReuso && (!informe.monitoresPresencia || !informe.salaReparacionPresencia || !informe.monitoresAusencia || !informe.salaReparacionAusencia)) return 'Completa los puntos de muestreo'
+    if (!informe.tecnicoResponsable) return 'Selecciona el técnico responsable'
+    return null
+  }
+
+  const handleGenerarInforme = async () => {
+    const error = validarInforme()
+    if (error) { alert(error); return }
+    setGenerandoInforme(true)
+    try {
+      const datosPdf = {
+        ...informe,
+        puntosPresencia: { monitores: informe.monitoresPresencia, salaReparacion: informe.salaReparacionPresencia },
+        puntosAusencia: { monitores: informe.monitoresAusencia, salaReparacion: informe.salaReparacionAusencia },
+      }
+      const blob = await generarPdfBlob(datosPdf)
+      const pdfUrl = await subirPdf(blob)
+
+      const fechaServicioTexto = `${String(informe.fechaServicioDia).padStart(2,'0')}/${String(informe.fechaServicioMes).padStart(2,'0')}/${informe.fechaServicioAnio}`
+
+      await addDoc(collection(db, 'informes'), {
+        uid: user.uid,
+        tecnico: TECNICOS[user.email] || user.email,
+        email: user.email,
+        cliente: informe.cliente,
+        fechaServicio: fechaServicioTexto,
+        tecnicoResponsable: informe.tecnicoResponsable,
+        pdfUrl,
+        creadoEn: Timestamp.now(),
+      })
+
+      await fetch('/api/enviar-informe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pdfUrl,
+          tecnicoEmail: user.email,
+          tecnicoNombre: informe.tecnicoResponsable,
+          cliente: informe.cliente,
+          fechaServicio: fechaServicioTexto,
+        }),
+      })
+
+      setExitoInforme(true)
+      setInforme(informeVacio)
+      setTimeout(() => setExitoInforme(false), 3000)
+    } catch (e) {
+      console.error(e)
+      alert('Error al generar el informe, intenta de nuevo')
+    } finally {
+      setGenerandoInforme(false)
+    }
+  }
+
   const nombreTecnico = user ? (TECNICOS[user.email] || user.email) : ''
   const iniciales = nombreTecnico.split(' ').map((n:string) => n[0]).join('').slice(0,2).toUpperCase()
   const mesActual = new Date().getMonth()
@@ -258,6 +376,9 @@ export default function TecnicoPage() {
     {icon:'/icon-centros.png', label:'Total registros', value: registros.length, sub:'Con y sin repuestos'},
   ]
 
+  const inputStyle = {width:'100%',padding:'10px',border:'1.5px solid #ddd',borderRadius:8,fontSize:13,color:'#222',background:'#fff'}
+  const labelStyle = {fontSize:13,color:'#555',display:'block' as const,marginBottom:4,fontWeight:500}
+
   return (
     <div style={{display:'flex',minHeight:'100vh',flexDirection:isMobile?'column':'row'}}>
 
@@ -269,7 +390,7 @@ export default function TecnicoPage() {
         </div>
       )}
 
-      {/* MODAL */}
+      {/* MODAL VISITA */}
       {modalRegistro && (
         <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:'1rem'}} onClick={cerrarModal}>
           <div style={{background:'#fff',borderRadius:16,padding:'1.5rem',width:'100%',maxWidth:520,maxHeight:'88vh',overflowY:'auto',boxShadow:'0 20px 60px rgba(0,0,0,0.2)'}} onClick={e => e.stopPropagation()}>
@@ -290,7 +411,6 @@ export default function TecnicoPage() {
                 <span style={badge(modalRegistro.estado)}>{modalRegistro.estado}</span>
               </div>
             </div>
-
             {editando && (
               <div style={{marginBottom:'1rem'}}>
                 <div style={{fontSize:12,color:'#555',marginBottom:8,fontWeight:500}}>¿Se utilizaron repuestos?</div>
@@ -300,7 +420,6 @@ export default function TecnicoPage() {
                 </div>
               </div>
             )}
-
             <div style={{marginBottom:'1rem'}}>
               <div style={{fontSize:12,color:'#555',marginBottom:6,fontWeight:500}}>Repuestos utilizados</div>
               {!editando ? (
@@ -321,9 +440,7 @@ export default function TecnicoPage() {
                       <input value={r.nombre} onChange={e => { const arr=[...editRepuestos]; arr[i]={...arr[i],nombre:e.target.value}; setEditRepuestos(arr) }}
                         placeholder="Nombre" style={{flex:2,padding:'8px 10px',border:'1.5px solid #2196f3',borderRadius:8,fontSize:13,color:'#222',background:'#fff'}} />
                       <input
-                        type="number"
-                        min={1}
-                        value={r.cantidad}
+                        type="number" min={1} value={r.cantidad}
                         onFocus={e => e.target.select()}
                         onChange={e => {
                           const val = e.target.value
@@ -333,9 +450,7 @@ export default function TecnicoPage() {
                         }}
                         onBlur={e => {
                           if (e.target.value === '') {
-                            const arr = [...editRepuestos]
-                            arr[i] = { ...arr[i], cantidad: 1 }
-                            setEditRepuestos(arr)
+                            const arr = [...editRepuestos]; arr[i] = { ...arr[i], cantidad: 1 }; setEditRepuestos(arr)
                           }
                         }}
                         style={{flex:1,padding:'8px 10px',border:'1.5px solid #2196f3',borderRadius:8,fontSize:13,color:'#222',background:'#fff'}} />
@@ -346,7 +461,6 @@ export default function TecnicoPage() {
                 </div>
               ) : null}
             </div>
-
             <div style={{marginBottom:'1rem'}}>
               <div style={{fontSize:12,color:'#555',marginBottom:6,fontWeight:500}}>Observaciones</div>
               {editando ? (
@@ -358,8 +472,6 @@ export default function TecnicoPage() {
                 </div>
               )}
             </div>
-
-            {/* FOTOS */}
             <div style={{marginBottom:'1.25rem'}}>
               <div style={{fontSize:12,color:'#555',marginBottom:8,fontWeight:500}}>Fotografías</div>
               <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
@@ -384,7 +496,6 @@ export default function TecnicoPage() {
                 )}
               </div>
             </div>
-
             <div style={{display:'flex',gap:10,justifyContent:'flex-end'}}>
               {editando ? (
                 <>
@@ -423,7 +534,7 @@ export default function TecnicoPage() {
               <span style={{display:'block',width:22,height:2,background:'#fff',borderRadius:2}}></span>
             </button>
           </div>
-          {[{id:'inicio',icon:'🏠',label:'Inicio'},{id:'registro',icon:'➕',label:'Registrar visita'},{id:'historial',icon:'📋',label:'Mis registros'}].map(item => (
+          {[{id:'inicio',icon:'🏠',label:'Inicio'},{id:'registro',icon:'➕',label:'Registrar visita'},{id:'historial',icon:'📋',label:'Mis registros'},{id:'informes',icon:'🧪',label:'Informes de Desinfección'}].map(item => (
             <div key={item.id} onClick={() => goTab(item.id)} style={{display:'flex',alignItems:'center',gap:10,padding:'12px 1rem',color:tab===item.id?'#fff':'rgba(255,255,255,0.8)',fontSize:14,cursor:'pointer',background:tab===item.id?'rgba(255,255,255,0.18)':'transparent',borderLeft:tab===item.id?'3px solid #fff':'3px solid transparent',whiteSpace:'nowrap',overflow:'hidden'}}>
               <span style={{fontSize:18,flexShrink:0}}>{item.icon}</span>
               {sidebarOpen && <span>{item.label}</span>}
@@ -539,7 +650,6 @@ export default function TecnicoPage() {
                 <input type="date" value={fecha} onChange={e => setFecha(e.target.value)} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14}} />
               </div>
             </div>
-
             <div style={{marginBottom:'1rem'}}>
               <label style={{fontSize:13,color:'#555',display:'block',marginBottom:8,fontWeight:500}}>¿Se utilizaron repuestos en esta visita?</label>
               <div style={{display:'flex',gap:10}}>
@@ -551,7 +661,6 @@ export default function TecnicoPage() {
                 </button>
               </div>
             </div>
-
             {usaRepuestos === true && (
               <div style={{marginBottom:'1rem'}}>
                 <label style={{fontSize:13,color:'#555',display:'block',marginBottom:8,fontWeight:500}}>Repuestos utilizados</label>
@@ -583,7 +692,6 @@ export default function TecnicoPage() {
                 <button onClick={addRepuesto} style={{fontSize:13,color:'#1a6fa8',background:'none',border:'none',cursor:'pointer',padding:'4px 0'}}>+ Agregar otro repuesto</button>
               </div>
             )}
-
             {usaRepuestos !== null && (
               <div style={{marginBottom:'1rem'}}>
                 <label style={{fontSize:13,color:'#555',display:'block',marginBottom:4,fontWeight:500}}>Observaciones</label>
@@ -592,7 +700,6 @@ export default function TecnicoPage() {
                   rows={4} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-
             {usaRepuestos !== null && (
               <div style={{marginBottom:'1.25rem'}}>
                 <label style={{fontSize:13,color:'#555',display:'block',marginBottom:8,fontWeight:500}}>📷 Fotografías <span style={{color:'#aaa',fontWeight:400}}>(opcional)</span></label>
@@ -613,7 +720,6 @@ export default function TecnicoPage() {
                 {subiendoFotos && <p style={{fontSize:12,color:'#1a6fa8'}}>Subiendo fotos...</p>}
               </div>
             )}
-
             {usaRepuestos !== null && (
               <button onClick={handleSubmit} disabled={guardando||subiendoFotos} style={{width:isMobile?'100%':'auto',padding:'12px 28px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>
                 {guardando ? 'Guardando...' : subiendoFotos ? 'Subiendo fotos...' : 'Guardar registro'}
@@ -686,14 +792,250 @@ export default function TecnicoPage() {
             )}
           </div>
         </>}
+
+        {/* TAB INFORMES DE DESINFECCIÓN */}
+        {tab === 'informes' && <>
+          <h1 style={{fontSize:isMobile?20:22,fontWeight:700,marginBottom:4,color:'#1a1a2e'}}>Informe de Desinfección</h1>
+          <p style={{color:'#888',marginBottom:'1.25rem',fontSize:14}}>Completa los datos para generar el informe en PDF</p>
+          {exitoInforme && <div style={{background:'#EAF3DE',color:'#3B6D11',padding:'12px 16px',borderRadius:8,marginBottom:'1rem',fontWeight:500}}>✅ Informe generado y enviado por correo correctamente</div>}
+
+          <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+            <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Datos generales</div>
+            <div style={{marginBottom:'1rem'}}>
+              <label style={labelStyle}>Cliente</label>
+              <select value={informe.cliente} onChange={e => setI('cliente', e.target.value)} style={inputStyle}>
+                <option value="">— Seleccionar centro —</option>
+                {CENTROS.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem',marginBottom:'1rem'}}>
+              <div>
+                <label style={labelStyle}>Fecha del Informe</label>
+                <div style={{display:'flex',gap:6}}>
+                  <input type="number" placeholder="Día" value={informe.fechaInformeDia} onChange={e => setI('fechaInformeDia', e.target.value)} style={{...inputStyle, width:'33%'}} />
+                  <input type="number" placeholder="Mes" value={informe.fechaInformeMes} onChange={e => setI('fechaInformeMes', e.target.value)} style={{...inputStyle, width:'33%'}} />
+                  <input type="number" placeholder="Año" value={informe.fechaInformeAnio} onChange={e => setI('fechaInformeAnio', e.target.value)} style={{...inputStyle, width:'34%'}} />
+                </div>
+              </div>
+              <div>
+                <label style={labelStyle}>Fecha del Servicio</label>
+                <div style={{display:'flex',gap:6}}>
+                  <input type="number" placeholder="Día" value={informe.fechaServicioDia} onChange={e => setI('fechaServicioDia', e.target.value)} style={{...inputStyle, width:'33%'}} />
+                  <input type="number" placeholder="Mes" value={informe.fechaServicioMes} onChange={e => setI('fechaServicioMes', e.target.value)} style={{...inputStyle, width:'33%'}} />
+                  <input type="number" placeholder="Año" value={informe.fechaServicioAnio} onChange={e => setI('fechaServicioAnio', e.target.value)} style={{...inputStyle, width:'34%'}} />
+                </div>
+              </div>
+            </div>
+
+            <div style={{marginBottom:'1rem'}}>
+              <label style={labelStyle}>Lugar de servicio</label>
+              <select value={informe.lugarServicio} onChange={e => setI('lugarServicio', e.target.value)} style={inputStyle}>
+                <option value="">— Seleccionar —</option>
+                {LUGARES_SERVICIO.map(l => <option key={l} value={l}>{l}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+            <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Químico utilizado</div>
+            <div style={{marginBottom:'1rem'}}>
+              <div style={{display:'flex',gap:10}}>
+                <button onClick={() => setI('quimico', 'Cloro comercial')} style={{flex:1,padding:'10px',border:`2px solid ${informe.quimico==='Cloro comercial'?'#1a6fa8':'#ddd'}`,borderRadius:8,background:informe.quimico==='Cloro comercial'?'#e8f4fd':'#fff',color:informe.quimico==='Cloro comercial'?'#1a6fa8':'#666',fontSize:13,cursor:'pointer',fontWeight:informe.quimico==='Cloro comercial'?600:400}}>Cloro comercial</button>
+                <button onClick={() => setI('quimico', 'Ácido peracético')} style={{flex:1,padding:'10px',border:`2px solid ${informe.quimico==='Ácido peracético'?'#1a6fa8':'#ddd'}`,borderRadius:8,background:informe.quimico==='Ácido peracético'?'#e8f4fd':'#fff',color:informe.quimico==='Ácido peracético'?'#1a6fa8':'#666',fontSize:13,cursor:'pointer',fontWeight:informe.quimico==='Ácido peracético'?600:400}}>Ácido peracético</button>
+              </div>
+            </div>
+
+            {informe.quimico === 'Cloro comercial' && (
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem'}}>
+                <div>
+                  <label style={labelStyle}>Concentración del cloro (g/l)</label>
+                  <input type="number" placeholder="Ej: 40" value={informe.concentracionCloro} onChange={e => setI('concentracionCloro', e.target.value)} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Fecha de expiración (MM/AAAA)</label>
+                  <input type="text" placeholder="Ej: 12/2026" value={informe.fechaExpiracionCloro} onChange={e => setI('fechaExpiracionCloro', e.target.value)} style={inputStyle} />
+                </div>
+              </div>
+            )}
+
+            {informe.quimico === 'Ácido peracético' && (
+              <>
+                <div style={{background:'#f7f9fc',borderRadius:8,padding:'10px 12px',fontSize:12,color:'#888',marginBottom:'1rem'}}>
+                  Referencia: 50 g/l - 5% / 100 g/l - 10% / 150 g/l - 15%
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem'}}>
+                  <div>
+                    <label style={labelStyle}>Concentración del ácido (g/l)</label>
+                    <input type="number" placeholder="Ej: 50" value={informe.concentracionAcido} onChange={e => setI('concentracionAcido', e.target.value)} style={inputStyle} />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Lote del ácido</label>
+                    <input type="text" value={informe.loteAcido} onChange={e => setI('loteAcido', e.target.value)} style={inputStyle} />
+                  </div>
+                </div>
+                <div style={{marginTop:'1rem'}}>
+                  <label style={labelStyle}>Fecha de vencimiento (MM/AAAA)</label>
+                  <input type="text" placeholder="Ej: 06/2027" value={informe.fechaVencimientoAcido} onChange={e => setI('fechaVencimientoAcido', e.target.value)} style={inputStyle} />
+                </div>
+              </>
+            )}
+          </div>
+
+          <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+            <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Cintas reactivas</div>
+            <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:'1rem'}}>
+              <div>
+                <label style={labelStyle}>Cinta Reactiva Presencia</label>
+                <select value={informe.cintaPresencia} onChange={e => setI('cintaPresencia', e.target.value)} style={inputStyle}>
+                  <option value="">— Seleccionar —</option>
+                  {CINTAS_REACTIVAS.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Cinta Reactiva Ausencia</label>
+                <select value={informe.cintaAusencia} onChange={e => setI('cintaAusencia', e.target.value)} style={inputStyle}>
+                  <option value="">— Seleccionar —</option>
+                  {CINTAS_REACTIVAS.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+            <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Dilución de trabajo</div>
+            <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:'1rem',marginBottom:'1rem'}}>
+              <div>
+                <label style={labelStyle}>Lt. agua tratada</label>
+                <input type="text" placeholder="Ej: 600" value={informe.ltAguaTratada} onChange={e => setI('ltAguaTratada', e.target.value)} style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>Lt. químico utilizado</label>
+                <input type="text" placeholder="Ej: 12" value={informe.ltQuimicoUtilizado} onChange={e => setI('ltQuimicoUtilizado', e.target.value)} style={inputStyle} />
+              </div>
+            </div>
+            <div style={{marginBottom:'1rem'}}>
+              <label style={labelStyle}>¿Hay segundo estanque?</label>
+              <div style={{display:'flex',gap:10}}>
+                <button onClick={() => setI('hay2doEstanque', true)} style={{flex:1,padding:'10px',border:`2px solid ${informe.hay2doEstanque===true?'#1a6fa8':'#ddd'}`,borderRadius:8,background:informe.hay2doEstanque===true?'#e8f4fd':'#fff',color:informe.hay2doEstanque===true?'#1a6fa8':'#666',fontSize:13,cursor:'pointer',fontWeight:informe.hay2doEstanque===true?600:400}}>✅ Sí</button>
+                <button onClick={() => setI('hay2doEstanque', false)} style={{flex:1,padding:'10px',border:`2px solid ${informe.hay2doEstanque===false?'#ef5350':'#ddd'}`,borderRadius:8,background:informe.hay2doEstanque===false?'#FCEBEB':'#fff',color:informe.hay2doEstanque===false?'#c0392b':'#666',fontSize:13,cursor:'pointer',fontWeight:informe.hay2doEstanque===false?600:400}}>❌ No</button>
+              </div>
+            </div>
+            {informe.hay2doEstanque === true && (
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:'1rem'}}>
+                <div>
+                  <label style={labelStyle}>Lt. agua tratada (2do estanque)</label>
+                  <input type="text" value={informe.ltAguaTratada2} onChange={e => setI('ltAguaTratada2', e.target.value)} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Lt. químico utilizado (2do estanque)</label>
+                  <input type="text" value={informe.ltQuimicoUtilizado2} onChange={e => setI('ltQuimicoUtilizado2', e.target.value)} style={inputStyle} />
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+            <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Tiempos del servicio</div>
+            <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr 1fr',gap:'1rem'}}>
+              <div>
+                <label style={labelStyle}>Hora de inicio</label>
+                <input type="time" value={informe.horaInicio} onChange={e => setI('horaInicio', e.target.value)} style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>Tiempo estadía (min)</label>
+                <input type="number" value={informe.tiempoEstadia} onChange={e => setI('tiempoEstadia', e.target.value)} style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>Tiempo enjuague (min)</label>
+                <input type="number" value={informe.tiempoEnjuague} onChange={e => setI('tiempoEnjuague', e.target.value)} style={inputStyle} />
+              </div>
+            </div>
+            {informe.horaInicio && informe.tiempoEstadia && informe.tiempoEnjuague && (
+              <p style={{fontSize:12,color:'#1a6fa8',marginTop:8}}>Hora de término calculada automáticamente al generar el informe.</p>
+            )}
+          </div>
+
+          <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+            <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Salas de reuso</div>
+            <div style={{marginBottom:'1rem'}}>
+              <label style={labelStyle}>¿Hay salas de reuso?</label>
+              <div style={{display:'flex',gap:10}}>
+                <button onClick={() => setI('haySalasReuso', true)} style={{flex:1,padding:'10px',border:`2px solid ${informe.haySalasReuso===true?'#1a6fa8':'#ddd'}`,borderRadius:8,background:informe.haySalasReuso===true?'#e8f4fd':'#fff',color:informe.haySalasReuso===true?'#1a6fa8':'#666',fontSize:13,cursor:'pointer',fontWeight:informe.haySalasReuso===true?600:400}}>✅ Sí</button>
+                <button onClick={() => setI('haySalasReuso', false)} style={{flex:1,padding:'10px',border:`2px solid ${informe.haySalasReuso===false?'#ef5350':'#ddd'}`,borderRadius:8,background:informe.haySalasReuso===false?'#FCEBEB':'#fff',color:informe.haySalasReuso===false?'#c0392b':'#666',fontSize:13,cursor:'pointer',fontWeight:informe.haySalasReuso===false?600:400}}>❌ No</button>
+              </div>
+            </div>
+            {informe.haySalasReuso === true && (
+              <>
+                <div style={{marginBottom:'1rem'}}>
+                  <div style={{fontSize:13,fontWeight:600,color:'#1a3a6b',marginBottom:8}}>Puntos de muestreo - Presencia del químico</div>
+                  <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:'1rem'}}>
+                    <div>
+                      <label style={labelStyle}>Válvulas monitores N° (presencia) — formato x,y,z</label>
+                      <input type="text" placeholder="Ej: 1,24" value={informe.monitoresPresencia} onChange={e => setI('monitoresPresencia', e.target.value)} style={inputStyle} />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>N° sala de reparación monitores (presencia) — formato x,y,z</label>
+                      <input type="text" placeholder="Ej: 1,2" value={informe.salaReparacionPresencia} onChange={e => setI('salaReparacionPresencia', e.target.value)} style={inputStyle} />
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div style={{fontSize:13,fontWeight:600,color:'#1a3a6b',marginBottom:8}}>Puntos de muestreo - Ausencia del químico</div>
+                  <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:'1rem'}}>
+                    <div>
+                      <label style={labelStyle}>Válvulas monitores N° (ausencia) — formato x,y,z</label>
+                      <input type="text" placeholder="Ej: 1,24" value={informe.monitoresAusencia} onChange={e => setI('monitoresAusencia', e.target.value)} style={inputStyle} />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>N° sala de reparación monitores (ausencia) — formato x,y,z</label>
+                      <input type="text" placeholder="Ej: 1,2" value={informe.salaReparacionAusencia} onChange={e => setI('salaReparacionAusencia', e.target.value)} style={inputStyle} />
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+            <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Técnico responsable</div>
+            <select value={informe.tecnicoResponsable} onChange={e => setI('tecnicoResponsable', e.target.value)} style={inputStyle}>
+              <option value="">— Seleccionar técnico —</option>
+              {TECNICOS_INFORME.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+
+          <button onClick={handleGenerarInforme} disabled={generandoInforme} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
+            {generandoInforme ? '⏳ Generando informe...' : '📄 Generar y enviar informe'}
+          </button>
+
+          {misInformes.length > 0 && (
+            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5'}}>
+              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Mis informes generados</div>
+              <div style={{display:'flex',flexDirection:'column',gap:8}}>
+                {misInformes.map(inf => (
+                  <div key={inf.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',background:'#f7f9fc',borderRadius:8,padding:'10px 12px'}}>
+                    <div>
+                      <div style={{fontSize:13,fontWeight:600,color:'#1a1a2e'}}>{inf.cliente}</div>
+                      <div style={{fontSize:11,color:'#888'}}>{inf.fechaServicio} · {inf.tecnicoResponsable}</div>
+                    </div>
+                    <a href={inf.pdfUrl} target="_blank" rel="noopener noreferrer" style={{padding:'6px 12px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',borderRadius:6,fontSize:12,textDecoration:'none'}}>
+                      📥 Descargar
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>}
       </div>
 
       {/* MOBILE BOTTOM NAV */}
       {isMobile && (
         <div style={{position:'fixed',bottom:0,left:0,right:0,background:'#fff',borderTop:'1px solid #eee',display:'flex',zIndex:100,boxShadow:'0 -2px 10px rgba(0,0,0,0.08)'}}>
-          {[{id:'inicio',icon:'🏠',label:'Inicio'},{id:'registro',icon:'➕',label:'Registrar'},{id:'historial',icon:'📋',label:'Registros'}].map(item => (
+          {[{id:'inicio',icon:'🏠',label:'Inicio'},{id:'registro',icon:'➕',label:'Registrar'},{id:'historial',icon:'📋',label:'Registros'},{id:'informes',icon:'🧪',label:'Informes'}].map(item => (
             <div key={item.id} onClick={() => goTab(item.id)} style={navTab(tab===item.id)}>
-              <span style={{fontSize:22}}>{item.icon}</span>
+              <span style={{fontSize:18}}>{item.icon}</span>
               <span>{item.label}</span>
             </div>
           ))}
