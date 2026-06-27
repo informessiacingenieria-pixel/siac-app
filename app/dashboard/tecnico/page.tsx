@@ -90,6 +90,10 @@ export default function TecnicoPage() {
   const [exitoInforme, setExitoInforme] = useState(false)
   const [misInformes, setMisInformes] = useState<any[]>([])
 
+  // Submenús del sidebar
+  const [submenuVisitasOpen, setSubmenuVisitasOpen] = useState(false)
+  const [submenuInformesOpen, setSubmenuInformesOpen] = useState(false)
+
   const router = useRouter()
 
   useEffect(() => {
@@ -149,6 +153,7 @@ export default function TecnicoPage() {
       body: formData,
     })
     const data = await res.json()
+    if (!data.secure_url) throw new Error('No se pudo subir el PDF a Cloudinary: ' + JSON.stringify(data))
     return data.secure_url
   }
 
@@ -291,7 +296,9 @@ export default function TecnicoPage() {
     const error = validarInforme()
     if (error) { alert(error); return }
     setGenerandoInforme(true)
+    let pasoActual = 'inicio'
     try {
+      pasoActual = 'generando PDF'
       const datosPdf = {
         ...informe,
         tecnicoResponsable: nombreTecnico,
@@ -299,10 +306,13 @@ export default function TecnicoPage() {
         puntosAusencia: { monitores: informe.monitoresAusencia, salaReparacion: informe.salaReparacionAusencia },
       }
       const blob = await generarPdfBlob(datosPdf)
+
+      pasoActual = 'subiendo PDF a Cloudinary'
       const pdfUrl = await subirPdf(blob)
 
       const fechaServicioTexto = `${String(informe.fechaServicioDia).padStart(2,'0')}/${String(informe.fechaServicioMes).padStart(2,'0')}/${informe.fechaServicioAnio}`
 
+      pasoActual = 'guardando en Firestore'
       await addDoc(collection(db, 'informes'), {
         uid: user.uid,
         tecnico: nombreTecnico,
@@ -314,7 +324,8 @@ export default function TecnicoPage() {
         creadoEn: Timestamp.now(),
       })
 
-      await fetch('/api/enviar-informe', {
+      pasoActual = 'enviando correo'
+      const respCorreo = await fetch('/api/enviar-informe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -326,12 +337,19 @@ export default function TecnicoPage() {
         }),
       })
 
-      setExitoInforme(true)
+      const dataCorreo = await respCorreo.json()
+      if (!respCorreo.ok || dataCorreo.error) {
+        console.error('Error al enviar correo:', dataCorreo)
+        alert('⚠️ El informe se generó y guardó correctamente, pero hubo un problema al enviar el correo: ' + (dataCorreo.error || 'Error desconocido') + '\n\nPuedes descargar el PDF desde la pestaña "Mis informes".')
+      } else {
+        setExitoInforme(true)
+        setTimeout(() => setExitoInforme(false), 4000)
+      }
+
       setInforme(informeVacio)
-      setTimeout(() => setExitoInforme(false), 3000)
     } catch (e: any) {
-      console.error('ERROR DETALLE:', e)
-      alert('Error al generar el informe: ' + (e?.message || 'Error desconocido') + '\n\nRevisa la consola para más detalles.')
+      console.error('ERROR DETALLE (paso: ' + pasoActual + '):', e)
+      alert('Error en el paso "' + pasoActual + '": ' + (e?.message || 'Error desconocido'))
     } finally {
       setGenerandoInforme(false)
     }
@@ -379,6 +397,19 @@ export default function TecnicoPage() {
 
   const inputStyle = {width:'100%',padding:'10px',border:'1.5px solid #ddd',borderRadius:8,fontSize:13,color:'#222',background:'#fff'}
   const labelStyle = {fontSize:13,color:'#555',display:'block' as const,marginBottom:4,fontWeight:500}
+
+  const navItem = (active: boolean) => ({
+    display:'flex',alignItems:'center',gap:10,padding:'12px 1rem',
+    color:active?'#fff':'rgba(255,255,255,0.8)',fontSize:14,cursor:'pointer',
+    background:active?'rgba(255,255,255,0.18)':'transparent',
+    borderLeft:active?'3px solid #fff':'3px solid transparent',whiteSpace:'nowrap' as const,overflow:'hidden'
+  })
+  const subItem = (active: boolean) => ({
+    display:'flex',alignItems:'center',gap:8,padding:'9px 1rem 9px 2.5rem',
+    color:active?'#fff':'rgba(255,255,255,0.65)',fontSize:13,cursor:'pointer',
+    background:active?'rgba(255,255,255,0.12)':'transparent',
+    borderLeft:active?'3px solid #fff':'3px solid transparent'
+  })
 
   return (
     <div style={{display:'flex',minHeight:'100vh',flexDirection:isMobile?'column':'row'}}>
@@ -518,7 +549,7 @@ export default function TecnicoPage() {
 
       {/* DESKTOP SIDEBAR */}
       {!isMobile && (
-        <div style={{width:sidebarOpen?220:64,background:'linear-gradient(180deg, #1a3a6b 0%, #2196f3 100%)',display:'flex',flexDirection:'column',transition:'width 0.3s ease',overflow:'hidden',flexShrink:0}}>
+        <div style={{width:sidebarOpen?230:64,background:'linear-gradient(180deg, #1a3a6b 0%, #2196f3 100%)',display:'flex',flexDirection:'column',transition:'width 0.3s ease',overflow:'hidden',flexShrink:0}}>
           <div style={{padding:'1rem',borderBottom:'1px solid rgba(255,255,255,0.15)',display:'flex',alignItems:'center',justifyContent:sidebarOpen?'space-between':'center'}}>
             {sidebarOpen && (
               <div style={{display:'flex',alignItems:'center',gap:10}}>
@@ -535,12 +566,29 @@ export default function TecnicoPage() {
               <span style={{display:'block',width:22,height:2,background:'#fff',borderRadius:2}}></span>
             </button>
           </div>
-          {[{id:'inicio',icon:'🏠',label:'Inicio'},{id:'registro',icon:'➕',label:'Registrar visita'},{id:'historial',icon:'📋',label:'Mis registros'},{id:'informes',icon:'🧪',label:'Informes de Desinfección'}].map(item => (
-            <div key={item.id} onClick={() => goTab(item.id)} style={{display:'flex',alignItems:'center',gap:10,padding:'12px 1rem',color:tab===item.id?'#fff':'rgba(255,255,255,0.8)',fontSize:14,cursor:'pointer',background:tab===item.id?'rgba(255,255,255,0.18)':'transparent',borderLeft:tab===item.id?'3px solid #fff':'3px solid transparent',whiteSpace:'nowrap',overflow:'hidden'}}>
-              <span style={{fontSize:18,flexShrink:0}}>{item.icon}</span>
-              {sidebarOpen && <span>{item.label}</span>}
-            </div>
-          ))}
+
+          <div onClick={() => goTab('inicio')} style={navItem(tab==='inicio')}>
+            <span style={{fontSize:18,flexShrink:0}}>🏠</span>{sidebarOpen && <span>Inicio</span>}
+          </div>
+
+          <div onClick={() => setSubmenuVisitasOpen(!submenuVisitasOpen)} style={navItem(tab==='registro'||tab==='historial')}>
+            <span style={{fontSize:18,flexShrink:0}}>🔧</span>
+            {sidebarOpen && <><span>Visitas</span><span style={{marginLeft:'auto',fontSize:11}}>{submenuVisitasOpen?'▲':'▼'}</span></>}
+          </div>
+          {submenuVisitasOpen && sidebarOpen && <>
+            <div onClick={() => goTab('registro')} style={subItem(tab==='registro')}>➕ Registrar visita</div>
+            <div onClick={() => goTab('historial')} style={subItem(tab==='historial')}>📋 Mis registros</div>
+          </>}
+
+          <div onClick={() => setSubmenuInformesOpen(!submenuInformesOpen)} style={navItem(tab==='informes'||tab==='misinformes')}>
+            <span style={{fontSize:18,flexShrink:0}}>🧪</span>
+            {sidebarOpen && <><span>Informes Desinfección</span><span style={{marginLeft:'auto',fontSize:11}}>{submenuInformesOpen?'▲':'▼'}</span></>}
+          </div>
+          {submenuInformesOpen && sidebarOpen && <>
+            <div onClick={() => goTab('informes')} style={subItem(tab==='informes')}>➕ Registrar informe</div>
+            <div onClick={() => goTab('misinformes')} style={subItem(tab==='misinformes')}>📋 Mis informes</div>
+          </>}
+
           <div style={{marginTop:'auto',padding:'1rem',borderTop:'1px solid rgba(255,255,255,0.15)'}}>
             {sidebarOpen && (
               <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}>
@@ -579,7 +627,7 @@ export default function TecnicoPage() {
           <p style={{color:'#888',marginBottom:'1.25rem',fontSize:14}}>Resumen de tus visitas y repuestos</p>
           <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'repeat(3,1fr)',gap:10,marginBottom:'1.25rem'}}>
             {kpis.map((k,i) => (
-              <div key={i} onClick={() => setTab('historial')} style={{background:'#fff',borderRadius:12,padding:'1rem',border:'1px solid #eef0f5',boxShadow:'0 1px 4px rgba(0,0,0,0.04)',cursor:'pointer',display:'flex',alignItems:'center',gap:12}}>
+              <div key={i} onClick={() => goTab('historial')} style={{background:'#fff',borderRadius:12,padding:'1rem',border:'1px solid #eef0f5',boxShadow:'0 1px 4px rgba(0,0,0,0.04)',cursor:'pointer',display:'flex',alignItems:'center',gap:12}}>
                 <img src={k.icon} alt="" style={{width:isMobile?52:42,height:isMobile?52:42,borderRadius:12,objectFit:'cover',flexShrink:0}} />
                 <div style={{flex:1}}>
                   <div style={{fontSize:12,color:'#888',marginBottom:4}}>{k.label}</div>
@@ -592,7 +640,7 @@ export default function TecnicoPage() {
           <div style={{background:'#fff',borderRadius:12,padding:'1rem',border:'1px solid #eef0f5'}}>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1rem'}}>
               <div style={{fontWeight:600,color:'#1a1a2e',fontSize:14}}>Últimos registros</div>
-              <button onClick={() => setTab('registro')} style={{padding:'7px 14px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:12,cursor:'pointer',fontWeight:500}}>+ Nueva visita</button>
+              <button onClick={() => goTab('registro')} style={{padding:'7px 14px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:12,cursor:'pointer',fontWeight:500}}>+ Nueva visita</button>
             </div>
             {isMobile ? (
               <div style={{display:'flex',flexDirection:'column',gap:10}}>
@@ -794,9 +842,9 @@ export default function TecnicoPage() {
           </div>
         </>}
 
-        {/* TAB INFORMES DE DESINFECCIÓN */}
+        {/* TAB REGISTRAR INFORME */}
         {tab === 'informes' && <>
-          <h1 style={{fontSize:isMobile?20:22,fontWeight:700,marginBottom:4,color:'#1a1a2e'}}>Informe de Desinfección</h1>
+          <h1 style={{fontSize:isMobile?20:22,fontWeight:700,marginBottom:4,color:'#1a1a2e'}}>Registrar Informe de Desinfección</h1>
           <p style={{color:'#888',marginBottom:'1.25rem',fontSize:14}}>Técnico responsable: <strong>{nombreTecnico}</strong></p>
           {exitoInforme && <div style={{background:'#EAF3DE',color:'#3B6D11',padding:'12px 16px',borderRadius:8,marginBottom:'1rem',fontWeight:500}}>✅ Informe generado y enviado por correo correctamente</div>}
 
@@ -1019,37 +1067,71 @@ export default function TecnicoPage() {
           <button onClick={handleGenerarInforme} disabled={generandoInforme} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
             {generandoInforme ? '⏳ Generando informe...' : '📄 Generar y enviar informe'}
           </button>
+        </>}
 
-          {misInformes.length > 0 && (
-            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5'}}>
-              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Mis informes generados</div>
-              <div style={{display:'flex',flexDirection:'column',gap:8}}>
+        {/* TAB MIS INFORMES */}
+        {tab === 'misinformes' && <>
+          <h1 style={{fontSize:isMobile?20:22,fontWeight:700,marginBottom:4,color:'#1a1a2e'}}>Mis informes</h1>
+          <p style={{color:'#888',marginBottom:'1.25rem',fontSize:14}}>Historial de informes de desinfección generados</p>
+          <div style={{background:'#fff',borderRadius:12,padding:'1rem',border:'1px solid #eef0f5'}}>
+            <div style={{fontSize:13,color:'#888',marginBottom:'1rem'}}>{misInformes.length} informes generados</div>
+            {isMobile ? (
+              <div style={{display:'flex',flexDirection:'column',gap:10}}>
                 {misInformes.map(inf => (
-                  <div key={inf.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',background:'#f7f9fc',borderRadius:8,padding:'10px 12px'}}>
-                    <div>
-                      <div style={{fontSize:13,fontWeight:600,color:'#1a1a2e'}}>{inf.cliente}</div>
-                      <div style={{fontSize:11,color:'#888'}}>{inf.fechaServicio} · {inf.tecnicoResponsable}</div>
-                    </div>
-                    <a href={inf.pdfUrl} target="_blank" rel="noopener noreferrer" style={{padding:'6px 12px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',borderRadius:6,fontSize:12,textDecoration:'none'}}>
-                      📥 Descargar
+                  <div key={inf.id} style={{background:'#f7f9fc',borderRadius:10,padding:'12px'}}>
+                    <div style={{fontSize:13,fontWeight:600,color:'#1a1a2e',marginBottom:4}}>{inf.cliente}</div>
+                    <div style={{fontSize:12,color:'#888',marginBottom:8}}>{inf.fechaServicio} · {inf.tecnicoResponsable}</div>
+                    <a href={inf.pdfUrl} target="_blank" rel="noopener noreferrer" style={{display:'block',textAlign:'center',padding:'7px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',borderRadius:6,fontSize:12,textDecoration:'none'}}>
+                      📥 Descargar PDF
                     </a>
                   </div>
                 ))}
+                {misInformes.length===0 && <p style={{textAlign:'center',color:'#aaa',padding:'1rem'}}>No hay informes generados aún</p>}
               </div>
-            </div>
-          )}
+            ) : (
+              <table style={{width:'100%',borderCollapse:'collapse',fontSize:13}}>
+                <thead><tr>{['Cliente','Fecha servicio','Técnico',''].map(h => (
+                  <th key={h} style={{textAlign:'left',padding:'8px',color:'#aaa',borderBottom:'1px solid #f0f0f0',fontWeight:500}}>{h}</th>
+                ))}</tr></thead>
+                <tbody>
+                  {misInformes.map(inf => (
+                    <tr key={inf.id}>
+                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{inf.cliente}</td>
+                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{inf.fechaServicio}</td>
+                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{inf.tecnicoResponsable}</td>
+                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>
+                        <a href={inf.pdfUrl} target="_blank" rel="noopener noreferrer" style={{padding:'4px 10px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',borderRadius:6,fontSize:11,textDecoration:'none'}}>
+                          📥 Descargar
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
+                  {misInformes.length===0 && <tr><td colSpan={4} style={{padding:'2rem',textAlign:'center',color:'#aaa'}}>No hay informes generados aún</td></tr>}
+                </tbody>
+              </table>
+            )}
+          </div>
         </>}
       </div>
 
       {/* MOBILE BOTTOM NAV */}
       {isMobile && (
         <div style={{position:'fixed',bottom:0,left:0,right:0,background:'#fff',borderTop:'1px solid #eee',display:'flex',zIndex:100,boxShadow:'0 -2px 10px rgba(0,0,0,0.08)'}}>
-          {[{id:'inicio',icon:'🏠',label:'Inicio'},{id:'registro',icon:'➕',label:'Registrar'},{id:'historial',icon:'📋',label:'Registros'},{id:'informes',icon:'🧪',label:'Informes'}].map(item => (
-            <div key={item.id} onClick={() => goTab(item.id)} style={navTab(tab===item.id)}>
-              <span style={{fontSize:18}}>{item.icon}</span>
-              <span>{item.label}</span>
-            </div>
-          ))}
+          <div onClick={() => goTab('inicio')} style={navTab(tab==='inicio')}>
+            <span style={{fontSize:18}}>🏠</span><span>Inicio</span>
+          </div>
+          <div onClick={() => goTab('registro')} style={navTab(tab==='registro')}>
+            <span style={{fontSize:18}}>➕</span><span>Visita</span>
+          </div>
+          <div onClick={() => goTab('historial')} style={navTab(tab==='historial')}>
+            <span style={{fontSize:18}}>📋</span><span>Registros</span>
+          </div>
+          <div onClick={() => goTab('informes')} style={navTab(tab==='informes')}>
+            <span style={{fontSize:18}}>🧪</span><span>Informe</span>
+          </div>
+          <div onClick={() => goTab('misinformes')} style={navTab(tab==='misinformes')}>
+            <span style={{fontSize:18}}>📄</span><span>Mis inf.</span>
+          </div>
         </div>
       )}
     </div>
