@@ -12,7 +12,13 @@ export async function POST(request) {
 
     // Descargar el PDF desde Cloudinary para adjuntarlo
     const pdfResponse = await fetch(pdfUrl)
+    if (!pdfResponse.ok) {
+      return Response.json({ error: `No se pudo descargar el PDF desde Cloudinary (status ${pdfResponse.status})` }, { status: 500 })
+    }
     const pdfBuffer = await pdfResponse.arrayBuffer()
+    if (pdfBuffer.byteLength === 0) {
+      return Response.json({ error: 'El PDF descargado está vacío' }, { status: 500 })
+    }
     const pdfBase64 = Buffer.from(pdfBuffer).toString('base64')
 
     const destinatarios = [

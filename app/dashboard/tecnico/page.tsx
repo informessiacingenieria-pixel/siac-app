@@ -145,17 +145,17 @@ export default function TecnicoPage() {
   }
 
   const subirPdf = async (blob: Blob): Promise<string> => {
-    const formData = new FormData()
-    formData.append('file', blob)
-    formData.append('upload_preset', CLOUDINARY_PRESET)
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
-      method: 'POST',
-      body: formData,
-    })
-    const data = await res.json()
-    if (!data.secure_url) throw new Error('No se pudo subir el PDF a Cloudinary: ' + JSON.stringify(data))
-    return data.secure_url
-  }
+  const formData = new FormData()
+  formData.append('file', blob, 'informe.pdf')
+  formData.append('upload_preset', CLOUDINARY_PRESET)
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/auto/upload`, {
+    method: 'POST',
+    body: formData,
+  })
+  const data = await res.json()
+  if (!data.secure_url) throw new Error('No se pudo subir el PDF a Cloudinary: ' + JSON.stringify(data))
+  return data.secure_url
+}
 
   const handleFotos = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
