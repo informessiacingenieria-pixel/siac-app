@@ -39,6 +39,7 @@ export async function POST(request) {
         {
           filename: nombreArchivo,
           content: pdfBase64,
+          contentType: 'application/pdf',
         },
       ],
     })
