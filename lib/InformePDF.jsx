@@ -40,7 +40,7 @@ export async function generarPdfBlob(datos) {
   function escribirEnCelda(texto, x0, topY, anchoDisponible, opciones = {}) {
     const { size = 9, lineHeight = 11 } = opciones
     const lineasOriginal = String(texto).split('\n')
-    const lineasFinales: string[] = []
+    const lineasFinales = []
 
     lineasOriginal.forEach((linea) => {
       const palabras = linea.split(' ')
