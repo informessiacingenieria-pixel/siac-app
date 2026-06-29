@@ -32,35 +32,46 @@ export async function generarPdfBlob(datos) {
   const plantillaBytes = await plantillaRes.arrayBuffer()
   const pdfDoc = await PDFDocument.load(plantillaBytes)
   const page = pdfDoc.getPages()[0]
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
-  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+  const font = await pdfDoc.embedFont(StandardFonts.TimesRoman)
+  const fontBold = await pdfDoc.embedFont(StandardFonts.TimesRomanBold)
   const negro = rgb(0, 0, 0)
+  const gris = rgb(0.4, 0.4, 0.4)
 
-  // Escribe texto con wrap automático dentro de un ancho disponible, alineado arriba de la celda
-  function escribirEnCelda(texto, x0, topY, anchoDisponible, opciones = {}) {
-    const { size = 9, lineHeight = 11 } = opciones
+  function escribirEnCelda(texto, x0, topY, anchoDisponible, espacioMaxAlto, opciones = {}) {
+    let { size = 11, lineHeight = 12.5, bold = false, color = negro } = opciones
+    const usarFont = bold ? fontBold : font
     const lineasOriginal = String(texto).split('\n')
-    const lineasFinales = []
 
-    lineasOriginal.forEach((linea) => {
-      const palabras = linea.split(' ')
-      let actual = ''
-      palabras.forEach((palabra) => {
-        const prueba = actual ? `${actual} ${palabra}` : palabra
-        const ancho = font.widthOfTextAtSize(prueba, size)
-        if (ancho > anchoDisponible && actual) {
-          lineasFinales.push(actual)
-          actual = palabra
-        } else {
-          actual = prueba
-        }
+    function calcularLineas(tam) {
+      const lineas = []
+      lineasOriginal.forEach((linea) => {
+        const palabras = linea.split(' ')
+        let actual = ''
+        palabras.forEach((palabra) => {
+          const prueba = actual ? `${actual} ${palabra}` : palabra
+          const ancho = usarFont.widthOfTextAtSize(prueba, tam)
+          if (ancho > anchoDisponible && actual) {
+            lineas.push(actual)
+            actual = palabra
+          } else {
+            actual = prueba
+          }
+        })
+        if (actual) lineas.push(actual)
       })
-      if (actual) lineasFinales.push(actual)
-    })
+      return lineas
+    }
 
-    let yActual = convertirY(topY) - size - 1
+    let lineasFinales = calcularLineas(size)
+    while (lineasFinales.length * lineHeight > espacioMaxAlto && size > 6) {
+      size -= 0.5
+      lineHeight -= 0.5
+      lineasFinales = calcularLineas(size)
+    }
+
+    let yActual = convertirY(topY) - size
     lineasFinales.forEach((linea) => {
-      page.drawText(linea, { x: x0, y: yActual, size, font, color: negro })
+      page.drawText(linea, { x: x0, y: yActual, size, font: usarFont, color })
       yActual -= lineHeight
     })
   }
@@ -95,30 +106,31 @@ export async function generarPdfBlob(datos) {
     puntosAusenciaTexto = PUNTOS_SIN_REUSO
   }
 
-  // ---- ESCRIBIR (coordenadas de la plantilla SIN marcadores) ----
+  // ---- ESCRIBIR ----
 
-  // Fecha del informe (al lado de "Santiago,")
-  page.drawText(fechaInformeTexto, { x: 405, y: convertirY(101.0) - 8, size: 10, font, color: negro })
+  // Fecha del informe: negrita + gris
+  page.drawText(fechaInformeTexto, { x: 405, y: convertirY(101.0) - 9, size: 11, font: fontBold, color: gris })
 
-  // Cliente (al lado de "Señores:")
-  page.drawText(cliente, { x: 95, y: convertirY(114.5) - 8, size: 10, font, color: negro })
+  // Cliente: negrita
+  page.drawText(cliente, { x: 95, y: convertirY(114.5) - 9, size: 11, font: fontBold, color: negro })
 
-  // Tabla — columna derecha empieza en x=230, ancho disponible ~320
-  escribirEnCelda(fechaServicioTexto, 230, 172.8, 320, { size: 9.5 })
-  escribirEnCelda(lugarServicio, 230, 198.3, 320, { size: 9.5 })
-  escribirEnCelda(quimicoTexto, 230, 223.1, 320, { size: 8.5 })
-  escribirEnCelda(cintaPresencia, 230, 251.6, 320, { size: 8 })
-  escribirEnCelda(cintaAusencia, 230, 282.3, 320, { size: 8 })
-  escribirEnCelda(dilucionTexto, 230, 313.1, 320, { size: 8.5, lineHeight: 10 })
-  escribirEnCelda(concentracionFinalTexto, 230, 337.8, 320, { size: 9 })
-  escribirEnCelda(`${horaInicio} hs.`, 230, 362.6, 320, { size: 9.5 })
-  escribirEnCelda(puntosPresenciaTexto, 230, 387.3, 320, { size: 7.8, lineHeight: 9.5 })
-  escribirEnCelda(`${tiempoEstadia} min.`, 230, 452.6, 320, { size: 9.5 })
-  escribirEnCelda(`${tiempoEnjuague} min.`, 230, 487.8, 320, { size: 9.5 })
-  escribirEnCelda(puntosAusenciaTexto, 230, 512.6, 320, { size: 7.8, lineHeight: 9.5 })
-  escribirEnCelda(`${horaTermino} hs.`, 230, 577.8, 320, { size: 9.5 })
+  const ANCHO = 320
+  // Fecha del servicio: negrita
+  escribirEnCelda(fechaServicioTexto, 230, 172.8, ANCHO, 22, { size: 11, bold: true })
+  escribirEnCelda(lugarServicio, 230, 198.3, ANCHO, 21, { size: 11 })
+  escribirEnCelda(quimicoTexto, 230, 223.1, ANCHO, 25, { size: 10 })
+  escribirEnCelda(cintaPresencia, 230, 251.6, ANCHO, 27, { size: 9.5 })
+  escribirEnCelda(cintaAusencia, 230, 282.3, ANCHO, 27, { size: 9.5 })
+  escribirEnCelda(dilucionTexto, 230, 313.1, ANCHO, 21, { size: 10 })
+  escribirEnCelda(concentracionFinalTexto, 230, 337.8, ANCHO, 21, { size: 11 })
+  escribirEnCelda(`${horaInicio} hs.`, 230, 362.6, ANCHO, 21, { size: 11 })
+  escribirEnCelda(puntosPresenciaTexto, 230, 387.3, ANCHO, 60, { size: 9.5, lineHeight: 11 })
+  escribirEnCelda(`${tiempoEstadia} min.`, 230, 452.6, ANCHO, 32, { size: 11 })
+  escribirEnCelda(`${tiempoEnjuague} min.`, 230, 487.8, ANCHO, 21, { size: 11 })
+  escribirEnCelda(puntosAusenciaTexto, 230, 512.6, ANCHO, 60, { size: 9.5, lineHeight: 11 })
+  escribirEnCelda(`${horaTermino} hs.`, 230, 577.8, ANCHO, 30, { size: 11 })
 
-  // Firma — entre "Atentamente," (top=611) y "Servicio Técnico" (top=719)
+  // Firma
   const firmaUrl = FIRMAS[tecnicoResponsable]
   if (firmaUrl) {
     try {
@@ -127,7 +139,7 @@ export async function generarPdfBlob(datos) {
       const altoFirma = (firmaImg.height / firmaImg.width) * anchoFirma
       page.drawImage(firmaImg, {
         x: 250,
-        y: convertirY(700) ,
+        y: convertirY(700),
         width: anchoFirma,
         height: altoFirma,
       })
@@ -136,8 +148,7 @@ export async function generarPdfBlob(datos) {
     }
   }
 
-  // Nombre del técnico (justo arriba de "Servicio Técnico")
-  page.drawText(tecnicoResponsable, { x: 250, y: convertirY(710), size: 10, font: fontBold, color: negro })
+  page.drawText(tecnicoResponsable, { x: 250, y: convertirY(712), size: 11, font: fontBold, color: negro })
 
   const pdfBytes = await pdfDoc.save()
   return new Blob([pdfBytes], { type: 'application/pdf' })
