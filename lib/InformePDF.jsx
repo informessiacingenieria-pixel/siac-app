@@ -1,9 +1,6 @@
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import { FIRMAS, formatearFechaLarga, formatearFechaCorta, calcularHoraTermino, calcularConcentracion, PUNTOS_SIN_REUSO } from './informesConfig'
 
-// Coordenadas medidas desde la plantilla original (PDF 612x792, origen abajo-izquierda)
-// pdf-lib usa Y desde abajo, así que convertimos: y_pdflib = 792 - y_top_medido
-
 const PAGE_HEIGHT = 792
 
 function convertirY(yTop) {
@@ -30,7 +27,6 @@ export async function generarPdfBlob(datos) {
     tecnicoResponsable,
   } = datos
 
-  // Cargar la plantilla base
   const plantillaUrl = '/plantillas/PLANTILLA_Informe_Servicio_SIAC.pdf'
   const plantillaRes = await fetch(plantillaUrl)
   const plantillaBytes = await plantillaRes.arrayBuffer()
@@ -38,51 +34,35 @@ export async function generarPdfBlob(datos) {
   const page = pdfDoc.getPages()[0]
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
   const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
-
-  const blanco = rgb(1, 1, 1)
   const negro = rgb(0, 0, 0)
 
-  // Función para "borrar" el texto <<campo>> dibujando un rectángulo blanco encima
-  function limpiar(x0, yTop, x1, alturaLinea = 14, lineasExtra = 0) {
-    const y = convertirY(yTop) - 3
-    page.drawRectangle({
-      x: x0 - 2,
-      y: y - (alturaLinea * lineasExtra),
-      width: (x1 - x0) + 200, // suficiente ancho para cubrir cualquier texto largo
-      height: alturaLinea * (lineasExtra + 1) + 4,
-      color: blanco,
-    })
-  }
+  // Escribe texto con wrap automático dentro de un ancho disponible, alineado arriba de la celda
+  function escribirEnCelda(texto, x0, topY, anchoDisponible, opciones = {}) {
+    const { size = 9, lineHeight = 11 } = opciones
+    const lineasOriginal = String(texto).split('\n')
+    const lineasFinales: string[] = []
 
-  // Función para escribir texto en una posición, con soporte multilínea
-  function escribir(texto, x, yTop, opciones = {}) {
-    const { size = 9, bold = false, maxWidth = 280, lineHeight = 12 } = opciones
-    const usarFont = bold ? fontBold : font
-    const lineas = String(texto).split('\n')
-    let yActual = convertirY(yTop)
-    lineas.forEach((linea) => {
-      // Wrap simple si la línea es muy larga
+    lineasOriginal.forEach((linea) => {
       const palabras = linea.split(' ')
-      let lineaActual = ''
-      const lineasFinales = []
+      let actual = ''
       palabras.forEach((palabra) => {
-        const prueba = lineaActual ? `${lineaActual} ${palabra}` : palabra
-        const ancho = usarFont.widthOfTextAtSize(prueba, size)
-        if (ancho > maxWidth && lineaActual) {
-          lineasFinales.push(lineaActual)
-          lineaActual = palabra
+        const prueba = actual ? `${actual} ${palabra}` : palabra
+        const ancho = font.widthOfTextAtSize(prueba, size)
+        if (ancho > anchoDisponible && actual) {
+          lineasFinales.push(actual)
+          actual = palabra
         } else {
-          lineaActual = prueba
+          actual = prueba
         }
       })
-      if (lineaActual) lineasFinales.push(lineaActual)
-
-      lineasFinales.forEach((lf) => {
-        page.drawText(lf, { x, y: yActual - 9, size, font: usarFont, color: negro })
-        yActual -= lineHeight
-      })
+      if (actual) lineasFinales.push(actual)
     })
-    return yActual
+
+    let yActual = convertirY(topY) - size - 1
+    lineasFinales.forEach((linea) => {
+      page.drawText(linea, { x: x0, y: yActual, size, font, color: negro })
+      yActual -= lineHeight
+    })
   }
 
   // ---- Calcular valores ----
@@ -115,82 +95,39 @@ export async function generarPdfBlob(datos) {
     puntosAusenciaTexto = PUNTOS_SIN_REUSO
   }
 
-  // ---- Limpiar y escribir cada campo (usando coordenadas medidas) ----
+  // ---- ESCRIBIR (coordenadas de la plantilla SIN marcadores) ----
 
-  // Santiago, <<Fecha del Informe>>  → y0=101.0, x0=404.9
-  limpiar(404.9, 101.0, 516.1)
-  escribir(fechaInformeTexto, 404.9, 101.0, { size: 10 })
+  // Fecha del informe (al lado de "Santiago,")
+  page.drawText(fechaInformeTexto, { x: 405, y: convertirY(101.0) - 8, size: 10, font, color: negro })
 
-  // <<Cliente>>  → y0=114.5, x0=104.6
-  limpiar(104.6, 114.5, 163.2)
-  escribir(cliente, 104.6, 114.5, { size: 10, maxWidth: 380 })
+  // Cliente (al lado de "Señores:")
+  page.drawText(cliente, { x: 95, y: convertirY(114.5) - 8, size: 10, font, color: negro })
 
-  // <<Fecha del Servicio>>  → y0=173.0, x0=225.5
-  limpiar(225.5, 173.0, 336.0)
-  escribir(fechaServicioTexto, 225.5, 173.0, { size: 9 })
+  // Tabla — columna derecha empieza en x=230, ancho disponible ~320
+  escribirEnCelda(fechaServicioTexto, 230, 172.8, 320, { size: 9.5 })
+  escribirEnCelda(lugarServicio, 230, 198.3, 320, { size: 9.5 })
+  escribirEnCelda(quimicoTexto, 230, 223.1, 320, { size: 8.5 })
+  escribirEnCelda(cintaPresencia, 230, 251.6, 320, { size: 8 })
+  escribirEnCelda(cintaAusencia, 230, 282.3, 320, { size: 8 })
+  escribirEnCelda(dilucionTexto, 230, 313.1, 320, { size: 8.5, lineHeight: 10 })
+  escribirEnCelda(concentracionFinalTexto, 230, 337.8, 320, { size: 9 })
+  escribirEnCelda(`${horaInicio} hs.`, 230, 362.6, 320, { size: 9.5 })
+  escribirEnCelda(puntosPresenciaTexto, 230, 387.3, 320, { size: 7.8, lineHeight: 9.5 })
+  escribirEnCelda(`${tiempoEstadia} min.`, 230, 452.6, 320, { size: 9.5 })
+  escribirEnCelda(`${tiempoEnjuague} min.`, 230, 487.8, 320, { size: 9.5 })
+  escribirEnCelda(puntosAusenciaTexto, 230, 512.6, 320, { size: 7.8, lineHeight: 9.5 })
+  escribirEnCelda(`${horaTermino} hs.`, 230, 577.8, 320, { size: 9.5 })
 
-  // <<Lugar de servicio>>  → y0=198.5, x0=225.5
-  limpiar(225.5, 198.5, 327.2)
-  escribir(lugarServicio, 225.5, 198.5, { size: 9, maxWidth: 280 })
-
-  // <<Quimico>>  → y0=223.3, x0=225.5
-  limpiar(225.5, 223.3, 288.8, 14, 1)
-  escribir(quimicoTexto, 225.5, 223.3, { size: 9, maxWidth: 280 })
-
-  // <<Cinta Reactiva Presencia>>  → y0=251.8, x0=225.5
-  limpiar(225.5, 251.8, 360.2, 14, 1)
-  escribir(cintaPresencia, 225.5, 251.8, { size: 9, maxWidth: 280 })
-
-  // <<Cinta Reactiva Ausencia>>  → y0=282.5, x0=225.5
-  limpiar(225.5, 282.5, 359.0, 14, 1)
-  escribir(cintaAusencia, 225.5, 282.5, { size: 9, maxWidth: 280 })
-
-  // <<Dilucion trabajo>>  → y0=313.3, x0=225.5
-  const lineasDilucion = dilucionTexto.split('\n').length
-  limpiar(225.5, 313.3, 322.0, 14, lineasDilucion - 1)
-  escribir(dilucionTexto, 225.5, 313.3, { size: 9, maxWidth: 280, lineHeight: 12 })
-
-  // <<Concentracion final>>  → y0=338.0, x0=225.5
-  limpiar(225.5, 338.0, 337.3)
-  escribir(concentracionFinalTexto, 225.5, 338.0, { size: 9, maxWidth: 280 })
-
-  // <<Hora de inicio>>  → y0=362.8, x0=225.5
-  limpiar(225.5, 362.8, 313.2)
-  escribir(`${horaInicio} hs.`, 225.5, 362.8, { size: 9 })
-
-  // <<Puntos muestreo presencia>>  → y0=387.5, x0=225.5
-  const lineasPresencia = puntosPresenciaTexto.split('\n').length
-  limpiar(225.5, 387.5, 367.5, 12, lineasPresencia - 1 + 1)
-  escribir(puntosPresenciaTexto, 225.5, 387.5, { size: 8, maxWidth: 280, lineHeight: 11 })
-
-  // <<Tiempo de estadia o recirculación>>  → y0=434.8, x0=225.5
-  limpiar(225.5, 434.8, 421.4)
-  escribir(`${tiempoEstadia} min.`, 225.5, 434.8, { size: 9 })
-
-  // <<Tiempo de enguaje>>  → y0=470.0, x0=225.5
-  limpiar(225.5, 470.0, 356.7)
-  escribir(`${tiempoEnjuague} min.`, 225.5, 470.0, { size: 9 })
-
-  // <<Puntos muestreo ausencia>>  → y0=494.8, x0=225.5
-  const lineasAusencia = puntosAusenciaTexto.split('\n').length
-  limpiar(225.5, 494.8, 366.6, 12, lineasAusencia - 1 + 1)
-  escribir(puntosAusenciaTexto, 225.5, 494.8, { size: 8, maxWidth: 280, lineHeight: 11 })
-
-  // <<Hora de termino>>  → y0=536.8, x0=225.5
-  limpiar(225.5, 536.8, 337.6)
-  escribir(`${horaTermino} hs.`, 225.5, 536.8, { size: 9 })
-
-  // <<Firma URL>>  → y0=584.1, x0=270.7 — insertar imagen
-  limpiar(270.7, 584.1, 346.5, 40)
+  // Firma — entre "Atentamente," (top=611) y "Servicio Técnico" (top=719)
   const firmaUrl = FIRMAS[tecnicoResponsable]
   if (firmaUrl) {
     try {
       const firmaImg = await cargarImagenFirma(pdfDoc, firmaUrl)
-      const anchoFirma = 90
+      const anchoFirma = 110
       const altoFirma = (firmaImg.height / firmaImg.width) * anchoFirma
       page.drawImage(firmaImg, {
-        x: 270.7,
-        y: convertirY(584.1) - altoFirma + 10,
+        x: 250,
+        y: convertirY(700) ,
         width: anchoFirma,
         height: altoFirma,
       })
@@ -199,9 +136,8 @@ export async function generarPdfBlob(datos) {
     }
   }
 
-  // <<Tecnico responsable>>  → y0=597.5, x0=249.1
-  limpiar(249.1, 597.5, 363.2)
-  escribir(tecnicoResponsable, 249.1, 597.5, { size: 10, maxWidth: 200 })
+  // Nombre del técnico (justo arriba de "Servicio Técnico")
+  page.drawText(tecnicoResponsable, { x: 250, y: convertirY(710), size: 10, font: fontBold, color: negro })
 
   const pdfBytes = await pdfDoc.save()
   return new Blob([pdfBytes], { type: 'application/pdf' })
