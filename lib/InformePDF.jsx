@@ -148,7 +148,7 @@ export async function generarPdfBlob(datos) {
     }
   }
 
-  page.drawText(tecnicoResponsable, { x: 250, y: convertirY(712), size: 11, font: fontBold, color: negro })
+  page.drawText('TEST-V2', { x: 450, y: 50, size: 20, font: fontBold, color: rgb(1, 0, 0) })
 
   const pdfBytes = await pdfDoc.save()
   return new Blob([pdfBytes], { type: 'application/pdf' })
