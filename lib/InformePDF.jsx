@@ -69,7 +69,7 @@ export async function generarPdfBlob(datos) {
       lineasFinales = calcularLineas(size)
     }
 
-    let yActual = convertirY(topY) - size
+    let yActual = convertirY(topY) - size - 1
     lineasFinales.forEach((linea) => {
       page.drawText(linea, { x: x0, y: yActual, size, font: usarFont, color })
       yActual -= lineHeight
@@ -124,11 +124,11 @@ export async function generarPdfBlob(datos) {
   escribirEnCelda(dilucionTexto, 230, 313.1, ANCHO, 21, { size: 10 })
   escribirEnCelda(concentracionFinalTexto, 230, 337.8, ANCHO, 21, { size: 11 })
   escribirEnCelda(`${horaInicio} hs.`, 230, 362.6, ANCHO, 21, { size: 11 })
-  escribirEnCelda(puntosPresenciaTexto, 230, 387.3, ANCHO, 60, { size: 9.5, lineHeight: 11 })
-  escribirEnCelda(`${tiempoEstadia} min.`, 230, 452.6, ANCHO, 32, { size: 11 })
-  escribirEnCelda(`${tiempoEnjuague} min.`, 230, 487.8, ANCHO, 21, { size: 11 })
-  escribirEnCelda(puntosAusenciaTexto, 230, 512.6, ANCHO, 60, { size: 9.5, lineHeight: 11 })
-  escribirEnCelda(`${horaTermino} hs.`, 230, 577.8, ANCHO, 30, { size: 11 })
+  escribirEnCelda(puntosPresenciaTexto, 230, 390, ANCHO, 60, { size: 9, lineHeight: 10.5 })
+  escribirEnCelda(`${tiempoEstadia} min.`, 230, 455, ANCHO, 28, { size: 11 })
+  escribirEnCelda(`${tiempoEnjuague} min.`, 230, 490, ANCHO, 18, { size: 11 })
+  escribirEnCelda(puntosAusenciaTexto, 230, 515, ANCHO, 60, { size: 9, lineHeight: 10.5 })
+  escribirEnCelda(`${horaTermino} hs.`, 230, 580, ANCHO, 25, { size: 11 })
 
   // Firma
   const firmaUrl = FIRMAS[tecnicoResponsable]
