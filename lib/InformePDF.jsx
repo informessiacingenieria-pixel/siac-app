@@ -1,5 +1,5 @@
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
-import { FIRMAS, formatearFechaLarga, formatearFechaCorta, calcularHoraTermino, PUNTOS_SIN_REUSO } from '../lib/informesConfig'
+import { FIRMAS, formatearFechaLarga, formatearFechaCorta, calcularHoraTermino, PUNTOS_SIN_REUSO } from './informesConfig'
 
 const PAGE_HEIGHT = 792
 
