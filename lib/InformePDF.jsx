@@ -140,10 +140,10 @@ export async function generarPdfBlob(datos) {
   escribirEnCelda(dilucionTexto, 230, 313.1, ANCHO, 21, { size: 11 })
   escribirEnCelda(concentracionFinalTexto, 230, 337.8, ANCHO, 21, { size: 11 })
   escribirEnCelda(`${horaInicio} hs.`, 230, 362.6, ANCHO, 21, { size: 11 })
-  escribirEnCelda(puntosPresenciaTexto, 230, 389, ANCHO, 60, { size: 11, lineHeight: 13 })
+  escribirEnCelda(puntosPresenciaTexto, 230, 380, ANCHO, 60, { size: 11, lineHeight: 13 })
   escribirEnCelda(`${tiempoEstadia} min.`, 230, 452, ANCHO, 32, { size: 11 })
   escribirEnCelda(`${tiempoEnjuague} min.`, 230, 487, ANCHO, 21, { size: 11 })
-  escribirEnCelda(puntosAusenciaTexto, 230, 512, ANCHO, 60, { size: 11, lineHeight: 13 })
+  escribirEnCelda(puntosAusenciaTexto, 230, 508, ANCHO, 60, { size: 11, lineHeight: 13 })
   escribirEnCelda(`${horaTermino} hs.`, 230, 577, ANCHO, 28, { size: 11 })
 
   const firmaUrl = FIRMAS[tecnicoResponsable]
