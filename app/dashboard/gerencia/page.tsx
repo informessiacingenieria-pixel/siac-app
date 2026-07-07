@@ -365,10 +365,9 @@ export default function GerenciaPage() {
   const pendientes = registros.filter(r => r.estado === 'Pendiente').length
   const enRevision = registros.filter(r => r.estado === 'En revisión').length
   const cobrados = registros.filter(r => r.estado === 'Cobrado').length
-  const totalRepuestos = registros.reduce((acc, r) => {
-    if (!r.repuestos) return acc
-    return acc + r.repuestos.reduce((a:number, rep:any) => a + (typeof rep === 'object' ? (rep.cantidad||1) : 1), 0)
-  }, 0)
+  const totalRepuestos = registrosMes.filter(r => r.repuestos && r.repuestos.length > 0).reduce((acc, r) => {
+  return acc + r.repuestos.reduce((a:number, rep:any) => a + (typeof rep === 'object' ? (rep.cantidad||1) : 1), 0)
+}, 0)
 
   const centroCount: Record<string,number> = {}
   registros.forEach(r => { if (r.repuestos) centroCount[r.centro] = (centroCount[r.centro] || 0) + r.repuestos.length })
