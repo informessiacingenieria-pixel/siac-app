@@ -132,7 +132,7 @@ export async function generarPdfBlob(datos) {
   page.drawText(cliente, { x: 95, y: convertirY(114.5) - 9, size: 11, font: fontBold, color: negro })
 
   const ANCHO = 320
-  escribirEnCelda(fechaServicioTexto, 230, 172.8, ANCHO, 22, { size: 11, bold: true })
+  escribirEnCelda(fechaServicioTexto, 230, 170, ANCHO, 22, { size: 11, bold: true })
   escribirEnCelda(lugarServicio, 230, 198.3, ANCHO, 21, { size: 11 })
   escribirEnCelda(quimicoTexto, 230, 223.1, ANCHO, 25, { size: 11 })
   escribirEnCelda(cintaPresencia, 230, 251.6, ANCHO, 27, { size: 11 })
@@ -144,7 +144,7 @@ export async function generarPdfBlob(datos) {
   escribirEnCelda(`${tiempoEstadia} min.`, 230, 452, ANCHO, 32, { size: 11 })
   escribirEnCelda(`${tiempoEnjuague} min.`, 230, 483, ANCHO, 21, { size: 11 })
   escribirEnCelda(puntosAusenciaTexto, 230, 508, ANCHO, 60, { size: 11, lineHeight: 13 })
-  escribirEnCelda(`${horaTermino} hs.`, 230, 577, ANCHO, 28, { size: 11 })
+  escribirEnCelda(`${horaTermino} hs.`, 230, 574, ANCHO, 28, { size: 11 })
 
   const firmaUrl = FIRMAS[tecnicoResponsable]
   if (firmaUrl) {
@@ -166,7 +166,7 @@ export async function generarPdfBlob(datos) {
   // Nombre del técnico centrado bajo la firma
   const anchoNombre = font.widthOfTextAtSize(tecnicoResponsable, 11)
   const xNombre = 305 - anchoNombre / 2
-  page.drawText(tecnicoResponsable, { x: xNombre, y: convertirY(708), size: 11, font, color: negro })
+  page.drawText(tecnicoResponsable, { x: xNombre, y: convertirY(704), size: 11, font, color: negro })
 
   const pdfBytes = await pdfDoc.save()
   return new Blob([pdfBytes], { type: 'application/pdf' })
