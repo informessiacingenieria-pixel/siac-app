@@ -18,18 +18,14 @@ function formatearNumeros(texto) {
   return texto.split(',').map(n => `N°${n.trim()}`).join(', ')
 }
 
-// Fórmula correcta según Excel de SIAC
 function calcularConcentracionSIAC(ltQuimico, ltAgua, quimico) {
   const q = parseFloat(String(ltQuimico).replace(',', '.')) || 0
   const a = parseFloat(String(ltAgua).replace(',', '.')) || 0
   if (a === 0) return '0% o 0 PPM'
-  // Extraer concentración g/l del texto del químico (ej: "Cloro comercial (40 g/l) Exp: 12/2026" → 40)
   const match = String(quimico).match(/\((\d+)\s*g\/l\)/)
   const concGl = match ? parseFloat(match[1]) : 40
-  // PPM = (lt_quimico * conc_gl / lt_agua) * 1000, redondeado a -3 (miles)
   const ppm = Math.round((q * concGl / a) * 1000 / 1000) * 1000
-  // % = PPM / 50 / 1000, redondeado a 3 decimales
-  const porcentaje = Math.round((ppm / 50 / 1000) * 1000) / 1000
+  const porcentaje = Math.round((ppm / 50 / 1000) * 1000 * 100) / 1000
   return `${porcentaje}% o ${ppm} PPM`
 }
 
@@ -95,18 +91,15 @@ export async function generarPdfBlob(datos) {
     })
   }
 
-  // ---- Calcular valores ----
   const fechaInformeTexto = formatearFechaLarga(fechaInformeDia, fechaInformeMes, fechaInformeAnio)
   const fechaServicioTexto = formatearFechaCorta(fechaServicioDia, fechaServicioMes, fechaServicioAnio)
   const horaTermino = calcularHoraTermino(horaInicio, tiempoEstadia, tiempoEnjuague)
 
-  // Construir texto del químico con concentración real
   const concGl = quimico === 'Cloro comercial' ? concentracionCloro : concentracionAcido
   const quimicoTexto = quimico === 'Cloro comercial'
     ? `Cloro comercial (${concentracionCloro} g/l) Exp: ${fechaExpiracionCloro}`
     : `Ácido peracético (${concentracionAcido} g/l) Lote: ${loteAcido} Exp: ${fechaVencimientoAcido}`
 
-  // Texto del químico con g/l para extraer en cálculo
   const quimicoConConc = `${quimico} (${concGl} g/l)`
 
   let dilucionTexto, concentracionFinalTexto
@@ -135,12 +128,7 @@ export async function generarPdfBlob(datos) {
     puntosAusenciaTexto = PUNTOS_SIN_REUSO
   }
 
-  // ---- ESCRIBIR ----
-
-  // Fecha del informe: negrita + gris claro
   page.drawText(fechaInformeTexto, { x: 405, y: convertirY(101.0) - 9, size: 11, font: fontBold, color: grisClaro })
-
-  // Cliente: negrita
   page.drawText(cliente, { x: 95, y: convertirY(114.5) - 9, size: 11, font: fontBold, color: negro })
 
   const ANCHO = 320
@@ -152,16 +140,12 @@ export async function generarPdfBlob(datos) {
   escribirEnCelda(dilucionTexto, 230, 313.1, ANCHO, 21, { size: 11 })
   escribirEnCelda(concentracionFinalTexto, 230, 337.8, ANCHO, 21, { size: 11 })
   escribirEnCelda(`${horaInicio} hs.`, 230, 362.6, ANCHO, 21, { size: 11 })
-  // Puntos de testeo: tamaño 11 con saltos de línea
   escribirEnCelda(puntosPresenciaTexto, 230, 389, ANCHO, 60, { size: 11, lineHeight: 13 })
-  // Tiempo estadía: mover más arriba
   escribirEnCelda(`${tiempoEstadia} min.`, 230, 452, ANCHO, 32, { size: 11 })
   escribirEnCelda(`${tiempoEnjuague} min.`, 230, 487, ANCHO, 21, { size: 11 })
   escribirEnCelda(puntosAusenciaTexto, 230, 512, ANCHO, 60, { size: 11, lineHeight: 13 })
-  // Hora término: mover más arriba
   escribirEnCelda(`${horaTermino} hs.`, 230, 577, ANCHO, 28, { size: 11 })
 
-  // Firma
   const firmaUrl = FIRMAS[tecnicoResponsable]
   if (firmaUrl) {
     try {
@@ -179,8 +163,10 @@ export async function generarPdfBlob(datos) {
     }
   }
 
-  // Nombre del técnico debajo de la firma, sin negrita, centrado con el bloque
-  page.drawText(tecnicoResponsable, { x: 250, y: convertirY(708), size: 11, font, color: negro })
+  // Nombre del técnico centrado bajo la firma
+  const anchoNombre = font.widthOfTextAtSize(tecnicoResponsable, 11)
+  const xNombre = 305 - anchoNombre / 2
+  page.drawText(tecnicoResponsable, { x: xNombre, y: convertirY(708), size: 11, font, color: negro })
 
   const pdfBytes = await pdfDoc.save()
   return new Blob([pdfBytes], { type: 'application/pdf' })
