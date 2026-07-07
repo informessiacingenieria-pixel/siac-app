@@ -137,12 +137,12 @@ export async function generarPdfBlob(datos) {
   escribirEnCelda(quimicoTexto, 230, 223.1, ANCHO, 25, { size: 11 })
   escribirEnCelda(cintaPresencia, 230, 251.6, ANCHO, 27, { size: 11 })
   escribirEnCelda(cintaAusencia, 230, 282.3, ANCHO, 27, { size: 11 })
-  escribirEnCelda(dilucionTexto, 230, 313.1, ANCHO, 21, { size: 11 })
-  escribirEnCelda(concentracionFinalTexto, 230, 337.8, ANCHO, 21, { size: 11 })
-  escribirEnCelda(`${horaInicio} hs.`, 230, 362.6, ANCHO, 21, { size: 11 })
-  escribirEnCelda(puntosPresenciaTexto, 230, 380, ANCHO, 60, { size: 11, lineHeight: 13 })
+  escribirEnCelda(dilucionTexto, 230, 310, ANCHO, 21, { size: 11 })
+  escribirEnCelda(concentracionFinalTexto, 230, 334, ANCHO, 21, { size: 11 })
+  escribirEnCelda(`${horaInicio} hs.`, 230, 360, ANCHO, 21, { size: 11 })
+  escribirEnCelda(puntosPresenciaTexto, 230, 385, ANCHO, 60, { size: 11, lineHeight: 13 })
   escribirEnCelda(`${tiempoEstadia} min.`, 230, 452, ANCHO, 32, { size: 11 })
-  escribirEnCelda(`${tiempoEnjuague} min.`, 230, 487, ANCHO, 21, { size: 11 })
+  escribirEnCelda(`${tiempoEnjuague} min.`, 230, 483, ANCHO, 21, { size: 11 })
   escribirEnCelda(puntosAusenciaTexto, 230, 508, ANCHO, 60, { size: 11, lineHeight: 13 })
   escribirEnCelda(`${horaTermino} hs.`, 230, 577, ANCHO, 28, { size: 11 })
 
@@ -153,7 +153,7 @@ export async function generarPdfBlob(datos) {
       const anchoFirma = 110
       const altoFirma = (firmaImg.height / firmaImg.width) * anchoFirma
       page.drawImage(firmaImg, {
-        x: 250,
+        x: 254,
         y: convertirY(695),
         width: anchoFirma,
         height: altoFirma,
