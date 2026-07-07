@@ -23,7 +23,7 @@ const CENTROS = [
   'Hosp. Maipú','Hosp. Nueva Imperial','Hosp. Osorno Diálisis','Hosp. Osorno Esterelización',
   'Hosp. Puerto Montt','Hosp. Purranque','Hosp. Salvador Diálisis','Hosp. Salvador Estéril',
   'Hosp. San Camilo','Hosp. San Jose','Hosp. Valdivia','Nefrodial Linares','Nefrodial Molina',
-  'Nefrodial San Javier','Municipalidad Puerto Montt','Premio Nobel','Red Dialisis'
+  'Nefrodial San Javier','Municipalidad Puerto Montt','Premio Nobel','Red Dialisis','UPC Hospital Nueva Imperial'
 ]
 
 const TECNICOS: Record<string,string> = {
@@ -65,6 +65,7 @@ export default function TecnicoPage() {
   const [registros, setRegistros] = useState<any[]>([])
   const [centro, setCentro] = useState('')
   const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0])
+  const [numeroInforme, setNumeroInforme] = useState('')
   const [usaRepuestos, setUsaRepuestos] = useState<boolean|null>(null)
   const [repuestos, setRepuestos] = useState<any[]>([{nombre:'',cantidad:1}])
   const [observaciones, setObservaciones] = useState('')
@@ -82,6 +83,7 @@ export default function TecnicoPage() {
   const [editObservaciones, setEditObservaciones] = useState('')
   const [editUsaRepuestos, setEditUsaRepuestos] = useState(true)
   const [editFotos, setEditFotos] = useState<string[]>([])
+  const [editNumeroInforme, setEditNumeroInforme] = useState('')
   const [guardandoEdit, setGuardandoEdit] = useState(false)
   const [fotoVisor, setFotoVisor] = useState<string|null>(null)
 
@@ -90,7 +92,6 @@ export default function TecnicoPage() {
   const [exitoInforme, setExitoInforme] = useState(false)
   const [misInformes, setMisInformes] = useState<any[]>([])
 
-  // Submenús del sidebar
   const [submenuVisitasOpen, setSubmenuVisitasOpen] = useState(false)
   const [submenuInformesOpen, setSubmenuInformesOpen] = useState(false)
 
@@ -145,17 +146,17 @@ export default function TecnicoPage() {
   }
 
   const subirPdf = async (blob: Blob): Promise<string> => {
-  const formData = new FormData()
-  formData.append('file', blob, 'informe.pdf')
-  formData.append('upload_preset', CLOUDINARY_PRESET)
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/auto/upload`, {
-    method: 'POST',
-    body: formData,
-  })
-  const data = await res.json()
-  if (!data.secure_url) throw new Error('No se pudo subir el PDF a Cloudinary: ' + JSON.stringify(data))
-  return data.secure_url
-}
+    const formData = new FormData()
+    formData.append('file', blob, 'informe.pdf')
+    formData.append('upload_preset', CLOUDINARY_PRESET)
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/auto/upload`, {
+      method: 'POST',
+      body: formData,
+    })
+    const data = await res.json()
+    if (!data.secure_url) throw new Error('No se pudo subir el PDF a Cloudinary: ' + JSON.stringify(data))
+    return data.secure_url
+  }
 
   const handleFotos = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
@@ -214,12 +215,14 @@ export default function TecnicoPage() {
       await addDoc(collection(db, 'visitas'), {
         uid: user.uid, tecnico: TECNICOS[user.email] || user.email, email: user.email, centro,
         fecha: Timestamp.fromDate(new Date(fecha + 'T12:00:00')),
+        numeroInforme,
         repuestos: usaRepuestos ? repuestosFinal : [],
         usaRepuestos, observaciones, fotos, estado: 'Pendiente', creadoEn: Timestamp.now()
       })
       setExito(true)
       setCentro(''); setRepuestos([{nombre:'',cantidad:1}]); setObservaciones('')
       setFecha(new Date().toISOString().split('T')[0]); setUsaRepuestos(null); setFotos([])
+      setNumeroInforme('')
       setTimeout(() => { setExito(false); setTab('historial') }, 1500)
     } catch (e) {
       alert('Error al guardar, intenta de nuevo')
@@ -241,6 +244,7 @@ export default function TecnicoPage() {
     setEditObservaciones(r.observaciones || '')
     setEditUsaRepuestos(r.repuestos && r.repuestos.length > 0)
     setEditFotos(r.fotos || [])
+    setEditNumeroInforme(r.numeroInforme || '')
     setEditando(false)
   }
 
@@ -266,12 +270,12 @@ export default function TecnicoPage() {
     await updateDoc(doc(db, 'visitas', modalRegistro.id), {
       repuestos: repsGuardar, observaciones: editObservaciones,
       usaRepuestos: editUsaRepuestos, fotos: editFotos,
+      numeroInforme: editNumeroInforme,
     })
     setGuardandoEdit(false); setEditando(false)
-    setModalRegistro({...modalRegistro, repuestos: repsGuardar, observaciones: editObservaciones, fotos: editFotos})
+    setModalRegistro({...modalRegistro, repuestos: repsGuardar, observaciones: editObservaciones, fotos: editFotos, numeroInforme: editNumeroInforme})
   }
 
-  // ---- Lógica del formulario de Informe de Desinfección ----
   const setI = (field: string, val: any) => setInforme((prev: any) => ({ ...prev, [field]: val }))
 
   const validarInforme = () => {
@@ -306,49 +310,33 @@ export default function TecnicoPage() {
         puntosAusencia: { monitores: informe.monitoresAusencia, salaReparacion: informe.salaReparacionAusencia },
       }
       const blob = await generarPdfBlob(datosPdf)
-
       pasoActual = 'subiendo PDF a Cloudinary'
       const pdfUrl = await subirPdf(blob)
-
       const fechaServicioTexto = `${String(informe.fechaServicioDia).padStart(2,'0')}/${String(informe.fechaServicioMes).padStart(2,'0')}/${informe.fechaServicioAnio}`
-
       pasoActual = 'guardando en Firestore'
       await addDoc(collection(db, 'informes'), {
-        uid: user.uid,
-        tecnico: nombreTecnico,
-        email: user.email,
-        cliente: informe.cliente,
-        fechaServicio: fechaServicioTexto,
-        tecnicoResponsable: nombreTecnico,
-        pdfUrl,
-        creadoEn: Timestamp.now(),
+        uid: user.uid, tecnico: nombreTecnico, email: user.email,
+        cliente: informe.cliente, fechaServicio: fechaServicioTexto,
+        tecnicoResponsable: nombreTecnico, pdfUrl, creadoEn: Timestamp.now(),
       })
-
       pasoActual = 'enviando correo'
       const respCorreo = await fetch('/api/enviar-informe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          pdfUrl,
-          tecnicoEmail: user.email,
-          tecnicoNombre: nombreTecnico,
-          cliente: informe.cliente,
-          fechaServicio: fechaServicioTexto,
+          pdfUrl, tecnicoEmail: user.email, tecnicoNombre: nombreTecnico,
+          cliente: informe.cliente, fechaServicio: fechaServicioTexto,
         }),
       })
-
       const dataCorreo = await respCorreo.json()
       if (!respCorreo.ok || dataCorreo.error) {
-        console.error('Error al enviar correo:', dataCorreo)
         alert('⚠️ El informe se generó y guardó correctamente, pero hubo un problema al enviar el correo: ' + (dataCorreo.error || 'Error desconocido') + '\n\nPuedes descargar el PDF desde la pestaña "Mis informes".')
       } else {
         setExitoInforme(true)
         setTimeout(() => setExitoInforme(false), 4000)
       }
-
       setInforme(informeVacio)
     } catch (e: any) {
-      console.error('ERROR DETALLE (paso: ' + pasoActual + '):', e)
       alert('Error en el paso "' + pasoActual + '": ' + (e?.message || 'Error desconocido'))
     } finally {
       setGenerandoInforme(false)
@@ -414,7 +402,6 @@ export default function TecnicoPage() {
   return (
     <div style={{display:'flex',minHeight:'100vh',flexDirection:isMobile?'column':'row'}}>
 
-      {/* VISOR FOTO */}
       {fotoVisor && (
         <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.9)',zIndex:2000,display:'flex',alignItems:'center',justifyContent:'center'}} onClick={() => setFotoVisor(null)}>
           <img src={fotoVisor} alt="foto" style={{maxWidth:'95vw',maxHeight:'90vh',borderRadius:8,objectFit:'contain'}} />
@@ -422,7 +409,6 @@ export default function TecnicoPage() {
         </div>
       )}
 
-      {/* MODAL VISITA */}
       {modalRegistro && (
         <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:'1rem'}} onClick={cerrarModal}>
           <div style={{background:'#fff',borderRadius:16,padding:'1.5rem',width:'100%',maxWidth:520,maxHeight:'88vh',overflowY:'auto',boxShadow:'0 20px 60px rgba(0,0,0,0.2)'}} onClick={e => e.stopPropagation()}>
@@ -443,6 +429,21 @@ export default function TecnicoPage() {
                 <span style={badge(modalRegistro.estado)}>{modalRegistro.estado}</span>
               </div>
             </div>
+
+            {/* Número de informe en modal */}
+            <div style={{marginBottom:'1rem'}}>
+              <div style={{fontSize:12,color:'#555',marginBottom:6,fontWeight:500}}>Número de informe</div>
+              {editando ? (
+                <input value={editNumeroInforme} onChange={e => setEditNumeroInforme(e.target.value)}
+                  placeholder="Ej: 001"
+                  style={{width:'100%',padding:'9px 10px',border:'1.5px solid #2196f3',borderRadius:8,fontSize:13,color:'#222',background:'#fff'}} />
+              ) : (
+                <div style={{background:'#f7f9fc',borderRadius:8,padding:'10px',fontSize:13,color:modalRegistro.numeroInforme?'#1a1a2e':'#aaa'}}>
+                  {modalRegistro.numeroInforme || 'Sin número de informe'}
+                </div>
+              )}
+            </div>
+
             {editando && (
               <div style={{marginBottom:'1rem'}}>
                 <div style={{fontSize:12,color:'#555',marginBottom:8,fontWeight:500}}>¿Se utilizaron repuestos?</div>
@@ -471,20 +472,10 @@ export default function TecnicoPage() {
                     <div key={i} style={{display:'flex',gap:8,marginBottom:6,alignItems:'center'}}>
                       <input value={r.nombre} onChange={e => { const arr=[...editRepuestos]; arr[i]={...arr[i],nombre:e.target.value}; setEditRepuestos(arr) }}
                         placeholder="Nombre" style={{flex:2,padding:'8px 10px',border:'1.5px solid #2196f3',borderRadius:8,fontSize:13,color:'#222',background:'#fff'}} />
-                      <input
-                        type="number" min={1} value={r.cantidad}
+                      <input type="number" min={1} value={r.cantidad}
                         onFocus={e => e.target.select()}
-                        onChange={e => {
-                          const val = e.target.value
-                          const arr = [...editRepuestos]
-                          arr[i] = { ...arr[i], cantidad: val === '' ? '' : parseInt(val) || 1 }
-                          setEditRepuestos(arr)
-                        }}
-                        onBlur={e => {
-                          if (e.target.value === '') {
-                            const arr = [...editRepuestos]; arr[i] = { ...arr[i], cantidad: 1 }; setEditRepuestos(arr)
-                          }
-                        }}
+                        onChange={e => { const val = e.target.value; const arr = [...editRepuestos]; arr[i] = { ...arr[i], cantidad: val === '' ? '' : parseInt(val) || 1 }; setEditRepuestos(arr) }}
+                        onBlur={e => { if (e.target.value === '') { const arr = [...editRepuestos]; arr[i] = { ...arr[i], cantidad: 1 }; setEditRepuestos(arr) } }}
                         style={{flex:1,padding:'8px 10px',border:'1.5px solid #2196f3',borderRadius:8,fontSize:13,color:'#222',background:'#fff'}} />
                       <button onClick={() => setEditRepuestos(editRepuestos.filter((_,idx)=>idx!==i))} style={{width:36,height:36,border:'1px solid #ddd',borderRadius:8,background:'#fff',cursor:'pointer',color:'#888'}}>✕</button>
                     </div>
@@ -566,11 +557,9 @@ export default function TecnicoPage() {
               <span style={{display:'block',width:22,height:2,background:'#fff',borderRadius:2}}></span>
             </button>
           </div>
-
           <div onClick={() => goTab('inicio')} style={navItem(tab==='inicio')}>
             <span style={{fontSize:18,flexShrink:0}}>🏠</span>{sidebarOpen && <span>Inicio</span>}
           </div>
-
           <div onClick={() => setSubmenuVisitasOpen(!submenuVisitasOpen)} style={navItem(tab==='registro'||tab==='historial')}>
             <span style={{fontSize:18,flexShrink:0}}>🔧</span>
             {sidebarOpen && <><span>Visitas</span><span style={{marginLeft:'auto',fontSize:11}}>{submenuVisitasOpen?'▲':'▼'}</span></>}
@@ -579,7 +568,6 @@ export default function TecnicoPage() {
             <div onClick={() => goTab('registro')} style={subItem(tab==='registro')}>➕ Registrar visita</div>
             <div onClick={() => goTab('historial')} style={subItem(tab==='historial')}>📋 Mis registros</div>
           </>}
-
           <div onClick={() => setSubmenuInformesOpen(!submenuInformesOpen)} style={navItem(tab==='informes'||tab==='misinformes')}>
             <span style={{fontSize:18,flexShrink:0}}>🧪</span>
             {sidebarOpen && <><span>Informes Desinfección</span><span style={{marginLeft:'auto',fontSize:11}}>{submenuInformesOpen?'▲':'▼'}</span></>}
@@ -588,7 +576,6 @@ export default function TecnicoPage() {
             <div onClick={() => goTab('informes')} style={subItem(tab==='informes')}>➕ Registrar informe</div>
             <div onClick={() => goTab('misinformes')} style={subItem(tab==='misinformes')}>📋 Mis informes</div>
           </>}
-
           <div style={{marginTop:'auto',padding:'1rem',borderTop:'1px solid rgba(255,255,255,0.15)'}}>
             {sidebarOpen && (
               <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}>
@@ -613,9 +600,7 @@ export default function TecnicoPage() {
               <div style={{color:'rgba(255,255,255,0.6)',fontSize:10}}>{nombreTecnico}</div>
             </div>
           </div>
-          <button onClick={handleLogout} style={{background:'rgba(255,255,255,0.15)',border:'none',borderRadius:8,color:'#fff',fontSize:12,padding:'6px 12px',cursor:'pointer'}}>
-            Salir
-          </button>
+          <button onClick={handleLogout} style={{background:'rgba(255,255,255,0.15)',border:'none',borderRadius:8,color:'#fff',fontSize:12,padding:'6px 12px',cursor:'pointer'}}>Salir</button>
         </div>
       )}
 
@@ -659,7 +644,7 @@ export default function TecnicoPage() {
               </div>
             ) : (
               <table style={{width:'100%',borderCollapse:'collapse',fontSize:13}}>
-                <thead><tr>{['Fecha','Centro','Repuestos','Estado',''].map(h => (
+                <thead><tr>{['Fecha','Centro','N° Informe','Repuestos','Estado',''].map(h => (
                   <th key={h} style={{textAlign:'left',padding:'8px',color:'#aaa',borderBottom:'1px solid #f0f0f0',fontWeight:500}}>{h}</th>
                 ))}</tr></thead>
                 <tbody>
@@ -667,6 +652,7 @@ export default function TecnicoPage() {
                     <tr key={r.id}>
                       <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{r.fecha?.toDate().toLocaleDateString('es-CL')}</td>
                       <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{r.centro}</td>
+                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8',color:'#1a6fa8',fontWeight:500}}>{r.numeroInforme || '-'}</td>
                       <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{formatRepuestos(r.repuestos)}</td>
                       <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}><span style={badge(r.estado)}>{r.estado}</span></td>
                       <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>
@@ -674,7 +660,7 @@ export default function TecnicoPage() {
                       </td>
                     </tr>
                   ))}
-                  {registros.length===0 && <tr><td colSpan={5} style={{padding:'2rem',textAlign:'center',color:'#aaa'}}>No hay registros aún</td></tr>}
+                  {registros.length===0 && <tr><td colSpan={6} style={{padding:'2rem',textAlign:'center',color:'#aaa'}}>No hay registros aún</td></tr>}
                 </tbody>
               </table>
             )}
@@ -699,6 +685,19 @@ export default function TecnicoPage() {
                 <input type="date" value={fecha} onChange={e => setFecha(e.target.value)} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14}} />
               </div>
             </div>
+
+            {/* Campo número de informe */}
+            <div style={{marginBottom:'1rem'}}>
+              <label style={{fontSize:13,color:'#555',display:'block',marginBottom:4,fontWeight:500}}>Número de informe</label>
+              <input
+                type="text"
+                value={numeroInforme}
+                onChange={e => setNumeroInforme(e.target.value)}
+                placeholder="Ej: 001"
+                style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,color:'#222',background:'#fff'}}
+              />
+            </div>
+
             <div style={{marginBottom:'1rem'}}>
               <label style={{fontSize:13,color:'#555',display:'block',marginBottom:8,fontWeight:500}}>¿Se utilizaron repuestos en esta visita?</label>
               <div style={{display:'flex',gap:10}}>
@@ -722,18 +721,10 @@ export default function TecnicoPage() {
                   <div key={i} style={{display:'flex',gap:8,marginBottom:8,alignItems:'center'}}>
                     <input type="text" value={r.nombre} onChange={e => updateRepuesto(i,'nombre',e.target.value)} placeholder="Ej: Membrana RO"
                       style={{flex:2,padding:'11px 10px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,color:'#222',background:'#fff'}} />
-                    <input
-                      type="number"
-                      min={1}
-                      value={r.cantidad}
+                    <input type="number" min={1} value={r.cantidad}
                       onFocus={e => e.target.select()}
-                      onChange={e => {
-                        const val = e.target.value
-                        updateRepuesto(i, 'cantidad', val === '' ? '' : (parseInt(val) || 1))
-                      }}
-                      onBlur={e => {
-                        if (e.target.value === '') updateRepuesto(i, 'cantidad', 1)
-                      }}
+                      onChange={e => { const val = e.target.value; updateRepuesto(i, 'cantidad', val === '' ? '' : (parseInt(val) || 1)) }}
+                      onBlur={e => { if (e.target.value === '') updateRepuesto(i, 'cantidad', 1) }}
                       style={{width:80,padding:'11px 8px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,color:'#222',background:'#fff'}} />
                     <button onClick={() => removeRepuesto(i)} style={{width:40,height:44,border:'1px solid #ddd',borderRadius:8,background:'#fff',cursor:'pointer',color:'#888',fontSize:18,flexShrink:0}}>✕</button>
                   </div>
@@ -807,10 +798,9 @@ export default function TecnicoPage() {
                       <span style={badge(r.estado)}>{r.estado}</span>
                     </div>
                     <div style={{fontSize:12,color:'#888',marginBottom:4}}>{r.fecha?.toDate().toLocaleDateString('es-CL')}</div>
+                    {r.numeroInforme && <div style={{fontSize:12,color:'#1a6fa8',marginBottom:4}}>N° Informe: {r.numeroInforme}</div>}
                     <div style={{fontSize:12,color:'#555',marginBottom:4}}>{formatRepuestos(r.repuestos)}</div>
-                    {r.fotos && r.fotos.length > 0 && (
-                      <div style={{fontSize:11,color:'#1a6fa8',marginBottom:6}}>📷 {r.fotos.length} foto(s)</div>
-                    )}
+                    {r.fotos && r.fotos.length > 0 && <div style={{fontSize:11,color:'#1a6fa8',marginBottom:6}}>📷 {r.fotos.length} foto(s)</div>}
                     {r.observaciones && <div style={{fontSize:12,color:'#888',marginBottom:8,fontStyle:'italic'}}>{r.observaciones}</div>}
                     <button onClick={() => abrirModal(r)} style={{width:'100%',padding:'7px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:6,fontSize:12,cursor:'pointer'}}>Ver detalle</button>
                   </div>
@@ -819,7 +809,7 @@ export default function TecnicoPage() {
               </div>
             ) : (
               <table style={{width:'100%',borderCollapse:'collapse',fontSize:13}}>
-                <thead><tr>{['Fecha','Centro','Repuestos','Fotos','Estado',''].map(h => (
+                <thead><tr>{['Fecha','Centro','N° Informe','Repuestos','Fotos','Estado',''].map(h => (
                   <th key={h} style={{textAlign:'left',padding:'8px',color:'#aaa',borderBottom:'1px solid #f0f0f0',fontWeight:500}}>{h}</th>
                 ))}</tr></thead>
                 <tbody>
@@ -827,6 +817,7 @@ export default function TecnicoPage() {
                     <tr key={r.id}>
                       <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8',whiteSpace:'nowrap'}}>{r.fecha?.toDate().toLocaleDateString('es-CL')}</td>
                       <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{r.centro}</td>
+                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8',color:'#1a6fa8',fontWeight:500}}>{r.numeroInforme || '-'}</td>
                       <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{formatRepuestos(r.repuestos)}</td>
                       <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8',color:'#1a6fa8'}}>{r.fotos?.length > 0 ? `📷 ${r.fotos.length}` : '-'}</td>
                       <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}><span style={badge(r.estado)}>{r.estado}</span></td>
@@ -835,7 +826,7 @@ export default function TecnicoPage() {
                       </td>
                     </tr>
                   ))}
-                  {registrosFiltrados.length===0 && <tr><td colSpan={6} style={{padding:'2rem',textAlign:'center',color:'#aaa'}}>No hay registros</td></tr>}
+                  {registrosFiltrados.length===0 && <tr><td colSpan={7} style={{padding:'2rem',textAlign:'center',color:'#aaa'}}>No hay registros</td></tr>}
                 </tbody>
               </table>
             )}
@@ -857,7 +848,6 @@ export default function TecnicoPage() {
                 {CENTROS.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
-
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem',marginBottom:'1rem'}}>
               <div>
                 <label style={labelStyle}>Fecha del Informe</label>
@@ -894,7 +884,6 @@ export default function TecnicoPage() {
                 </div>
               </div>
             </div>
-
             <div style={{marginBottom:'1rem'}}>
               <label style={labelStyle}>Lugar de servicio</label>
               <select value={informe.lugarServicio} onChange={e => setI('lugarServicio', e.target.value)} style={inputStyle}>
@@ -912,12 +901,11 @@ export default function TecnicoPage() {
                 <button onClick={() => setI('quimico', 'Ácido peracético')} style={{flex:1,padding:'10px',border:`2px solid ${informe.quimico==='Ácido peracético'?'#1a6fa8':'#ddd'}`,borderRadius:8,background:informe.quimico==='Ácido peracético'?'#e8f4fd':'#fff',color:informe.quimico==='Ácido peracético'?'#1a6fa8':'#666',fontSize:13,cursor:'pointer',fontWeight:informe.quimico==='Ácido peracético'?600:400}}>Ácido peracético</button>
               </div>
             </div>
-
             {informe.quimico === 'Cloro comercial' && (
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem'}}>
                 <div>
                   <label style={labelStyle}>Concentración del cloro (g/l)</label>
-                  <input type="number" placeholder="Ej: 40" value={informe.concentracionCloro} onChange={e => setI('concentracionCloro', e.target.value)} style={inputStyle} />
+                  <input type="number" placeholder="Ej: 50" value={informe.concentracionCloro} onChange={e => setI('concentracionCloro', e.target.value)} style={inputStyle} />
                 </div>
                 <div>
                   <label style={labelStyle}>Fecha de expiración (MM/AAAA)</label>
@@ -925,7 +913,6 @@ export default function TecnicoPage() {
                 </div>
               </div>
             )}
-
             {informe.quimico === 'Ácido peracético' && (
               <>
                 <div style={{background:'#f7f9fc',borderRadius:8,padding:'10px 12px',fontSize:12,color:'#888',marginBottom:'1rem'}}>
