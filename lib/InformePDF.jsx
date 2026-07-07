@@ -52,9 +52,20 @@ export async function generarPdfBlob(datos) {
   const negro = rgb(0, 0, 0)
   const grisClaro = rgb(0.6, 0.6, 0.6)
 
-  function escribirEnCelda(texto, x0, topY, anchoDisponible, espacioMaxAlto, opciones = {}) {
+  // Escribe texto centrado verticalmente en una celda (para textos de 1 línea)
+  function escribirCentrado(texto, x0, topCelda, bottomCelda, opciones = {}) {
+    const { size = 11, bold = false, color = negro } = opciones
+    const usarFont = bold ? fontBold : font
+    const centroCelda = topCelda + (bottomCelda - topCelda) / 2
+    const y = convertirY(centroCelda) - size / 2
+    page.drawText(String(texto), { x: x0, y, size, font: usarFont, color })
+  }
+
+  // Escribe texto multilínea centrado verticalmente en una celda
+  function escribirMultilineaCentrado(texto, x0, topCelda, bottomCelda, opciones = {}) {
     let { size = 11, lineHeight = 12.5, bold = false, color = negro } = opciones
     const usarFont = bold ? fontBold : font
+    const anchoDisponible = 320
     const lineasOriginal = String(texto).split('\n')
 
     function calcularLineas(tam) {
@@ -77,20 +88,67 @@ export async function generarPdfBlob(datos) {
       return lineas
     }
 
+    const altoMaximo = bottomCelda - topCelda
     let lineasFinales = calcularLineas(size)
-    while (lineasFinales.length * lineHeight > espacioMaxAlto && size > 6) {
+    while (lineasFinales.length * lineHeight > altoMaximo && size > 6) {
       size -= 0.5
       lineHeight -= 0.5
       lineasFinales = calcularLineas(size)
     }
 
-    let yActual = convertirY(topY) - size - 1
+    const altoTexto = lineasFinales.length * lineHeight
+    const inicioY = topCelda + (altoMaximo - altoTexto) / 2
+    let yActual = convertirY(inicioY) - size
+
     lineasFinales.forEach((linea) => {
       page.drawText(linea, { x: x0, y: yActual, size, font: usarFont, color })
       yActual -= lineHeight
     })
   }
 
+  // Escribe texto multilínea desde arriba (sin centrado vertical)
+  function escribirDesdeArriba(texto, x0, topCelda, bottomCelda, opciones = {}) {
+    let { size = 11, lineHeight = 12.5, bold = false, color = negro } = opciones
+    const usarFont = bold ? fontBold : font
+    const anchoDisponible = 320
+    const lineasOriginal = String(texto).split('\n')
+
+    function calcularLineas(tam) {
+      const lineas = []
+      lineasOriginal.forEach((linea) => {
+        const palabras = linea.split(' ')
+        let actual = ''
+        palabras.forEach((palabra) => {
+          const prueba = actual ? `${actual} ${palabra}` : palabra
+          const ancho = usarFont.widthOfTextAtSize(prueba, tam)
+          if (ancho > anchoDisponible && actual) {
+            lineas.push(actual)
+            actual = palabra
+          } else {
+            actual = prueba
+          }
+        })
+        if (actual) lineas.push(actual)
+      })
+      return lineas
+    }
+
+    const altoMaximo = bottomCelda - topCelda
+    let lineasFinales = calcularLineas(size)
+    while (lineasFinales.length * lineHeight > altoMaximo && size > 6) {
+      size -= 0.5
+      lineHeight -= 0.5
+      lineasFinales = calcularLineas(size)
+    }
+
+    let yActual = convertirY(topCelda) - size - 3
+    lineasFinales.forEach((linea) => {
+      page.drawText(linea, { x: x0, y: yActual, size, font: usarFont, color })
+      yActual -= lineHeight
+    })
+  }
+
+  // ---- Calcular valores ----
   const fechaInformeTexto = formatearFechaLarga(fechaInformeDia, fechaInformeMes, fechaInformeAnio)
   const fechaServicioTexto = formatearFechaCorta(fechaServicioDia, fechaServicioMes, fechaServicioAnio)
   const horaTermino = calcularHoraTermino(horaInicio, tiempoEstadia, tiempoEnjuague)
@@ -128,24 +186,32 @@ export async function generarPdfBlob(datos) {
     puntosAusenciaTexto = PUNTOS_SIN_REUSO
   }
 
+  // ---- ESCRIBIR ----
+
+  // Fecha del informe: negrita + gris claro
   page.drawText(fechaInformeTexto, { x: 405, y: convertirY(101.0) - 9, size: 11, font: fontBold, color: grisClaro })
+
+  // Cliente: negrita
   page.drawText(cliente, { x: 95, y: convertirY(114.5) - 9, size: 11, font: fontBold, color: negro })
 
-  const ANCHO = 320
-  escribirEnCelda(fechaServicioTexto, 230, 172.8, ANCHO, 22, { size: 11, bold: true })
-  escribirEnCelda(lugarServicio, 230, 198.3, ANCHO, 21, { size: 11 })
-  escribirEnCelda(quimicoTexto, 230, 223.1, ANCHO, 25, { size: 11 })
-  escribirEnCelda(cintaPresencia, 230, 251.6, ANCHO, 27, { size: 11 })
-  escribirEnCelda(cintaAusencia, 230, 282.3, ANCHO, 27, { size: 11 })
-  escribirEnCelda(dilucionTexto, 230, 313.1, ANCHO, 21, { size: 11 })
-  escribirEnCelda(concentracionFinalTexto, 230, 337.8, ANCHO, 21, { size: 11 })
-  escribirEnCelda(`${horaInicio} hs.`, 230, 362.6, ANCHO, 21, { size: 11 })
-  escribirEnCelda(puntosPresenciaTexto, 230, 389, ANCHO, 60, { size: 11, lineHeight: 13 })
-  escribirEnCelda(`${tiempoEstadia} min.`, 230, 452, ANCHO, 32, { size: 11 })
-  escribirEnCelda(`${tiempoEnjuague} min.`, 230, 487, ANCHO, 21, { size: 11 })
-  escribirEnCelda(puntosAusenciaTexto, 230, 512, ANCHO, 60, { size: 11, lineHeight: 13 })
-  escribirEnCelda(`${horaTermino} hs.`, 230, 577, ANCHO, 28, { size: 11 })
+  const X = 230
 
+  // Coordenadas top/bottom de cada celda medidas de la plantilla
+  escribirCentrado(fechaServicioTexto, X, 190.6, 215.3, { size: 11, bold: true })
+  escribirCentrado(lugarServicio, X, 243.8, 274.6, { size: 11 })
+  escribirMultilineaCentrado(quimicoTexto, X, 274.6, 305.3, { size: 11 })
+  escribirMultilineaCentrado(cintaPresencia, X, 305.3, 330.1, { size: 11 })
+  escribirMultilineaCentrado(cintaAusencia, X, 330.1, 354.8, { size: 11 })
+  escribirMultilineaCentrado(dilucionTexto, X, 354.8, 379.6, { size: 11, lineHeight: 12.5 })
+  escribirCentrado(concentracionFinalTexto, X, 379.6, 404.3, { size: 11 })
+  escribirCentrado(`${horaInicio} hs.`, X, 404.3, 429.1, { size: 11 })
+  escribirDesdeArriba(puntosPresenciaTexto, X, 429.1, 494.4, { size: 11, lineHeight: 13 })
+  escribirCentrado(`${tiempoEstadia} min.`, X, 494.4, 529.6, { size: 11 })
+  escribirCentrado(`${tiempoEnjuague} min.`, X, 529.6, 554.4, { size: 11 })
+  escribirDesdeArriba(puntosAusenciaTexto, X, 554.4, 619.6, { size: 11, lineHeight: 13 })
+  escribirCentrado(`${horaTermino} hs.`, X, 619.6, 644.4, { size: 11 })
+
+  // Firma corrida a la derecha
   const firmaUrl = FIRMAS[tecnicoResponsable]
   if (firmaUrl) {
     try {
@@ -153,7 +219,7 @@ export async function generarPdfBlob(datos) {
       const anchoFirma = 110
       const altoFirma = (firmaImg.height / firmaImg.width) * anchoFirma
       page.drawImage(firmaImg, {
-        x: 250,
+        x: 270,
         y: convertirY(695),
         width: anchoFirma,
         height: altoFirma,
@@ -165,7 +231,7 @@ export async function generarPdfBlob(datos) {
 
   // Nombre del técnico centrado bajo la firma
   const anchoNombre = font.widthOfTextAtSize(tecnicoResponsable, 11)
-  const xNombre = 305 - anchoNombre / 2
+  const xNombre = 325 - anchoNombre / 2
   page.drawText(tecnicoResponsable, { x: xNombre, y: convertirY(708), size: 11, font, color: negro })
 
   const pdfBytes = await pdfDoc.save()
