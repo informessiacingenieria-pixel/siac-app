@@ -166,7 +166,7 @@ export async function generarPdfBlob(datos) {
   // Nombre del técnico centrado bajo la firma
   const anchoNombre = font.widthOfTextAtSize(tecnicoResponsable, 11)
   const xNombre = 305 - anchoNombre / 2
-  page.drawText(tecnicoResponsable, { x: xNombre, y: convertirY(704), size: 11, font, color: negro })
+  page.drawText(tecnicoResponsable, { x: xNombre, y: convertirY(711), size: 11, font, color: negro })
 
   const pdfBytes = await pdfDoc.save()
   return new Blob([pdfBytes], { type: 'application/pdf' })
