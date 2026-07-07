@@ -42,7 +42,9 @@ export async function generarPdfBlob(datos) {
     tecnicoResponsable,
   } = datos
 
-  const plantillaUrl = '/plantillas/PLANTILLA_Informe_Servicio_SIAC.pdf'
+  const plantillaUrl = hay2doEstanque
+  ? '/plantillas/PLANTILLA_Informe_Servicio_SIAC_dos_estanques.pdf'
+  : '/plantillas/PLANTILLA_Informe_Servicio_SIAC.pdf'
   const plantillaRes = await fetch(plantillaUrl)
   const plantillaBytes = await plantillaRes.arrayBuffer()
   const pdfDoc = await PDFDocument.load(plantillaBytes)
