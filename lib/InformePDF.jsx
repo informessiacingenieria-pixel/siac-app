@@ -42,7 +42,9 @@ export async function generarPdfBlob(datos) {
     tecnicoResponsable,
   } = datos
 
-  const plantillaUrl = hay2doEstanque
+  const tieneSegundoEstanque = hay2doEstanque === true
+
+  const plantillaUrl = tieneSegundoEstanque
     ? '/plantillas/PLANTILLA_Informe_Servicio_SIAC_dos_estanques.pdf'
     : '/plantillas/PLANTILLA_Informe_Servicio_SIAC.pdf'
 
@@ -107,7 +109,7 @@ export async function generarPdfBlob(datos) {
   const quimicoConConc = `${quimico} (${concGl} g/l)`
 
   let dilucionTexto, concentracionFinalTexto
-  if (hay2doEstanque) {
+  if (tieneSegundoEstanque) {
     const nombreQ = quimico === 'Cloro comercial' ? 'Cloro comercial' : 'Ácido peracético'
     dilucionTexto = `Estanque Sala: ${ltAguaTratada} lt. Agua trat. y ${ltQuimicoUtilizado} lt. de ${nombreQ}\nEstanque Reuso: ${ltAguaTratada2} lt. Agua trat. y ${ltQuimicoUtilizado2} lt. de ${nombreQ}`
     const conc1 = calcularConcentracionSIAC(ltQuimicoUtilizado, ltAguaTratada, quimicoConConc)
@@ -133,47 +135,47 @@ export async function generarPdfBlob(datos) {
   }
 
   // ---- COORDENADAS según plantilla ----
-  const coords = (hay2doEstanque === true) ? {
-    fechaInforme: { x: 400, y: 83.0 },
-    cliente: { x: 95, y: 96.5 },
+  const coords = tieneSegundoEstanque ? {
+    fechaInformeX: 400, fechaInformeY: 83.0,
+    clienteX: 95, clienteY: 96.5,
     fecha: 152,
     servicio: 178,
     quimico: 205.1,
     cintaPresencia: 233.6,
     cintaAusencia: 264.3,
-    dilucion: { top: 293, bottom: 333.3 },
+    dilucionTop: 293, dilucionBottom: 333.3,
     concentracion: 330,
     horaInicio: 356,
-    puntosPresencia: { top: 380, bottom: 448.1 },
+    puntosPresenciaTop: 380, puntosPresenciaBottom: 448.1,
     tiempoEstadia: 448.1,
-    tiempoEnjuague: 480,
-    puntosAusencia: { top: 505, bottom: 573.3 },
+    tiempoEnjuague: 483.3,
+    puntosAusenciaTop: 505, puntosAusenciaBottom: 573.3,
     horaTermino: 570,
-    firma: 700,
-    tecnico: 712,
+    xFirma: 250, yFirma: 680,
+    xNombreCentro: 300, yNombre: 700,
   } : {
-    fechaInforme: { x: 405, y: 101.0 },
-    cliente: { x: 95, y: 114.5 },
+    fechaInformeX: 405, fechaInformeY: 101.0,
+    clienteX: 95, clienteY: 114.5,
     fecha: 172.8,
     servicio: 198.3,
     quimico: 223.1,
     cintaPresencia: 251.6,
     cintaAusencia: 282.3,
-    dilucion: { top: 313.1, bottom: 337.8 },
+    dilucionTop: 313.1, dilucionBottom: 337.8,
     concentracion: 337.8,
     horaInicio: 362.6,
-    puntosPresencia: { top: 387.3, bottom: 452.6 },
+    puntosPresenciaTop: 387.3, puntosPresenciaBottom: 452.6,
     tiempoEstadia: 452.6,
     tiempoEnjuague: 487.8,
-    puntosAusencia: { top: 512.6, bottom: 577.8 },
+    puntosAusenciaTop: 512.6, puntosAusenciaBottom: 577.8,
     horaTermino: 577.8,
-    firma: 695,
-    tecnico: 708,
+    xFirma: 270, yFirma: 695,
+    xNombreCentro: 325, yNombre: 708,
   }
 
   // ---- ESCRIBIR ----
-  page.drawText(fechaInformeTexto, { x: coords.fechaInforme.x, y: convertirY(coords.fechaInforme.y) - 9, size: 11, font: fontBold, color: grisClaro })
-  page.drawText(cliente, { x: coords.cliente.x, y: convertirY(coords.cliente.y) - 9, size: 11, font: fontBold, color: negro })
+  page.drawText(fechaInformeTexto, { x: coords.fechaInformeX, y: convertirY(coords.fechaInformeY) - 9, size: 11, font: fontBold, color: grisClaro })
+  page.drawText(cliente, { x: coords.clienteX, y: convertirY(coords.clienteY) - 9, size: 11, font: fontBold, color: negro })
 
   const X = 230
   escribirEnCelda(fechaServicioTexto, X, coords.fecha, 320, 22, { size: 11, bold: true })
@@ -181,13 +183,13 @@ export async function generarPdfBlob(datos) {
   escribirEnCelda(quimicoTexto, X, coords.quimico, 320, 25, { size: 11 })
   escribirEnCelda(cintaPresencia, X, coords.cintaPresencia, 320, 27, { size: 11 })
   escribirEnCelda(cintaAusencia, X, coords.cintaAusencia, 320, 27, { size: 11 })
-  escribirEnCelda(dilucionTexto, X, coords.dilucion.top, 320, coords.dilucion.bottom - coords.dilucion.top, { size: 11, lineHeight: 12 })
+  escribirEnCelda(dilucionTexto, X, coords.dilucionTop, 320, coords.dilucionBottom - coords.dilucionTop, { size: 11, lineHeight: 12 })
   escribirEnCelda(concentracionFinalTexto, X, coords.concentracion, 320, 22, { size: 11 })
   escribirEnCelda(`${horaInicio} hs.`, X, coords.horaInicio, 320, 22, { size: 11 })
-  escribirEnCelda(puntosPresenciaTexto, X, coords.puntosPresencia.top, 320, coords.puntosPresencia.bottom - coords.puntosPresencia.top, { size: 11, lineHeight: 13 })
+  escribirEnCelda(puntosPresenciaTexto, X, coords.puntosPresenciaTop, 320, coords.puntosPresenciaBottom - coords.puntosPresenciaTop, { size: 11, lineHeight: 13 })
   escribirEnCelda(`${tiempoEstadia} min.`, X, coords.tiempoEstadia, 320, 32, { size: 11 })
   escribirEnCelda(`${tiempoEnjuague} min.`, X, coords.tiempoEnjuague, 320, 22, { size: 11 })
-  escribirEnCelda(puntosAusenciaTexto, X, coords.puntosAusencia.top, 320, coords.puntosAusencia.bottom - coords.puntosAusencia.top, { size: 11, lineHeight: 13 })
+  escribirEnCelda(puntosAusenciaTexto, X, coords.puntosAusenciaTop, 320, coords.puntosAusenciaBottom - coords.puntosAusenciaTop, { size: 11, lineHeight: 13 })
   escribirEnCelda(`${horaTermino} hs.`, X, coords.horaTermino, 320, 30, { size: 11 })
 
   // Firma
@@ -208,7 +210,7 @@ export async function generarPdfBlob(datos) {
     }
   }
 
-  // Nombre del técnico centrado bajo la firma
+  // Nombre del técnico
   const anchoNombre = font.widthOfTextAtSize(tecnicoResponsable, 11)
   const xNombre = coords.xNombreCentro - anchoNombre / 2
   page.drawText(tecnicoResponsable, { x: xNombre, y: convertirY(coords.yNombre), size: 11, font, color: negro })
