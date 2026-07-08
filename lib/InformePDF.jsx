@@ -133,7 +133,7 @@ export async function generarPdfBlob(datos) {
   }
 
   // ---- COORDENADAS según plantilla ----
-  const coords = hay2doEstanque ? {
+  const coords = (hay2doEstanque === true) ? {
     fechaInforme: { x: 400, y: 83.0 },
     cliente: { x: 95, y: 96.5 },
     fecha: 152,
