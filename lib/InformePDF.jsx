@@ -136,7 +136,7 @@ export async function generarPdfBlob(datos) {
 
   // ---- COORDENADAS según plantilla ----
   const coords = tieneSegundoEstanque ? {
-    fechaInformeX: 400, fechaInformeY: 83.0,
+    fechaInformeX: 390, fechaInformeY: 83.0,
     clienteX: 95, clienteY: 96.5,
     fecha: 152,
     servicio: 178,
