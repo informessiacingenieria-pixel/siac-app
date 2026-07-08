@@ -848,7 +848,7 @@ export default function TecnicoPage() {
                 {CENTROS.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem',marginBottom:'1rem'}}>
+            <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:'1rem',marginBottom:'1rem'}}></div>
               <div>
                 <label style={labelStyle}>Fecha del Informe</label>
                 <div style={{display:'flex',gap:6}}>
