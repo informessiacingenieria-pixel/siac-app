@@ -152,7 +152,7 @@ export async function generarPdfBlob(datos) {
     puntosAusenciaTop: 505, puntosAusenciaBottom: 573.3,
     horaTermino: 570,
     xFirma: 250, yFirma: 670,
-    xNombreCentro: 298, yNombre: 680,
+    xNombreCentro: 310, yNombre: 710,
   } : {
     fechaInformeX: 405, fechaInformeY: 101.0,
     clienteX: 95, clienteY: 114.5,
