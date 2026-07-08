@@ -134,21 +134,21 @@ export async function generarPdfBlob(datos) {
 
   // ---- COORDENADAS según plantilla ----
   const coords = hay2doEstanque ? {
-    fechaInforme: { x: 405, y: 83.0 },
+    fechaInforme: { x: 400, y: 83.0 },
     cliente: { x: 95, y: 96.5 },
-    fecha: 154.8,
-    servicio: 180.3,
+    fecha: 152,
+    servicio: 178,
     quimico: 205.1,
     cintaPresencia: 233.6,
     cintaAusencia: 264.3,
-    dilucion: { top: 295.1, bottom: 333.3 },
-    concentracion: 333.3,
-    horaInicio: 358.1,
-    puntosPresencia: { top: 382.8, bottom: 448.1 },
+    dilucion: { top: 293, bottom: 333.3 },
+    concentracion: 330,
+    horaInicio: 356,
+    puntosPresencia: { top: 380, bottom: 448.1 },
     tiempoEstadia: 448.1,
-    tiempoEnjuague: 483.3,
-    puntosAusencia: { top: 508.1, bottom: 573.3 },
-    horaTermino: 573.3,
+    tiempoEnjuague: 480,
+    puntosAusencia: { top: 505, bottom: 573.3 },
+    horaTermino: 570,
     firma: 700,
     tecnico: 712,
   } : {
@@ -181,7 +181,7 @@ export async function generarPdfBlob(datos) {
   escribirEnCelda(quimicoTexto, X, coords.quimico, 320, 25, { size: 11 })
   escribirEnCelda(cintaPresencia, X, coords.cintaPresencia, 320, 27, { size: 11 })
   escribirEnCelda(cintaAusencia, X, coords.cintaAusencia, 320, 27, { size: 11 })
-  escribirEnCelda(dilucionTexto, X, coords.dilucion.top, 320, coords.dilucion.bottom - coords.dilucion.top, { size: 10, lineHeight: 12 })
+  escribirEnCelda(dilucionTexto, X, coords.dilucion.top, 320, coords.dilucion.bottom - coords.dilucion.top, { size: 11, lineHeight: 12 })
   escribirEnCelda(concentracionFinalTexto, X, coords.concentracion, 320, 22, { size: 11 })
   escribirEnCelda(`${horaInicio} hs.`, X, coords.horaInicio, 320, 22, { size: 11 })
   escribirEnCelda(puntosPresenciaTexto, X, coords.puntosPresencia.top, 320, coords.puntosPresencia.bottom - coords.puntosPresencia.top, { size: 11, lineHeight: 13 })
@@ -198,8 +198,8 @@ export async function generarPdfBlob(datos) {
       const anchoFirma = 110
       const altoFirma = (firmaImg.height / firmaImg.width) * anchoFirma
       page.drawImage(firmaImg, {
-        x: 270,
-        y: convertirY(coords.firma),
+        x: coords.xFirma,
+        y: convertirY(coords.yFirma),
         width: anchoFirma,
         height: altoFirma,
       })
@@ -208,9 +208,10 @@ export async function generarPdfBlob(datos) {
     }
   }
 
+  // Nombre del técnico centrado bajo la firma
   const anchoNombre = font.widthOfTextAtSize(tecnicoResponsable, 11)
-  const xNombre = 325 - anchoNombre / 2
-  page.drawText(tecnicoResponsable, { x: xNombre, y: convertirY(coords.tecnico), size: 11, font, color: negro })
+  const xNombre = coords.xNombreCentro - anchoNombre / 2
+  page.drawText(tecnicoResponsable, { x: xNombre, y: convertirY(coords.yNombre), size: 11, font, color: negro })
 
   const pdfBytes = await pdfDoc.save()
   return new Blob([pdfBytes], { type: 'application/pdf' })
