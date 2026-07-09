@@ -114,7 +114,7 @@ export async function generarPdfBlob(datos) {
     dilucionTexto = `Estanque Sala: ${ltAguaTratada} lt. Agua trat. y ${ltQuimicoUtilizado} lt. de ${nombreQ}\nEstanque Reuso: ${ltAguaTratada2} lt. Agua trat. y ${ltQuimicoUtilizado2} lt. de ${nombreQ}`
     const conc1 = calcularConcentracionSIAC(ltQuimicoUtilizado, ltAguaTratada, quimicoConConc)
     const conc2 = calcularConcentracionSIAC(ltQuimicoUtilizado2, ltAguaTratada2, quimicoConConc)
-    concentracionFinalTexto = `${conc1} / ${conc2} por cada estanque.`
+    concentracionFinalTexto = `${conc1} por cada estanque.`
   } else {
     const nombreQ = quimico === 'Cloro comercial' ? 'Cloro comercial' : 'Ácido peracético'
     dilucionTexto = `${ltAguaTratada} lt. Agua trat. y ${ltQuimicoUtilizado} lt. de ${nombreQ}`
