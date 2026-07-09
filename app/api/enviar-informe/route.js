@@ -40,8 +40,7 @@ export async function POST(request) {
     }
     const pdfBase64 = Buffer.from(pdfBuffer).toString('base64')
 
-    const destinatarios = ['informessiacingenieria@gmail.com', 'ventas@siac-ingenieria.cl']
-    if (tecnicoEmail) destinatarios.push(tecnicoEmail)
+    const destinatarios = ['informessiacingenieria@gmail.com']
 
     const fechaLarga = formatearFechaLarga(fechaServicio)
     const mesAnio = formatearMesAnio(fechaServicio)
