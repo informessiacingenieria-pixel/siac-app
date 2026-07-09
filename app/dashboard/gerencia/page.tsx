@@ -6,6 +6,7 @@ import { collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, deleteD
 import { useRouter } from 'next/navigation'
 import { PieChart, Pie, Cell, Tooltip, Legend, LineChart, Line, BarChart, Bar, XAxis, YAxis, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { generarPdfBlob } from '../../../lib/InformePDF'
+import { generarPdfSemestralBlob, calcularRR, textoFinalRR } from '../../../lib/InformeSemestralPDF'
 import { LUGARES_SERVICIO, CINTAS_REACTIVAS } from '../../../lib/informesConfig'
 
 const CENTROS = [
@@ -52,6 +53,15 @@ const informeVacio = {
   monitoresAusencia: '', salaReparacionAusencia: '',
 }
 
+const semestralVacio = {
+  cliente: '',
+  diaInforme: '', mesInforme: '', anioInforme: '',
+  o1CondPre1: '', o1CondPost1: '', o1Flujo1: '',
+  o1CondPre2: '', o1CondPost2: '', o1Flujo2: '',
+  cde1: '', cds1: '', fp1: '', fd1: '', pd1: '',
+  recomendacion: '',
+}
+
 export default function GerenciaPage() {
   const [user, setUser] = useState<any>(null)
   const [tab, setTab] = useState('inicio')
@@ -96,6 +106,13 @@ export default function GerenciaPage() {
   const [generandoInforme, setGenerandoInforme] = useState(false)
   const [exitoInforme, setExitoInforme] = useState(false)
 
+  // Estado informe semestral
+  const [semestral, setSemestral] = useState<any>(semestralVacio)
+  const [semestrales, setSemestrales] = useState<any[]>([])
+  const [generandoSemestral, setGenerandoSemestral] = useState(false)
+  const [exitoSemestral, setExitoSemestral] = useState(false)
+  const [submenuSemestralOpen, setSubmenuSemestralOpen] = useState(false)
+
   const router = useRouter()
 
   useEffect(() => {
@@ -130,6 +147,15 @@ export default function GerenciaPage() {
       const todos = snap.docs.map(d => ({ id: d.id, ...d.data() })) as any[]
       setTodosInformes(todos)
       setMisInformesG(todos.filter(i => i.email === user.email))
+    })
+    return () => unsub()
+  }, [user])
+
+  useEffect(() => {
+    if (!user) return
+    const q = query(collection(db, 'informes_semestrales'), orderBy('creadoEn', 'desc'))
+    const unsub = onSnapshot(q, (snap) => {
+      setSemestrales(snap.docs.map(d => ({ id: d.id, ...d.data() })) as any[])
     })
     return () => unsub()
   }, [user])
@@ -335,6 +361,56 @@ export default function GerenciaPage() {
       alert('Error en "' + pasoActual + '": ' + (e?.message || 'Error desconocido'))
     } finally {
       setGenerandoInforme(false)
+    }
+  }
+
+  const setS = (field: string, val: any) => setSemestral((prev: any) => ({ ...prev, [field]: val }))
+
+  // RR calculado en vivo (o null si falta entrada/salida)
+  const rrSemestral = semestral.cde1 && semestral.cds1 ? calcularRR(semestral.cde1, semestral.cds1) : null
+  const rrFueraRango = rrSemestral !== null && rrSemestral < 97
+
+  const eliminarSemestral = async (id: string) => {
+    if (!confirm('¿Estás seguro que deseas eliminar este informe semestral?')) return
+    await deleteDoc(doc(db, 'informes_semestrales', id))
+  }
+
+  const validarSemestral = () => {
+    if (!semestral.cliente) return 'Selecciona un cliente'
+    if (semestral.cliente !== 'CD Vidacare') return 'Esta configuración solo está disponible para CD Vidacare por ahora'
+    if (!semestral.diaInforme || !semestral.mesInforme || !semestral.anioInforme) return 'Completa la fecha del informe'
+    const campos = ['o1CondPre1','o1CondPost1','o1Flujo1','o1CondPre2','o1CondPost2','o1Flujo2','cde1','cds1','fp1','fd1','pd1']
+    for (const campo of campos) {
+      if (!semestral[campo]) return 'Completa todos los datos de las membranas y la osmosis'
+    }
+    return null
+  }
+
+  const handleGenerarSemestral = async () => {
+    const error = validarSemestral()
+    if (error) { alert(error); return }
+    setGenerandoSemestral(true)
+    let pasoActual = 'inicio'
+    try {
+      pasoActual = 'generando PDF'
+      const datosPdf = { ...semestral, tecnicoResponsable: 'Baldomero Urriola' }
+      const blob = await generarPdfSemestralBlob(datosPdf)
+      pasoActual = 'subiendo PDF'
+      const pdfUrl = await subirPdf(blob)
+      const fechaInformeTexto = `${String(semestral.diaInforme).padStart(2,'0')}/${String(semestral.mesInforme).padStart(2,'0')}/${semestral.anioInforme}`
+      pasoActual = 'guardando en Firestore'
+      await addDoc(collection(db, 'informes_semestrales'), {
+        uid: 'gerencia', tecnico: 'Baldomero Urriola', email: user.email,
+        cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
+        tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
+      })
+      setExitoSemestral(true)
+      setTimeout(() => setExitoSemestral(false), 4000)
+      setSemestral(semestralVacio)
+    } catch (e: any) {
+      alert('Error en "' + pasoActual + '": ' + (e?.message || 'Error desconocido'))
+    } finally {
+      setGenerandoSemestral(false)
     }
   }
 
@@ -694,6 +770,15 @@ export default function GerenciaPage() {
             <div onClick={() => goTab('informes')} style={subItem(tab==='informes')}>➕ Registrar informe</div>
             <div onClick={() => goTab('misinformes')} style={subItem(tab==='misinformes')}>📋 Mis informes</div>
             <div onClick={() => goTab('todosinformes')} style={subItem(tab==='todosinformes')}>📊 Todos los informes</div>
+          </>}
+
+          <div onClick={() => setSubmenuSemestralOpen(!submenuSemestralOpen)} style={navItem(tab==='semestral'||tab==='missemestrales')}>
+            <span style={{fontSize:18,flexShrink:0}}>📊</span>
+            {sidebarOpen && <><span>Informes Semestrales</span><span style={{marginLeft:'auto',fontSize:11}}>{submenuSemestralOpen?'▲':'▼'}</span></>}
+          </div>
+          {submenuSemestralOpen && sidebarOpen && <>
+            <div onClick={() => goTab('semestral')} style={subItem(tab==='semestral')}>➕ Registrar informe</div>
+            <div onClick={() => goTab('missemestrales')} style={subItem(tab==='missemestrales')}>📋 Mis informes</div>
           </>}
 
           <div style={{marginTop:'auto',padding:'1rem',borderTop:'1px solid rgba(255,255,255,0.15)'}}>
