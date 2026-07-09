@@ -25,7 +25,7 @@ const CENTROS = [
   'Hosp. Maipú','Hosp. Nueva Imperial','Hosp. Osorno Diálisis','Hosp. Osorno Esterelización',
   'Hosp. Puerto Montt','Hosp. Purranque','Hosp. Salvador Diálisis','Hosp. Salvador Estéril',
   'Hosp. San Camilo','Hosp. San Jose','Hosp. Valdivia','Nefrodial Linares','Nefrodial Molina',
-  'Nefrodial San Javier','Municipalidad Puerto Montt','Premio Nobel','Red Dialisis'
+  'Nefrodial San Javier','Municipalidad Puerto Montt','Premio Nobel','Red Dialisis','UPC Hospital Nueva Imperial'
 ]
 
 const ESTADOS = ['Pendiente', 'En revisión', 'Cobrado']
