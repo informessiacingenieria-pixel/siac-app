@@ -71,6 +71,7 @@ export default function GerenciaPage() {
   const [filtroEstado, setFiltroEstado] = useState('')
   const [filtroTecnico, setFiltroTecnico] = useState('')
   const [filtroCentro, setFiltroCentro] = useState('')
+  const [filtroMesReg, setFiltroMesReg] = useState('')
   const [filtroTecnicoInf, setFiltroTecnicoInf] = useState('')
   const [filtroCentroInf, setFiltroCentroInf] = useState('')
   const [filtroMesInf, setFiltroMesInf] = useState('')
@@ -418,6 +419,10 @@ export default function GerenciaPage() {
     if (filtroTecnico && r.tecnico !== filtroTecnico) return false
     if (filtroCentro && r.centro !== filtroCentro) return false
     if (filtroEstado && r.estado !== filtroEstado) return false
+    if (filtroMesReg !== '') {
+      const fd = r.fecha?.toDate()
+      if (!fd || fd.getMonth() !== parseInt(filtroMesReg)) return false
+    }
     return true
   })
 
@@ -538,13 +543,14 @@ export default function GerenciaPage() {
     </div>
   ) : (
     <table style={{width:'100%',borderCollapse:'collapse',fontSize:12}}>
-      <thead><tr>{['Fecha','Centro','Técnico','N° Inf.','Repuesto(s)','Estado','Cambiar',''].map(h => (
+      <thead><tr>{['Fecha','Registrado','Centro','Técnico','N° Inf.','Repuesto(s)','Estado','Cambiar',''].map(h => (
         <th key={h} style={{textAlign:'left',padding:'8px',color:'#aaa',borderBottom:'1px solid #f0f0f0',fontWeight:500}}>{h}</th>
       ))}</tr></thead>
       <tbody>
         {lista.map(r => (
           <tr key={r.id}>
             <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8',whiteSpace:'nowrap'}}>{r.fecha?.toDate().toLocaleDateString('es-CL')}</td>
+            <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8',whiteSpace:'nowrap',color:'#888'}}>{r.creadoEn?.toDate ? r.creadoEn.toDate().toLocaleDateString('es-CL') : '-'}</td>
             <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{r.centro}</td>
             <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{r.tecnico}</td>
             <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8',color:'#1a6fa8',fontWeight:500}}>{r.numeroInforme || '-'}</td>
@@ -561,7 +567,7 @@ export default function GerenciaPage() {
             </td>
           </tr>
         ))}
-        {lista.length===0 && <tr><td colSpan={8} style={{padding:'2rem',textAlign:'center',color:'#aaa'}}>No hay registros</td></tr>}
+        {lista.length===0 && <tr><td colSpan={9} style={{padding:'2rem',textAlign:'center',color:'#aaa'}}>No hay registros</td></tr>}
       </tbody>
     </table>
   )
@@ -995,7 +1001,7 @@ export default function GerenciaPage() {
           </h1>
           <p style={{color:'#888',marginBottom:'1.25rem',fontSize:14}}>Filtra y gestiona todos los registros</p>
           <div style={{background:'#fff',borderRadius:12,padding:'1rem',border:'1px solid #eef0f5'}}>
-            <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr 1fr',gap:10,marginBottom:'1rem'}}>
+            <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr 1fr 1fr',gap:10,marginBottom:'1rem'}}>
               <div>
                 <label style={{fontSize:12,color:'#888',display:'block',marginBottom:4}}>Técnico</label>
                 <select value={filtroTecnico} onChange={e => setFiltroTecnico(e.target.value)} style={{width:'100%',padding:'9px',border:'1px solid #ddd',borderRadius:8,fontSize:13}}>
@@ -1015,6 +1021,13 @@ export default function GerenciaPage() {
                 <select value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)} style={{width:'100%',padding:'9px',border:'1px solid #ddd',borderRadius:8,fontSize:13}}>
                   <option value="">Todos los estados</option>
                   {ESTADOS.map(e => <option key={e} value={e}>{e}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{fontSize:12,color:'#888',display:'block',marginBottom:4}}>Mes de visita</label>
+                <select value={filtroMesReg} onChange={e => setFiltroMesReg(e.target.value)} style={{width:'100%',padding:'9px',border:'1px solid #ddd',borderRadius:8,fontSize:13}}>
+                  <option value="">Todos los meses</option>
+                  {MESES_NOMBRE.map((m,i) => <option key={i} value={String(i)}>{m}</option>)}
                 </select>
               </div>
             </div>
