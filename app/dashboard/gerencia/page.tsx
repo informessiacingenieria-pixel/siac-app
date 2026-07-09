@@ -87,6 +87,7 @@ export default function GerenciaPage() {
   const [editUsaRepuestos, setEditUsaRepuestos] = useState(true)
   const [editFotos, setEditFotos] = useState<string[]>([])
   const [editNumeroInforme, setEditNumeroInforme] = useState('')
+  const [editFecha, setEditFecha] = useState('')
   const [guardandoEdit, setGuardandoEdit] = useState(false)
   const [fotoVisor, setFotoVisor] = useState<string|null>(null)
 
@@ -198,6 +199,7 @@ export default function GerenciaPage() {
     setEditUsaRepuestos(r.repuestos && r.repuestos.length > 0)
     setEditFotos(r.fotos || [])
     setEditNumeroInforme(r.numeroInforme || '')
+    setEditFecha(r.fecha?.toDate ? r.fecha.toDate().toISOString().split('T')[0] : '')
     setEditando(false)
   }
 
@@ -223,9 +225,10 @@ export default function GerenciaPage() {
     await updateDoc(doc(db, 'visitas', modalRegistro.id), {
       repuestos: repsGuardar, observaciones: editObservaciones, estado: editEstado,
       usaRepuestos: editUsaRepuestos, fotos: editFotos, numeroInforme: editNumeroInforme,
+      fecha: editFecha ? Timestamp.fromDate(new Date(editFecha + 'T12:00:00')) : modalRegistro.fecha,
     })
     setGuardandoEdit(false); setEditando(false)
-    setModalRegistro({...modalRegistro, repuestos: repsGuardar, observaciones: editObservaciones, estado: editEstado, fotos: editFotos, numeroInforme: editNumeroInforme})
+    setModalRegistro({...modalRegistro, repuestos: repsGuardar, observaciones: editObservaciones, estado: editEstado, fotos: editFotos, numeroInforme: editNumeroInforme, fecha: editFecha ? Timestamp.fromDate(new Date(editFecha + 'T12:00:00')) : modalRegistro.fecha})
   }
 
   const subirFoto = async (file: File): Promise<string> => {
@@ -601,6 +604,18 @@ export default function GerenciaPage() {
                 <div style={{fontSize:11,color:'#aaa',marginBottom:4}}>Centro</div>
                 <div style={{fontSize:13,fontWeight:600,color:'#1a1a2e'}}>{modalRegistro.centro}</div>
               </div>
+            </div>
+
+            <div style={{marginBottom:'1rem'}}>
+              <div style={{fontSize:12,color:'#555',marginBottom:6,fontWeight:500}}>Fecha de la visita</div>
+              {editando ? (
+                <input type="date" value={editFecha} onChange={e => setEditFecha(e.target.value)}
+                  style={{width:'100%',padding:'9px 10px',border:'1.5px solid #2196f3',borderRadius:8,fontSize:13,color:'#222',background:'#fff'}} />
+              ) : (
+                <div style={{background:'#f7f9fc',borderRadius:8,padding:'10px',fontSize:13,color:'#1a1a2e'}}>
+                  {modalRegistro.fecha?.toDate ? modalRegistro.fecha.toDate().toLocaleDateString('es-CL') : '-'}
+                </div>
+              )}
             </div>
 
             <div style={{marginBottom:'1rem'}}>
