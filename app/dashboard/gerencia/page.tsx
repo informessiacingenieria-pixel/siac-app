@@ -1360,6 +1360,178 @@ export default function GerenciaPage() {
             )}
           </div>
         </>}
+        {/* TAB REGISTRAR INFORME SEMESTRAL */}
+        {tab === 'semestral' && <>
+          <h1 style={{fontSize:isMobile?20:22,fontWeight:700,marginBottom:4,color:'#1a1a2e'}}>Registrar Informe Semestral</h1>
+          <p style={{color:'#888',marginBottom:'1.25rem',fontSize:14}}>Mantención de membranas · Se registrará a nombre de Baldomero Urriola</p>
+          {exitoSemestral && <div style={{background:'#EAF3DE',color:'#3B6D11',padding:'12px 16px',borderRadius:8,marginBottom:'1rem',fontWeight:500}}>✅ Informe semestral generado correctamente</div>}
+
+          <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+            <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Datos generales</div>
+            <div style={{marginBottom:'1rem'}}>
+              <label style={labelStyle}>Cliente</label>
+              <select value={semestral.cliente} onChange={e => setS('cliente', e.target.value)} style={inputStyle}>
+                <option value="">— Seleccionar centro —</option>
+                {CENTROS.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            {semestral.cliente && semestral.cliente !== 'CD Vidacare' && (
+              <div style={{background:'#FAEEDA',color:'#854F0B',padding:'12px 16px',borderRadius:8,fontSize:13}}>
+                ⚠️ La configuración para este centro aún no está disponible. Por ahora solo CD Vidacare está habilitado.
+              </div>
+            )}
+          </div>
+
+          {semestral.cliente === 'CD Vidacare' && <>
+            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Fecha del informe</div>
+              <div style={{display:'flex',gap:6,maxWidth:360}}>
+                <select value={semestral.diaInforme} onChange={e => setS('diaInforme', e.target.value)} style={{...inputStyle, width:'30%'}}>
+                  <option value="">Día</option>
+                  {DIAS_DISPONIBLES.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+                <select value={semestral.mesInforme} onChange={e => setS('mesInforme', e.target.value)} style={{...inputStyle, width:'40%'}}>
+                  <option value="">Mes</option>
+                  {MESES_NOMBRE.map((m,i) => <option key={i} value={i+1}>{m}</option>)}
+                </select>
+                <select value={semestral.anioInforme} onChange={e => setS('anioInforme', e.target.value)} style={{...inputStyle, width:'30%'}}>
+                  <option value="">Año</option>
+                  {ANIOS_DISPONIBLES.map(a => <option key={a} value={a}>{a}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Membrana N° 1</div>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr 1fr',gap:'1rem'}}>
+                <div>
+                  <label style={labelStyle}>Cond. pre lavado (µS/cm)</label>
+                  <input type="number" value={semestral.o1CondPre1} onChange={e => setS('o1CondPre1', e.target.value)} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Cond. post lavado (µS/cm)</label>
+                  <input type="number" value={semestral.o1CondPost1} onChange={e => setS('o1CondPost1', e.target.value)} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Flujo post lavado (Lpm)</label>
+                  <input type="number" value={semestral.o1Flujo1} onChange={e => setS('o1Flujo1', e.target.value)} style={inputStyle} />
+                </div>
+              </div>
+            </div>
+
+            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Membrana N° 2</div>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr 1fr',gap:'1rem'}}>
+                <div>
+                  <label style={labelStyle}>Cond. pre lavado (µS/cm)</label>
+                  <input type="number" value={semestral.o1CondPre2} onChange={e => setS('o1CondPre2', e.target.value)} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Cond. post lavado (µS/cm)</label>
+                  <input type="number" value={semestral.o1CondPost2} onChange={e => setS('o1CondPost2', e.target.value)} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Flujo post lavado (Lpm)</label>
+                  <input type="number" value={semestral.o1Flujo2} onChange={e => setS('o1Flujo2', e.target.value)} style={inputStyle} />
+                </div>
+              </div>
+            </div>
+
+            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Datos de la osmosis</div>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:'1rem',marginBottom:'1rem'}}>
+                <div>
+                  <label style={labelStyle}>Conductividad de entrada (µS/cm)</label>
+                  <input type="number" value={semestral.cde1} onChange={e => setS('cde1', e.target.value)} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Conductividad de salida (µS/cm)</label>
+                  <input type="number" value={semestral.cds1} onChange={e => setS('cds1', e.target.value)} style={inputStyle} />
+                </div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr 1fr',gap:'1rem'}}>
+                <div>
+                  <label style={labelStyle}>Flujo Producto (lpm)</label>
+                  <input type="number" value={semestral.fp1} onChange={e => setS('fp1', e.target.value)} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Flujo Descarte (lpm)</label>
+                  <input type="number" value={semestral.fd1} onChange={e => setS('fd1', e.target.value)} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Presión Descarte (psi)</label>
+                  <input type="number" value={semestral.pd1} onChange={e => setS('pd1', e.target.value)} style={inputStyle} />
+                </div>
+              </div>
+
+              {rrSemestral !== null && (
+                <div style={{marginTop:'1rem',padding:'12px 16px',borderRadius:8,background:rrFueraRango?'#FCEBEB':'#EAF3DE',color:rrFueraRango?'#A32D2D':'#3B6D11',fontWeight:600,fontSize:14}}>
+                  RR calculado: {(Math.round(rrSemestral*100)/100).toString().replace('.',',')}%
+                  {rrFueraRango ? ' — Fuera de rango (menor a 97%)' : ' — Dentro de parámetros normales'}
+                </div>
+              )}
+            </div>
+
+            {rrFueraRango && (
+              <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+                <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Recomendación <span style={{color:'#aaa',fontWeight:400}}>(el RR está fuera de rango)</span></div>
+                <textarea value={semestral.recomendacion} onChange={e => setS('recomendacion', e.target.value)}
+                  placeholder="Escribe la recomendación. Si lo dejas vacío, el informe dirá 'Recomendación pendiente.'"
+                  rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
+              </div>
+            )}
+
+            <button onClick={handleGenerarSemestral} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
+              {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
+            </button>
+          </>}
+        </>}
+
+        {/* TAB MIS INFORMES SEMESTRALES */}
+        {tab === 'missemestrales' && <>
+          <h1 style={{fontSize:isMobile?20:22,fontWeight:700,marginBottom:4,color:'#1a1a2e'}}>Mis informes semestrales</h1>
+          <p style={{color:'#888',marginBottom:'1.25rem',fontSize:14}}>Historial de informes de mantención de membranas</p>
+          <div style={{background:'#fff',borderRadius:12,padding:'1rem',border:'1px solid #eef0f5'}}>
+            <div style={{fontSize:13,color:'#888',marginBottom:'1rem'}}>{semestrales.length} informes generados</div>
+            {isMobile ? (
+              <div style={{display:'flex',flexDirection:'column',gap:10}}>
+                {semestrales.map(inf => (
+                  <div key={inf.id} style={{background:'#f7f9fc',borderRadius:10,padding:'12px'}}>
+                    <div style={{fontSize:13,fontWeight:600,color:'#1a1a2e',marginBottom:4}}>{inf.cliente}</div>
+                    <div style={{fontSize:12,color:'#888',marginBottom:8}}>{inf.fechaInforme} · {inf.tecnicoResponsable}</div>
+                    <div style={{display:'flex',gap:8}}>
+                      <a href={inf.pdfUrl} target="_blank" rel="noopener noreferrer" style={{flex:1,display:'block',textAlign:'center',padding:'7px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',borderRadius:6,fontSize:12,textDecoration:'none'}}>📥 Descargar</a>
+                      <button onClick={() => eliminarSemestral(inf.id)} style={{padding:'7px 12px',background:'#FCEBEB',color:'#c0392b',border:'none',borderRadius:6,fontSize:12,cursor:'pointer'}}>🗑️</button>
+                    </div>
+                  </div>
+                ))}
+                {semestrales.length===0 && <p style={{textAlign:'center',color:'#aaa',padding:'1rem'}}>No hay informes generados aún</p>}
+              </div>
+            ) : (
+              <table style={{width:'100%',borderCollapse:'collapse',fontSize:13}}>
+                <thead><tr>{['Cliente','Fecha informe','Técnico','',''].map(h => (
+                  <th key={h} style={{textAlign:'left',padding:'8px',color:'#aaa',borderBottom:'1px solid #f0f0f0',fontWeight:500}}>{h}</th>
+                ))}</tr></thead>
+                <tbody>
+                  {semestrales.map(inf => (
+                    <tr key={inf.id}>
+                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{inf.cliente}</td>
+                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{inf.fechaInforme}</td>
+                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{inf.tecnicoResponsable}</td>
+                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>
+                        <a href={inf.pdfUrl} target="_blank" rel="noopener noreferrer" style={{padding:'4px 10px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',borderRadius:6,fontSize:11,textDecoration:'none'}}>📥 Descargar</a>
+                      </td>
+                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>
+                        <button onClick={() => eliminarSemestral(inf.id)} style={{padding:'4px 10px',background:'#FCEBEB',color:'#c0392b',border:'none',borderRadius:6,fontSize:11,cursor:'pointer'}}>🗑️ Eliminar</button>
+                      </td>
+                    </tr>
+                  ))}
+                  {semestrales.length===0 && <tr><td colSpan={5} style={{padding:'2rem',textAlign:'center',color:'#aaa'}}>No hay informes generados aún</td></tr>}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </>}
       </div>
 
       {/* MOBILE BOTTOM NAV */}
