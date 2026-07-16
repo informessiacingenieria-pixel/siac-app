@@ -9,6 +9,7 @@ import { generarPdfBlob } from '../../../lib/InformePDF'
 import { generarPdfSemestralBlob, calcularRR, textoFinalRR } from '../../../lib/InformeSemestralPDF'
 import { generarPdfSemestral2m4m2oBlob } from '../../../lib/InformeSemestral_2m4m2o'
 import { generarPdfSemestral3s1oBlob } from '../../../lib/InformeSemestral_3s1o'
+import { generarPdfSemestral3sOtro1oBlob } from '../../../lib/InformeSemestral_3sOtro1o'
 import { LUGARES_SERVICIO, CINTAS_REACTIVAS } from '../../../lib/informesConfig'
 
 const CENTROS = [
@@ -105,6 +106,20 @@ const semestral3Vacio = {
   cde: '', cds: '', fp: '', fd: '', pd: '', recomendacion: '',
 }
 
+const CENTROS_3S_OTRO = ['DAM Quilpué','HBTL Esterilización','HBTL Sedile','HBTL UTI 1']
+
+const semestral4Vacio = {
+  cliente: '',
+  diaInforme: '', mesInforme: '', anioInforme: '',
+  m1Pre: '', m1Post: '', m1Flujo: '',
+  m2Pre: '', m2Post: '', m2Flujo: '',
+  m3Pre: '', m3Post: '', m3Flujo: '',
+  cde: '',
+  cds1: '', fp1: '', fd1: '', pd1: '',
+  cds2: '', fp2: '', fd2: '', pd2: '',
+  recomendacion: '',
+}
+
 export default function GerenciaPage() {
   const [user, setUser] = useState<any>(null)
   const [tab, setTab] = useState('inicio')
@@ -161,6 +176,7 @@ export default function GerenciaPage() {
   // Estado informes semestral 2 osmosis (CD Pacifico)
   const [semestral2, setSemestral2] = useState<any>(semestral2Vacio)
   const [semestral3, setSemestral3] = useState<any>(semestral3Vacio)
+  const [semestral4, setSemestral4] = useState<any>(semestral4Vacio)
 
   const router = useRouter()
 
@@ -457,6 +473,49 @@ export default function GerenciaPage() {
       setExitoSemestral(true)
       setTimeout(() => setExitoSemestral(false), 4000)
       setSemestral2(semestral2Vacio)
+    } catch (e: any) {
+      alert('Error en "' + pasoActual + '": ' + (e?.message || 'Error desconocido'))
+    } finally {
+      setGenerandoSemestral(false)
+    }
+  }
+
+  const setS4 = (field: string, val: any) => setSemestral4((prev: any) => ({ ...prev, [field]: val }))
+
+  const rr4_1 = semestral4.cde && semestral4.cds1 ? calcularRR(semestral4.cde, semestral4.cds1) : null
+  const rr4_2 = semestral4.cde && semestral4.cds2 ? calcularRR(semestral4.cde, semestral4.cds2) : null
+  const rr4_1Fuera = rr4_1 !== null && rr4_1 < 97
+
+  const validarSemestral4 = () => {
+    if (!semestral4.diaInforme || !semestral4.mesInforme || !semestral4.anioInforme) return 'Completa la fecha del informe'
+    const campos = ['m1Pre','m1Post','m1Flujo','m2Pre','m2Post','m2Flujo','m3Pre','m3Post','m3Flujo','cde','cds1','fp1','fd1','pd1','cds2','fp2','fd2','pd2']
+    for (const campo of campos) {
+      if (!semestral4[campo]) return 'Completa todos los datos de las membranas y las salidas'
+    }
+    return null
+  }
+
+  const handleGenerarSemestral4 = async () => {
+    const error = validarSemestral4()
+    if (error) { alert(error); return }
+    setGenerandoSemestral(true)
+    let pasoActual = 'inicio'
+    try {
+      pasoActual = 'generando PDF'
+      const datosPdf = { ...semestral4, cliente: semestral.cliente, tecnicoResponsable: 'Baldomero Urriola' }
+      const blob = await generarPdfSemestral3sOtro1oBlob(datosPdf)
+      pasoActual = 'subiendo PDF'
+      const pdfUrl = await subirPdf(blob)
+      const fechaInformeTexto = `${String(semestral4.diaInforme).padStart(2,'0')}/${String(semestral4.mesInforme).padStart(2,'0')}/${semestral4.anioInforme}`
+      pasoActual = 'guardando en Firestore'
+      await addDoc(collection(db, 'informes_semestrales'), {
+        uid: 'gerencia', tecnico: 'Baldomero Urriola', email: user.email,
+        cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
+        tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
+      })
+      setExitoSemestral(true)
+      setTimeout(() => setExitoSemestral(false), 4000)
+      setSemestral4(semestral4Vacio)
     } catch (e: any) {
       alert('Error en "' + pasoActual + '": ' + (e?.message || 'Error desconocido'))
     } finally {
@@ -1541,7 +1600,7 @@ export default function GerenciaPage() {
                 {CENTROS.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
-            {semestral.cliente && semestral.cliente !== 'CD Vidacare' && semestral.cliente !== 'CD Pacifico' && !CENTROS_3S1O.includes(semestral.cliente) && (
+            {semestral.cliente && semestral.cliente !== 'CD Vidacare' && semestral.cliente !== 'CD Pacifico' && !CENTROS_3S1O.includes(semestral.cliente) && !CENTROS_3S_OTRO.includes(semestral.cliente) && (
               <div style={{background:'#FAEEDA',color:'#854F0B',padding:'12px 16px',borderRadius:8,fontSize:13}}>
                 ⚠️ La configuración para este centro aún no está disponible. Por ahora solo CD Vidacare está habilitado.
               </div>
@@ -1648,6 +1707,102 @@ export default function GerenciaPage() {
             )}
 
             <button onClick={handleGenerarSemestral} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
+              {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
+            </button>
+          </>}
+          {CENTROS_3S_OTRO.includes(semestral.cliente) && <>
+            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Fecha del informe</div>
+              <div style={{display:'flex',gap:6,maxWidth:360}}>
+                <select value={semestral4.diaInforme} onChange={e => setS4('diaInforme', e.target.value)} style={{...inputStyle, width:'30%'}}>
+                  <option value="">Día</option>
+                  {DIAS_DISPONIBLES.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+                <select value={semestral4.mesInforme} onChange={e => setS4('mesInforme', e.target.value)} style={{...inputStyle, width:'40%'}}>
+                  <option value="">Mes</option>
+                  {MESES_NOMBRE.map((m,i) => <option key={i} value={i+1}>{m}</option>)}
+                </select>
+                <select value={semestral4.anioInforme} onChange={e => setS4('anioInforme', e.target.value)} style={{...inputStyle, width:'30%'}}>
+                  <option value="">Año</option>
+                  {ANIOS_DISPONIBLES.map(a => <option key={a} value={a}>{a}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Membranas (3)</div>
+
+            {[1,2,3].map(n => (
+              <div key={'m'+n} style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+                <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Membrana N° {n}</div>
+                <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr 1fr',gap:'1rem'}}>
+                  <div><label style={labelStyle}>Cond. pre lavado (µS/cm)</label>
+                    <input type="number" value={semestral4['m'+n+'Pre']} onChange={e => setS4('m'+n+'Pre', e.target.value)} style={inputStyle} /></div>
+                  <div><label style={labelStyle}>Cond. post lavado (µS/cm)</label>
+                    <input type="number" value={semestral4['m'+n+'Post']} onChange={e => setS4('m'+n+'Post', e.target.value)} style={inputStyle} /></div>
+                  <div><label style={labelStyle}>Flujo post lavado (Lpm)</label>
+                    <input type="number" value={semestral4['m'+n+'Flujo']} onChange={e => setS4('m'+n+'Flujo', e.target.value)} style={inputStyle} /></div>
+                </div>
+              </div>
+            ))}
+
+            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Conductividad de entrada</div>
+              <div style={{maxWidth:300}}>
+                <label style={labelStyle}>Conductividad de entrada (µS/cm)</label>
+                <input type="number" value={semestral4.cde} onChange={e => setS4('cde', e.target.value)} style={inputStyle} />
+              </div>
+            </div>
+
+            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Salida · Primer paso</div>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:'1rem',marginBottom:'1rem'}}>
+                <div><label style={labelStyle}>Conductividad de salida (µS/cm)</label>
+                  <input type="number" value={semestral4.cds1} onChange={e => setS4('cds1', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Flujo Producto (lpm)</label>
+                  <input type="number" value={semestral4.fp1} onChange={e => setS4('fp1', e.target.value)} style={inputStyle} /></div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:'1rem'}}>
+                <div><label style={labelStyle}>Flujo Descarte (lpm)</label>
+                  <input type="number" value={semestral4.fd1} onChange={e => setS4('fd1', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Presión Descarte (psi)</label>
+                  <input type="number" value={semestral4.pd1} onChange={e => setS4('pd1', e.target.value)} style={inputStyle} /></div>
+              </div>
+              {rr4_1 !== null && (
+                <div style={{marginTop:'1rem',padding:'12px 16px',borderRadius:8,background:rr4_1Fuera?'#FCEBEB':'#EAF3DE',color:rr4_1Fuera?'#A32D2D':'#3B6D11',fontWeight:600,fontSize:14}}>
+                  RR Primer paso: {(Math.round(rr4_1*100)/100).toString().replace('.',',')}%{rr4_1Fuera ? ' — Fuera de rango (menor a 97%)' : ' — Dentro de parámetros'}
+                </div>
+              )}
+            </div>
+
+            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Salida · Segundo paso (agua blanda)</div>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:'1rem',marginBottom:'1rem'}}>
+                <div><label style={labelStyle}>Conductividad de salida (µS/cm)</label>
+                  <input type="number" value={semestral4.cds2} onChange={e => setS4('cds2', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Flujo Producto (lpm)</label>
+                  <input type="number" value={semestral4.fp2} onChange={e => setS4('fp2', e.target.value)} style={inputStyle} /></div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:'1rem'}}>
+                <div><label style={labelStyle}>Flujo Descarte (lpm)</label>
+                  <input type="number" value={semestral4.fd2} onChange={e => setS4('fd2', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Presión Descarte (psi)</label>
+                  <input type="number" value={semestral4.pd2} onChange={e => setS4('pd2', e.target.value)} style={inputStyle} /></div>
+              </div>
+              {rr4_2 !== null && (
+                <div style={{marginTop:'1rem',padding:'12px 16px',borderRadius:8,background:'#EAF3DE',color:'#3B6D11',fontWeight:600,fontSize:14}}>
+                  RR Segundo paso: {(Math.round(rr4_2*100)/100).toString().replace('.',',')}%
+                </div>
+              )}
+            </div>
+
+            {rr4_1Fuera && (
+              <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+                <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Recomendación <span style={{color:'#aaa',fontWeight:400}}>(RR primer paso fuera de rango)</span></div>
+                <textarea value={semestral4.recomendacion} onChange={e => setS4('recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
+              </div>
+            )}
+
+            <button onClick={handleGenerarSemestral4} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
             </button>
           </>}
