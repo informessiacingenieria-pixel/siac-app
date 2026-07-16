@@ -225,6 +225,16 @@ export default function GerenciaPage() {
     return () => unsub()
   }, [user])
 
+  useEffect(() => {
+    const bloquearScroll = (e: any) => {
+      if (e.target instanceof HTMLInputElement && e.target.type === 'number' && document.activeElement === e.target) {
+        e.target.blur()
+      }
+    }
+    document.addEventListener('wheel', bloquearScroll, { passive: true })
+    return () => document.removeEventListener('wheel', bloquearScroll)
+  }, [])
+
   const handleLogout = async () => { await signOut(auth); router.push('/') }
 
   const cambiarEstado = async (id: string, nuevoEstado: string) => {
