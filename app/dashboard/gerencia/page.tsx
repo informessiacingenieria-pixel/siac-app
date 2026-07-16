@@ -8,6 +8,7 @@ import { PieChart, Pie, Cell, Tooltip, Legend, LineChart, Line, BarChart, Bar, X
 import { generarPdfBlob } from '../../../lib/InformePDF'
 import { generarPdfSemestralBlob, calcularRR, textoFinalRR } from '../../../lib/InformeSemestralPDF'
 import { generarPdfSemestral2m4m2oBlob } from '../../../lib/InformeSemestral_2m4m2o'
+import { generarPdfSemestral3s1oBlob } from '../../../lib/InformeSemestral_3s1o'
 import { LUGARES_SERVICIO, CINTAS_REACTIVAS } from '../../../lib/informesConfig'
 
 const CENTROS = [
@@ -78,6 +79,32 @@ const semestral2Vacio = {
   o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '',
 }
 
+const CENTROS_3S1O = ['CD Cendial Salamanca',
+  'CD Lampa','CD Los Andes',
+  'CD Nueva Vida Huepil',
+  'CD Ñuñoa Pudahuel',
+  'CD Padre Hurtado',
+  'CD Rancagua Dial',
+  'CD San Lucas',
+  'CD Urodial San Vicente',
+  'CD Vidadial Collipulli',
+  'Hemodiálisis Curicó',
+  'Hosp. Lautaro Nuevo',
+  'Hosp. Nueva Imperial',
+  'Nefrodial Linares',
+  'Nefrodial Molina',
+  'Nefrodial San Javier',
+  'UPC Hospital Nueva Imperial']
+
+const semestral3Vacio = {
+  cliente: '',
+  diaInforme: '', mesInforme: '', anioInforme: '',
+  m1Pre: '', m1Post: '', m1Flujo: '',
+  m2Pre: '', m2Post: '', m2Flujo: '',
+  m3Pre: '', m3Post: '', m3Flujo: '',
+  cde: '', cds: '', fp: '', fd: '', pd: '', recomendacion: '',
+}
+
 export default function GerenciaPage() {
   const [user, setUser] = useState<any>(null)
   const [tab, setTab] = useState('inicio')
@@ -131,8 +158,9 @@ export default function GerenciaPage() {
   const [exitoSemestral, setExitoSemestral] = useState(false)
   const [submenuSemestralOpen, setSubmenuSemestralOpen] = useState(false)
 
-  // Estado informe semestral 2 osmosis (CD Pacifico)
+  // Estado informes semestral 2 osmosis (CD Pacifico)
   const [semestral2, setSemestral2] = useState<any>(semestral2Vacio)
+  const [semestral3, setSemestral3] = useState<any>(semestral3Vacio)
 
   const router = useRouter()
 
@@ -429,6 +457,48 @@ export default function GerenciaPage() {
       setExitoSemestral(true)
       setTimeout(() => setExitoSemestral(false), 4000)
       setSemestral2(semestral2Vacio)
+    } catch (e: any) {
+      alert('Error en "' + pasoActual + '": ' + (e?.message || 'Error desconocido'))
+    } finally {
+      setGenerandoSemestral(false)
+    }
+  }
+
+  const setS3 = (field: string, val: any) => setSemestral3((prev: any) => ({ ...prev, [field]: val }))
+
+  const rr3 = semestral3.cde && semestral3.cds ? calcularRR(semestral3.cde, semestral3.cds) : null
+  const rr3Fuera = rr3 !== null && rr3 < 97
+
+  const validarSemestral3 = () => {
+    if (!semestral3.diaInforme || !semestral3.mesInforme || !semestral3.anioInforme) return 'Completa la fecha del informe'
+    const campos = ['m1Pre','m1Post','m1Flujo','m2Pre','m2Post','m2Flujo','m3Pre','m3Post','m3Flujo','cde','cds','fp','fd','pd']
+    for (const campo of campos) {
+      if (!semestral3[campo]) return 'Completa todos los datos de las membranas y la osmosis'
+    }
+    return null
+  }
+
+  const handleGenerarSemestral3 = async () => {
+    const error = validarSemestral3()
+    if (error) { alert(error); return }
+    setGenerandoSemestral(true)
+    let pasoActual = 'inicio'
+    try {
+      pasoActual = 'generando PDF'
+      const datosPdf = { ...semestral3, cliente: semestral.cliente, tecnicoResponsable: 'Baldomero Urriola' }
+      const blob = await generarPdfSemestral3s1oBlob(datosPdf)
+      pasoActual = 'subiendo PDF'
+      const pdfUrl = await subirPdf(blob)
+      const fechaInformeTexto = `${String(semestral3.diaInforme).padStart(2,'0')}/${String(semestral3.mesInforme).padStart(2,'0')}/${semestral3.anioInforme}`
+      pasoActual = 'guardando en Firestore'
+      await addDoc(collection(db, 'informes_semestrales'), {
+        uid: 'gerencia', tecnico: 'Baldomero Urriola', email: user.email,
+        cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
+        tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
+      })
+      setExitoSemestral(true)
+      setTimeout(() => setExitoSemestral(false), 4000)
+      setSemestral3(semestral3Vacio)
     } catch (e: any) {
       alert('Error en "' + pasoActual + '": ' + (e?.message || 'Error desconocido'))
     } finally {
@@ -1471,7 +1541,7 @@ export default function GerenciaPage() {
                 {CENTROS.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
-            {semestral.cliente && semestral.cliente !== 'CD Vidacare' && semestral.cliente !== 'CD Pacifico' && (
+            {semestral.cliente && semestral.cliente !== 'CD Vidacare' && semestral.cliente !== 'CD Pacifico' && !CENTROS_3S1O.includes(semestral.cliente) && (
               <div style={{background:'#FAEEDA',color:'#854F0B',padding:'12px 16px',borderRadius:8,fontSize:13}}>
                 ⚠️ La configuración para este centro aún no está disponible. Por ahora solo CD Vidacare está habilitado.
               </div>
@@ -1691,6 +1761,75 @@ export default function GerenciaPage() {
             )}
 
             <button onClick={handleGenerarSemestral2} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
+              {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
+            </button>
+          </>}
+          {CENTROS_3S1O.includes(semestral.cliente) && <>
+            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Fecha del informe</div>
+              <div style={{display:'flex',gap:6,maxWidth:360}}>
+                <select value={semestral3.diaInforme} onChange={e => setS3('diaInforme', e.target.value)} style={{...inputStyle, width:'30%'}}>
+                  <option value="">Día</option>
+                  {DIAS_DISPONIBLES.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+                <select value={semestral3.mesInforme} onChange={e => setS3('mesInforme', e.target.value)} style={{...inputStyle, width:'40%'}}>
+                  <option value="">Mes</option>
+                  {MESES_NOMBRE.map((m,i) => <option key={i} value={i+1}>{m}</option>)}
+                </select>
+                <select value={semestral3.anioInforme} onChange={e => setS3('anioInforme', e.target.value)} style={{...inputStyle, width:'30%'}}>
+                  <option value="">Año</option>
+                  {ANIOS_DISPONIBLES.map(a => <option key={a} value={a}>{a}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 1 (3 membranas)</div>
+
+            {[1,2,3].map(n => (
+              <div key={'m'+n} style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+                <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Membrana N° {n}</div>
+                <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr 1fr',gap:'1rem'}}>
+                  <div><label style={labelStyle}>Cond. pre lavado (µS/cm)</label>
+                    <input type="number" value={semestral3['m'+n+'Pre']} onChange={e => setS3('m'+n+'Pre', e.target.value)} style={inputStyle} /></div>
+                  <div><label style={labelStyle}>Cond. post lavado (µS/cm)</label>
+                    <input type="number" value={semestral3['m'+n+'Post']} onChange={e => setS3('m'+n+'Post', e.target.value)} style={inputStyle} /></div>
+                  <div><label style={labelStyle}>Flujo post lavado (Lpm)</label>
+                    <input type="number" value={semestral3['m'+n+'Flujo']} onChange={e => setS3('m'+n+'Flujo', e.target.value)} style={inputStyle} /></div>
+                </div>
+              </div>
+            ))}
+
+            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Datos de la osmosis</div>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:'1rem',marginBottom:'1rem'}}>
+                <div><label style={labelStyle}>Conductividad de entrada (µS/cm)</label>
+                  <input type="number" value={semestral3.cde} onChange={e => setS3('cde', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Conductividad de salida (µS/cm)</label>
+                  <input type="number" value={semestral3.cds} onChange={e => setS3('cds', e.target.value)} style={inputStyle} /></div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr 1fr',gap:'1rem'}}>
+                <div><label style={labelStyle}>Flujo Producto (lpm)</label>
+                  <input type="number" value={semestral3.fp} onChange={e => setS3('fp', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Flujo Descarte (lpm)</label>
+                  <input type="number" value={semestral3.fd} onChange={e => setS3('fd', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Presión Descarte (psi)</label>
+                  <input type="number" value={semestral3.pd} onChange={e => setS3('pd', e.target.value)} style={inputStyle} /></div>
+              </div>
+              {rr3 !== null && (
+                <div style={{marginTop:'1rem',padding:'12px 16px',borderRadius:8,background:rr3Fuera?'#FCEBEB':'#EAF3DE',color:rr3Fuera?'#A32D2D':'#3B6D11',fontWeight:600,fontSize:14}}>
+                  RR calculado: {(Math.round(rr3*100)/100).toString().replace('.',',')}%{rr3Fuera ? ' — Fuera de rango (menor a 97%)' : ' — Dentro de parámetros'}
+                </div>
+              )}
+            </div>
+
+            {rr3Fuera && (
+              <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+                <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Recomendación <span style={{color:'#aaa',fontWeight:400}}>(RR fuera de rango)</span></div>
+                <textarea value={semestral3.recomendacion} onChange={e => setS3('recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
+              </div>
+            )}
+
+            <button onClick={handleGenerarSemestral3} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
             </button>
           </>}
