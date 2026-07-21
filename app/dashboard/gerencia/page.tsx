@@ -160,7 +160,7 @@ const semestral7Vacio = {
   m3Pre: '', m3Post: '', m3Flujo: '',
   m4Pre: '', m4Post: '', m4Flujo: '',
   cde: '', cds: '', fp: '', fd: '', pd: '', recomendacion: '',
-}s
+}
 
 export default function GerenciaPage() {
   const [user, setUser] = useState<any>(null)
