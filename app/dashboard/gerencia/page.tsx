@@ -2407,53 +2407,6 @@ export default function GerenciaPage() {
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
             </button>
           </>}
-        </>}
-
-        {/* TAB MIS INFORMES SEMESTRALES */}
-        {tab === 'missemestrales' && <>
-          <h1 style={{fontSize:isMobile?20:22,fontWeight:700,marginBottom:4,color:'#1a1a2e'}}>Mis informes semestrales</h1>
-          <p style={{color:'#888',marginBottom:'1.25rem',fontSize:14}}>Historial de informes de mantención de membranas</p>
-          <div style={{background:'#fff',borderRadius:12,padding:'1rem',border:'1px solid #eef0f5'}}>
-            <div style={{fontSize:13,color:'#888',marginBottom:'1rem'}}>{semestrales.length} informes generados</div>
-            {isMobile ? (
-              <div style={{display:'flex',flexDirection:'column',gap:10}}>
-                {semestrales.map(inf => (
-                  <div key={inf.id} style={{background:'#f7f9fc',borderRadius:10,padding:'12px'}}>
-                    <div style={{fontSize:13,fontWeight:600,color:'#1a1a2e',marginBottom:4}}>{inf.cliente}</div>
-                    <div style={{fontSize:12,color:'#888',marginBottom:8}}>{inf.fechaInforme} · {inf.tecnicoResponsable}</div>
-                    <div style={{display:'flex',gap:8}}>
-                      <a href={inf.pdfUrl} target="_blank" rel="noopener noreferrer" style={{flex:1,display:'block',textAlign:'center',padding:'7px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',borderRadius:6,fontSize:12,textDecoration:'none'}}>📥 Descargar</a>
-                      <button onClick={() => eliminarSemestral(inf.id)} style={{padding:'7px 12px',background:'#FCEBEB',color:'#c0392b',border:'none',borderRadius:6,fontSize:12,cursor:'pointer'}}>🗑️</button>
-                    </div>
-                  </div>
-                ))}
-                {semestrales.length===0 && <p style={{textAlign:'center',color:'#aaa',padding:'1rem'}}>No hay informes generados aún</p>}
-              </div>
-            ) : (
-              <table style={{width:'100%',borderCollapse:'collapse',fontSize:13}}>
-                <thead><tr>{['Cliente','Fecha informe','Técnico','',''].map(h => (
-                  <th key={h} style={{textAlign:'left',padding:'8px',color:'#aaa',borderBottom:'1px solid #f0f0f0',fontWeight:500}}>{h}</th>
-                ))}</tr></thead>
-                <tbody>
-                  {semestrales.map(inf => (
-                    <tr key={inf.id}>
-                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{inf.cliente}</td>
-                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{inf.fechaInforme}</td>
-                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{inf.tecnicoResponsable}</td>
-                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>
-                        <a href={inf.pdfUrl} target="_blank" rel="noopener noreferrer" style={{padding:'4px 10px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',borderRadius:6,fontSize:11,textDecoration:'none'}}>📥 Descargar</a>
-                      </td>
-                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>
-                        <button onClick={() => eliminarSemestral(inf.id)} style={{padding:'4px 10px',background:'#FCEBEB',color:'#c0392b',border:'none',borderRadius:6,fontSize:11,cursor:'pointer'}}>🗑️ Eliminar</button>
-                      </td>
-                    </tr>
-                  ))}
-                  {semestrales.length===0 && <tr><td colSpan={5} style={{padding:'2rem',textAlign:'center',color:'#aaa'}}>No hay informes generados aún</td></tr>}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </>}
 
         {CENTROS_4S1O.includes(semestral.cliente) && <>
             <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
@@ -2524,6 +2477,53 @@ export default function GerenciaPage() {
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
             </button>
           </>}
+        </>}
+
+        {/* TAB MIS INFORMES SEMESTRALES */}
+        {tab === 'missemestrales' && <>
+          <h1 style={{fontSize:isMobile?20:22,fontWeight:700,marginBottom:4,color:'#1a1a2e'}}>Mis informes semestrales</h1>
+          <p style={{color:'#888',marginBottom:'1.25rem',fontSize:14}}>Historial de informes de mantención de membranas</p>
+          <div style={{background:'#fff',borderRadius:12,padding:'1rem',border:'1px solid #eef0f5'}}>
+            <div style={{fontSize:13,color:'#888',marginBottom:'1rem'}}>{semestrales.length} informes generados</div>
+            {isMobile ? (
+              <div style={{display:'flex',flexDirection:'column',gap:10}}>
+                {semestrales.map(inf => (
+                  <div key={inf.id} style={{background:'#f7f9fc',borderRadius:10,padding:'12px'}}>
+                    <div style={{fontSize:13,fontWeight:600,color:'#1a1a2e',marginBottom:4}}>{inf.cliente}</div>
+                    <div style={{fontSize:12,color:'#888',marginBottom:8}}>{inf.fechaInforme} · {inf.tecnicoResponsable}</div>
+                    <div style={{display:'flex',gap:8}}>
+                      <a href={inf.pdfUrl} target="_blank" rel="noopener noreferrer" style={{flex:1,display:'block',textAlign:'center',padding:'7px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',borderRadius:6,fontSize:12,textDecoration:'none'}}>📥 Descargar</a>
+                      <button onClick={() => eliminarSemestral(inf.id)} style={{padding:'7px 12px',background:'#FCEBEB',color:'#c0392b',border:'none',borderRadius:6,fontSize:12,cursor:'pointer'}}>🗑️</button>
+                    </div>
+                  </div>
+                ))}
+                {semestrales.length===0 && <p style={{textAlign:'center',color:'#aaa',padding:'1rem'}}>No hay informes generados aún</p>}
+              </div>
+            ) : (
+              <table style={{width:'100%',borderCollapse:'collapse',fontSize:13}}>
+                <thead><tr>{['Cliente','Fecha informe','Técnico','',''].map(h => (
+                  <th key={h} style={{textAlign:'left',padding:'8px',color:'#aaa',borderBottom:'1px solid #f0f0f0',fontWeight:500}}>{h}</th>
+                ))}</tr></thead>
+                <tbody>
+                  {semestrales.map(inf => (
+                    <tr key={inf.id}>
+                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{inf.cliente}</td>
+                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{inf.fechaInforme}</td>
+                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{inf.tecnicoResponsable}</td>
+                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>
+                        <a href={inf.pdfUrl} target="_blank" rel="noopener noreferrer" style={{padding:'4px 10px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',borderRadius:6,fontSize:11,textDecoration:'none'}}>📥 Descargar</a>
+                      </td>
+                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>
+                        <button onClick={() => eliminarSemestral(inf.id)} style={{padding:'4px 10px',background:'#FCEBEB',color:'#c0392b',border:'none',borderRadius:6,fontSize:11,cursor:'pointer'}}>🗑️ Eliminar</button>
+                      </td>
+                    </tr>
+                  ))}
+                  {semestrales.length===0 && <tr><td colSpan={5} style={{padding:'2rem',textAlign:'center',color:'#aaa'}}>No hay informes generados aún</td></tr>}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </>}
       </div>
 
       {/* MOBILE BOTTOM NAV */}
