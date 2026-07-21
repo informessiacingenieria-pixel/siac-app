@@ -2237,9 +2237,8 @@ export default function GerenciaPage() {
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
             </button>
           </>}
-        </>}
-
-        {CENTROS_3S_2S.includes(semestral.cliente) && <>
+          
+          {CENTROS_3S_2S.includes(semestral.cliente) && <>
             <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
               <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Fecha del informe</div>
               <div style={{display:'flex',gap:6,maxWidth:360}}>
@@ -2352,6 +2351,7 @@ export default function GerenciaPage() {
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
             </button>
           </>}
+        </>}
 
         {/* TAB MIS INFORMES SEMESTRALES */}
         {tab === 'missemestrales' && <>
