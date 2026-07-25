@@ -16,6 +16,7 @@ import { generarPdfSemestral4s1oBlob } from '../../../lib/InformeSemestral_4s1o.
 import { generarPdfSemestral4s2s2oBlob } from '../../../lib/InformeSemestral_4s2s2o'
 import { generarPdfSemestral4s3s2oBlob } from '../../../lib/InformeSemestral_4s3s2o'
 import { generarPdfSemestral4s4s2oBlob } from '../../../lib/InformeSemestral_4s4s2o'
+import { generarPdfSemestral5s1oBlob } from '../../../lib/InformeSemestral_5s1o'
 import { LUGARES_SERVICIO, CINTAS_REACTIVAS } from '../../../lib/informesConfig'
 
 const CENTROS = [
@@ -209,6 +210,19 @@ const semestral10Vacio = {
   o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '',
 }
 
+const CENTROS_5S1O = ['CD Vidadial Lanco','CD Vidadial Paillaco']
+
+const semestral11Vacio = {
+  cliente: '',
+  diaInforme: '', mesInforme: '', anioInforme: '',
+  m1Pre: '', m1Post: '', m1Flujo: '',
+  m2Pre: '', m2Post: '', m2Flujo: '',
+  m3Pre: '', m3Post: '', m3Flujo: '',
+  m4Pre: '', m4Post: '', m4Flujo: '',
+  m5Pre: '', m5Post: '', m5Flujo: '',
+  cde: '', cds: '', fp: '', fd: '', pd: '', recomendacion: '',
+}
+
 export default function GerenciaPage() {
   const [user, setUser] = useState<any>(null)
   const [tab, setTab] = useState('inicio')
@@ -272,6 +286,7 @@ export default function GerenciaPage() {
   const [semestral8, setSemestral8] = useState<any>(semestral8Vacio)
   const [semestral9, setSemestral9] = useState<any>(semestral9Vacio)
   const [semestral10, setSemestral10] = useState<any>(semestral10Vacio)
+  const [semestral11, setSemestral11] = useState<any>(semestral11Vacio)
 
   const router = useRouter()
 
@@ -995,6 +1010,49 @@ export default function GerenciaPage() {
     } finally {
       setGenerandoSemestral(false)
     }
+
+  const setS11 = (field: string, val: any) => setSemestral11((prev: any) => ({ ...prev, [field]: val }))
+
+  const rr11 = semestral11.cde && semestral11.cds ? calcularRR(semestral11.cde, semestral11.cds) : null
+  const rr11Fuera = rr11 !== null && rr11 < 97
+
+  const validarSemestral11 = () => {
+    if (!semestral11.diaInforme || !semestral11.mesInforme || !semestral11.anioInforme) return 'Completa la fecha del informe'
+    const campos = ['m1Pre','m1Post','m1Flujo','m2Pre','m2Post','m2Flujo','m3Pre','m3Post','m3Flujo','m4Pre','m4Post','m4Flujo','m5Pre','m5Post','m5Flujo','cde','cds','fp','fd','pd']
+    for (const campo of campos) {
+      if (!semestral11[campo]) return 'Completa todos los datos de las membranas y la osmosis'
+    }
+    return null
+  }
+
+  const handleGenerarSemestral11 = async () => {
+    const error = validarSemestral11()
+    if (error) { alert(error); return }
+    setGenerandoSemestral(true)
+    let pasoActual = 'inicio'
+    try {
+      pasoActual = 'generando PDF'
+      const datosPdf = { ...semestral11, cliente: semestral.cliente, tecnicoResponsable: 'Baldomero Urriola' }
+      const blob = await generarPdfSemestral5s1oBlob(datosPdf)
+      pasoActual = 'subiendo PDF'
+      const pdfUrl = await subirPdf(blob)
+      const fechaInformeTexto = `${String(semestral11.diaInforme).padStart(2,'0')}/${String(semestral11.mesInforme).padStart(2,'0')}/${semestral11.anioInforme}`
+      pasoActual = 'guardando en Firestore'
+      await addDoc(collection(db, 'informes_semestrales'), {
+        uid: 'gerencia', tecnico: 'Baldomero Urriola', email: user.email,
+        cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
+        tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
+      })
+      setExitoSemestral(true)
+      setTimeout(() => setExitoSemestral(false), 4000)
+      setSemestral11(semestral11Vacio)
+    } catch (e: any) {
+      alert('Error en "' + pasoActual + '": ' + (e?.message || 'Error desconocido'))
+    } finally {
+      setGenerandoSemestral(false)
+    }
+  }
+  
   }
 
   const registrosFiltrados = registros.filter(r => {
@@ -1982,7 +2040,7 @@ export default function GerenciaPage() {
                 {CENTROS.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
-            {semestral.cliente && semestral.cliente !== 'CD Vidacare' && semestral.cliente !== 'CD Pacifico' && semestral.cliente !== 'Ctro. Nefro. Puerto Montt' && semestral.cliente !== 'HCUCH Abla. y Panta Estéril' && semestral.cliente !== 'Hosp. Salvador Diálisis' && !CENTROS_3S1O.includes(semestral.cliente) && !CENTROS_3S_OTRO.includes(semestral.cliente) && !CENTROS_3S_2S.includes(semestral.cliente) && !CENTROS_4S1O.includes(semestral.cliente) && !CENTROS_4S_3S.includes(semestral.cliente) && (
+            {semestral.cliente && semestral.cliente !== 'CD Vidacare' && semestral.cliente !== 'CD Pacifico' && semestral.cliente !== 'Ctro. Nefro. Puerto Montt' && semestral.cliente !== 'HCUCH Abla. y Panta Estéril' && semestral.cliente !== 'Hosp. Salvador Diálisis' && !CENTROS_3S1O.includes(semestral.cliente) && !CENTROS_3S_OTRO.includes(semestral.cliente) && !CENTROS_3S_2S.includes(semestral.cliente) && !CENTROS_4S1O.includes(semestral.cliente) && !CENTROS_4S_3S.includes(semestral.cliente && !CENTROS_5S1O.includes(semestral.cliente)) && (
           
               <div style={{background:'#FAEEDA',color:'#854F0B',padding:'12px 16px',borderRadius:8,fontSize:13}}>
                 ⚠️ La configuración para este centro aún no está disponible. Por ahora solo CD Vidacare está habilitado.
@@ -3005,6 +3063,75 @@ export default function GerenciaPage() {
             )}
 
             <button onClick={handleGenerarSemestral10} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
+              {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
+            </button>
+          </>}
+          {CENTROS_5S1O.includes(semestral.cliente) && <>
+            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Fecha del informe</div>
+              <div style={{display:'flex',gap:6,maxWidth:360}}>
+                <select value={semestral11.diaInforme} onChange={e => setS11('diaInforme', e.target.value)} style={{...inputStyle, width:'30%'}}>
+                  <option value="">Día</option>
+                  {DIAS_DISPONIBLES.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+                <select value={semestral11.mesInforme} onChange={e => setS11('mesInforme', e.target.value)} style={{...inputStyle, width:'40%'}}>
+                  <option value="">Mes</option>
+                  {MESES_NOMBRE.map((m,i) => <option key={i} value={i+1}>{m}</option>)}
+                </select>
+                <select value={semestral11.anioInforme} onChange={e => setS11('anioInforme', e.target.value)} style={{...inputStyle, width:'30%'}}>
+                  <option value="">Año</option>
+                  {ANIOS_DISPONIBLES.map(a => <option key={a} value={a}>{a}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 1 (5 membranas)</div>
+
+            {[1,2,3,4,5].map(n => (
+              <div key={'s11m'+n} style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+                <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Membrana N° {n}</div>
+                <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr 1fr',gap:'1rem'}}>
+                  <div><label style={labelStyle}>Cond. pre lavado (µS/cm)</label>
+                    <input type="number" value={semestral11['m'+n+'Pre']} onChange={e => setS11('m'+n+'Pre', e.target.value)} style={inputStyle} /></div>
+                  <div><label style={labelStyle}>Cond. post lavado (µS/cm)</label>
+                    <input type="number" value={semestral11['m'+n+'Post']} onChange={e => setS11('m'+n+'Post', e.target.value)} style={inputStyle} /></div>
+                  <div><label style={labelStyle}>Flujo post lavado (Lpm)</label>
+                    <input type="number" value={semestral11['m'+n+'Flujo']} onChange={e => setS11('m'+n+'Flujo', e.target.value)} style={inputStyle} /></div>
+                </div>
+              </div>
+            ))}
+
+            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Datos de la osmosis</div>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:'1rem',marginBottom:'1rem'}}>
+                <div><label style={labelStyle}>Conductividad de entrada (µS/cm)</label>
+                  <input type="number" value={semestral11.cde} onChange={e => setS11('cde', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Conductividad de salida (µS/cm)</label>
+                  <input type="number" value={semestral11.cds} onChange={e => setS11('cds', e.target.value)} style={inputStyle} /></div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr 1fr',gap:'1rem'}}>
+                <div><label style={labelStyle}>Flujo Producto (lpm)</label>
+                  <input type="number" value={semestral11.fp} onChange={e => setS11('fp', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Flujo Descarte (lpm)</label>
+                  <input type="number" value={semestral11.fd} onChange={e => setS11('fd', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Presión Descarte (psi)</label>
+                  <input type="number" value={semestral11.pd} onChange={e => setS11('pd', e.target.value)} style={inputStyle} /></div>
+              </div>
+              {rr11 !== null && (
+                <div style={{marginTop:'1rem',padding:'12px 16px',borderRadius:8,background:rr11Fuera?'#FCEBEB':'#EAF3DE',color:rr11Fuera?'#A32D2D':'#3B6D11',fontWeight:600,fontSize:14}}>
+                  RR calculado: {(Math.round(rr11*100)/100).toString().replace('.',',')}%{rr11Fuera ? ' — Fuera de rango (menor a 97%)' : ' — Dentro de parámetros'}
+                </div>
+              )}
+            </div>
+
+            {rr11Fuera && (
+              <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+                <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Recomendación <span style={{color:'#aaa',fontWeight:400}}>(RR fuera de rango)</span></div>
+                <textarea value={semestral11.recomendacion} onChange={e => setS11('recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
+              </div>
+            )}
+
+            <button onClick={handleGenerarSemestral11} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
             </button>
           </>}
