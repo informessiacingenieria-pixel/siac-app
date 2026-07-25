@@ -223,6 +223,20 @@ const semestral11Vacio = {
   cde: '', cds: '', fp: '', fd: '', pd: '', recomendacion: '',
 }
 
+const CENTROS_YA_IMPLEMENTADOS = [
+  'CD Vidacare',
+  'CD Pacifico',
+  'Ctro. Nefro. Puerto Montt',
+  'HCUCH Abla. y Panta Estéril',
+  'Hosp. Salvador Diálisis',
+  ...CENTROS_3S1O,
+  ...CENTROS_3S_OTRO,
+  ...CENTROS_3S_2S,
+  ...CENTROS_4S1O,
+  ...CENTROS_4S_3S,
+  ...CENTROS_5S1O,
+]
+
 export default function GerenciaPage() {
   const [user, setUser] = useState<any>(null)
   const [tab, setTab] = useState('inicio')
@@ -2039,7 +2053,7 @@ export default function GerenciaPage() {
                 {CENTROS.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
-            {semestral.cliente && semestral.cliente !== 'CD Vidacare' && semestral.cliente !== 'CD Pacifico' && semestral.cliente !== 'Ctro. Nefro. Puerto Montt' && semestral.cliente !== 'HCUCH Abla. y Panta Estéril' && semestral.cliente !== 'Hosp. Salvador Diálisis' && !CENTROS_3S1O.includes(semestral.cliente) && !CENTROS_3S_OTRO.includes(semestral.cliente) && !CENTROS_3S_2S.includes(semestral.cliente) && !CENTROS_4S1O.includes(semestral.cliente) && !CENTROS_4S_3S.includes(semestral.cliente) && !CENTROS_5S1O.includes(semestral.cliente) && (
+            {semestral.cliente && !CENTROS_YA_IMPLEMENTADOS.includes(semestral.cliente) && (
           
               <div style={{background:'#FAEEDA',color:'#854F0B',padding:'12px 16px',borderRadius:8,fontSize:13}}>
                 ⚠️ Para este centro no esta permitido generar un informe semestral.
