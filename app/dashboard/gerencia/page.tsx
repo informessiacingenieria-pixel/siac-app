@@ -1010,6 +1010,7 @@ export default function GerenciaPage() {
     } finally {
       setGenerandoSemestral(false)
     }
+  }
 
   const setS11 = (field: string, val: any) => setSemestral11((prev: any) => ({ ...prev, [field]: val }))
 
@@ -1051,8 +1052,6 @@ export default function GerenciaPage() {
     } finally {
       setGenerandoSemestral(false)
     }
-  }
-  
   }
 
   const registrosFiltrados = registros.filter(r => {
