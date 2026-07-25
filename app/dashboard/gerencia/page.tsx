@@ -2039,10 +2039,10 @@ export default function GerenciaPage() {
                 {CENTROS.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
-            {semestral.cliente && semestral.cliente !== 'CD Vidacare' && semestral.cliente !== 'CD Pacifico' && semestral.cliente !== 'Ctro. Nefro. Puerto Montt' && semestral.cliente !== 'HCUCH Abla. y Panta Estéril' && semestral.cliente !== 'Hosp. Salvador Diálisis' && !CENTROS_3S1O.includes(semestral.cliente) && !CENTROS_3S_OTRO.includes(semestral.cliente) && !CENTROS_3S_2S.includes(semestral.cliente) && !CENTROS_4S1O.includes(semestral.cliente) && !CENTROS_4S_3S.includes(semestral.cliente && !CENTROS_5S1O.includes(semestral.cliente)) && (
+            {semestral.cliente && semestral.cliente !== 'CD Vidacare' && semestral.cliente !== 'CD Pacifico' && semestral.cliente !== 'Ctro. Nefro. Puerto Montt' && semestral.cliente !== 'HCUCH Abla. y Panta Estéril' && semestral.cliente !== 'Hosp. Salvador Diálisis' && !CENTROS_3S1O.includes(semestral.cliente) && !CENTROS_3S_OTRO.includes(semestral.cliente) && !CENTROS_3S_2S.includes(semestral.cliente) && !CENTROS_4S1O.includes(semestral.cliente) && !CENTROS_4S_3S.includes(semestral.cliente) && !CENTROS_5S1O.includes(semestral.cliente) && (
           
               <div style={{background:'#FAEEDA',color:'#854F0B',padding:'12px 16px',borderRadius:8,fontSize:13}}>
-                ⚠️ La configuración para este centro aún no está disponible. Por ahora solo CD Vidacare está habilitado.
+                ⚠️ Para este centro no esta permitido generar un informe semestral.
               </div>
             )}
           </div>
