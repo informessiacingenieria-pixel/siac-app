@@ -3588,15 +3588,8 @@ const handleGenerarSemestral5m4m = async () => {
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
             </button>
           </>}
+          
           {CENTROS_5M_4M.includes(semestral.cliente) && <>
-            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
-              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Selecciona un cliente</div>
-              <select value={semestral5m4m.cliente} onChange={e => setS5m4m('cliente', e.target.value)} style={{...inputStyle, width:'100%'}}>
-                <option value="">Elige un centro</option>
-                {CENTROS_5M_4M.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-
             <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
               <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Fecha del informe</div>
               <div style={{display:'flex',gap:6,maxWidth:360}}>
