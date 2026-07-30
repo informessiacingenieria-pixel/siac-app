@@ -1259,7 +1259,7 @@ const handleGenerarSemestral5m4m = async () => {
   let pasoActual = 'inicio'
   try {
     pasoActual = 'generando PDF'
-    const datosPdf = { ...semestral5m4m, cliente: semestral5m4m.cliente, tecnicoResponsable: 'Baldomero Urriola' }
+    const datosPdf = { ...semestral5m4m, cliente: semestral.cliente, tecnicoResponsable: 'Baldomero Urriola' }
     const blob = await generarPdfSemestral5m4mBlob(datosPdf)
     pasoActual = 'subiendo PDF'
     const pdfUrl = await subirPdf(blob)
@@ -3588,7 +3588,7 @@ const handleGenerarSemestral5m4m = async () => {
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
             </button>
           </>}
-          {CENTROS_5M_4M.includes(semestral5m4m.cliente) && <>
+          {CENTROS_5M_4M.includes(semestral.cliente) && <>
             <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
               <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Selecciona un cliente</div>
               <select value={semestral5m4m.cliente} onChange={e => setS5m4m('cliente', e.target.value)} style={{...inputStyle, width:'100%'}}>
