@@ -19,6 +19,7 @@ import { generarPdfSemestral4s4s2oBlob } from '../../../lib/InformeSemestral_4s4
 import { generarPdfSemestral5s1oBlob } from '../../../lib/InformeSemestral_5s1o'
 import { generarPdfSemestral5s2s2oBlob } from '../../../lib/InformeSemestral_5s2s2o'
 import { generarPdfSemestral5s3s2oBlob } from '../../../lib/InformeSemestral_5s3s2o'
+import { generarPdfSemestral5m4mBlob } from '../../../lib/InformeSemestral_5m_4m'
 import { LUGARES_SERVICIO, CINTAS_REACTIVAS } from '../../../lib/informesConfig'
 
 const CENTROS = [
@@ -258,6 +259,27 @@ const semestral13Vacio = {
   o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '',
 }
 
+const CENTROS_5M_4M = ['Davila Cron']
+
+const semestral5m4mVacio = {
+  cliente: '',
+  diaInforme: '', mesInforme: '', anioInforme: '',
+  // Osmosis 1: 5 membranas
+  o1m1Pre: '', o1m1Post: '', o1m1Flujo: '',
+  o1m2Pre: '', o1m2Post: '', o1m2Flujo: '',
+  o1m3Pre: '', o1m3Post: '', o1m3Flujo: '',
+  o1m4Pre: '', o1m4Post: '', o1m4Flujo: '',
+  o1m5Pre: '', o1m5Post: '', o1m5Flujo: '',
+  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '',
+  // Osmosis 2: 4 membranas
+  o2m1Pre: '', o2m1Post: '', o2m1Flujo: '',
+  o2m2Pre: '', o2m2Post: '', o2m2Flujo: '',
+  o2m3Pre: '', o2m3Post: '', o2m3Flujo: '',
+  o2m4Pre: '', o2m4Post: '', o2m4Flujo: '',
+  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '',
+}
+
+
 const CENTROS_YA_IMPLEMENTADOS = [
   'CD Vidacare',
   'CD Pacifico',
@@ -272,6 +294,7 @@ const CENTROS_YA_IMPLEMENTADOS = [
   ...CENTROS_5S1O,
   ...CENTROS_5S_2S_2O,
   ...CENTROS_5S_3S_2O,
+  ...CENTROS_5M_4M,
 ]
 
 export default function GerenciaPage() {
@@ -340,6 +363,8 @@ export default function GerenciaPage() {
   const [semestral11, setSemestral11] = useState<any>(semestral11Vacio)
   const [semestral12, setSemestral12] = useState<any>(semestral12Vacio)
   const [semestral13, setSemestral13] = useState<any>(semestral13Vacio)
+  const [semestral5m4m, setSemestral5m4m] = useState<any>(semestral5m4mVacio)
+  
 
   const router = useRouter()
 
@@ -1200,6 +1225,62 @@ const handleGenerarSemestral13 = async () => {
     setGenerandoSemestral(false)
   }
 }
+
+// Helper para actualizar estado
+const setS5m4m = (field: string, val: any) => setSemestral5m4m((prev: any) => ({ ...prev, [field]: val }))
+
+// Cálculos de RR
+const rr5m4mo1 = semestral5m4m.o1cde && semestral5m4m.o1cds ? calcularRR(semestral5m4m.o1cde, semestral5m4m.o1cds) : null
+const rr5m4mo2 = semestral5m4m.o2cde && semestral5m4m.o2cds ? calcularRR(semestral5m4m.o2cde, semestral5m4m.o2cds) : null
+const rr5m4mo1Fuera = rr5m4mo1 !== null && rr5m4mo1 < 97
+const rr5m4mo2Fuera = rr5m4mo2 !== null && rr5m4mo2 < 97
+
+// Validación
+const validarSemestral5m4m = () => {
+  if (!semestral5m4m.cliente) return 'Selecciona un cliente'
+  if (!semestral5m4m.diaInforme || !semestral5m4m.mesInforme || !semestral5m4m.anioInforme) return 'Completa la fecha del informe'
+  const campos = [
+    // Osmosis 1: 5 membranas
+    'o1m1Pre','o1m1Post','o1m1Flujo','o1m2Pre','o1m2Post','o1m2Flujo','o1m3Pre','o1m3Post','o1m3Flujo','o1m4Pre','o1m4Post','o1m4Flujo','o1m5Pre','o1m5Post','o1m5Flujo','o1cde','o1cds','o1fp','o1fd','o1pd',
+    // Osmosis 2: 4 membranas
+    'o2m1Pre','o2m1Post','o2m1Flujo','o2m2Pre','o2m2Post','o2m2Flujo','o2m3Pre','o2m3Post','o2m3Flujo','o2m4Pre','o2m4Post','o2m4Flujo','o2cde','o2cds','o2fp','o2fd','o2pd'
+  ]
+  for (const campo of campos) {
+    if (!semestral5m4m[campo]) return 'Completa todos los datos de las membranas y osmosis'
+  }
+  return null
+}
+
+// Generar PDF
+const handleGenerarSemestral5m4m = async () => {
+  const error = validarSemestral5m4m()
+  if (error) { alert(error); return }
+  setGenerandoSemestral(true)
+  let pasoActual = 'inicio'
+  try {
+    pasoActual = 'generando PDF'
+    const datosPdf = { ...semestral5m4m, cliente: semestral5m4m.cliente, tecnicoResponsable: 'Baldomero Urriola' }
+    const blob = await generarPdfSemestral5m4mBlob(datosPdf)
+    pasoActual = 'subiendo PDF'
+    const pdfUrl = await subirPdf(blob)
+    const fechaInformeTexto = `${String(semestral5m4m.diaInforme).padStart(2,'0')}/${String(semestral5m4m.mesInforme).padStart(2,'0')}/${semestral5m4m.anioInforme}`
+    pasoActual = 'guardando en Firestore'
+    await addDoc(collection(db, 'informes_semestrales'), {
+      uid: 'gerencia', tecnico: 'Baldomero Urriola', email: user.email,
+      cliente: semestral5m4m.cliente, fechaInforme: fechaInformeTexto,
+      tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
+    })
+    setExitoSemestral(true)
+    setTimeout(() => setExitoSemestral(false), 4000)
+    setSemestral5m4m(semestral5m4mVacio)
+  } catch (e: any) {
+    alert('Error en "' + pasoActual + '": ' + (e?.message || 'Error desconocido'))
+  } finally {
+    setGenerandoSemestral(false)
+  }
+}
+
+  
 
   const registrosFiltrados = registros.filter(r => {
     if (filtroTecnico && r.tecnico !== filtroTecnico) return false
@@ -3504,6 +3585,127 @@ const handleGenerarSemestral13 = async () => {
             )}
 
             <button onClick={handleGenerarSemestral13} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
+              {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
+            </button>
+          </>}
+          {CENTROS_5M_4M.includes(semestral5m4m.cliente) && <>
+            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Selecciona un cliente</div>
+              <select value={semestral5m4m.cliente} onChange={e => setS5m4m('cliente', e.target.value)} style={{...inputStyle, width:'100%'}}>
+                <option value="">Elige un centro</option>
+                {CENTROS_5M_4M.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+
+            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Fecha del informe</div>
+              <div style={{display:'flex',gap:6,maxWidth:360}}>
+                <select value={semestral5m4m.diaInforme} onChange={e => setS5m4m('diaInforme', e.target.value)} style={{...inputStyle, width:'30%'}}>
+                  <option value="">Día</option>
+                  {DIAS_DISPONIBLES.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+                <select value={semestral5m4m.mesInforme} onChange={e => setS5m4m('mesInforme', e.target.value)} style={{...inputStyle, width:'40%'}}>
+                  <option value="">Mes</option>
+                  {MESES_NOMBRE.map((m,i) => <option key={i} value={i+1}>{m}</option>)}
+                </select>
+                <select value={semestral5m4m.anioInforme} onChange={e => setS5m4m('anioInforme', e.target.value)} style={{...inputStyle, width:'30%'}}>
+                  <option value="">Año</option>
+                  {ANIOS_DISPONIBLES.map(a => <option key={a} value={a}>{a}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 1 (5 membranas)</div>
+
+            {[1,2,3,4,5].map(n => (
+              <div key={'s5m4mo1m'+n} style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+                <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>O1 · Membrana N° {n}</div>
+                <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr 1fr',gap:'1rem'}}>
+                  <div><label style={labelStyle}>Cond. pre lavado (µS/cm)</label>
+                    <input type="number" value={semestral5m4m['o1m'+n+'Pre']} onChange={e => setS5m4m('o1m'+n+'Pre', e.target.value)} style={inputStyle} /></div>
+                  <div><label style={labelStyle}>Cond. post lavado (µS/cm)</label>
+                    <input type="number" value={semestral5m4m['o1m'+n+'Post']} onChange={e => setS5m4m('o1m'+n+'Post', e.target.value)} style={inputStyle} /></div>
+                  <div><label style={labelStyle}>Flujo post lavado (Lpm)</label>
+                    <input type="number" value={semestral5m4m['o1m'+n+'Flujo']} onChange={e => setS5m4m('o1m'+n+'Flujo', e.target.value)} style={inputStyle} /></div>
+                </div>
+              </div>
+            ))}
+
+            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>O1 · Datos de la osmosis</div>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:'1rem',marginBottom:'1rem'}}>
+                <div><label style={labelStyle}>Conductividad de entrada (µS/cm)</label>
+                  <input type="number" value={semestral5m4m.o1cde} onChange={e => setS5m4m('o1cde', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Conductividad de salida (µS/cm)</label>
+                  <input type="number" value={semestral5m4m.o1cds} onChange={e => setS5m4m('o1cds', e.target.value)} style={inputStyle} /></div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr 1fr',gap:'1rem'}}>
+                <div><label style={labelStyle}>Flujo Producto (lpm)</label>
+                  <input type="number" value={semestral5m4m.o1fp} onChange={e => setS5m4m('o1fp', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Flujo Descarte (lpm)</label>
+                  <input type="number" value={semestral5m4m.o1fd} onChange={e => setS5m4m('o1fd', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Presión Descarte (psi)</label>
+                  <input type="number" value={semestral5m4m.o1pd} onChange={e => setS5m4m('o1pd', e.target.value)} style={inputStyle} /></div>
+              </div>
+              {rr5m4mo1 !== null && (
+                <div style={{marginTop:'1rem',padding:'12px 16px',borderRadius:8,background:rr5m4mo1Fuera?'#FCEBEB':'#EAF3DE',color:rr5m4mo1Fuera?'#A32D2D':'#3B6D11',fontWeight:600,fontSize:14}}>
+                  RR Osmosis 1: {(Math.round(rr5m4mo1*100)/100).toString().replace('.',',')}%{rr5m4mo1Fuera ? ' — Fuera de rango (menor a 97%)' : ' — Dentro de parámetros'}
+                </div>
+              )}
+            </div>
+            {rr5m4mo1Fuera && (
+              <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+                <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Recomendación Osmosis 1 <span style={{color:'#aaa',fontWeight:400}}>(RR fuera de rango)</span></div>
+                <textarea value={semestral5m4m.o1recomendacion} onChange={e => setS5m4m('o1recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
+              </div>
+            )}
+
+            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 2 (4 membranas)</div>
+
+            {[1,2,3,4].map(n => (
+              <div key={'s5m4mo2m'+n} style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+                <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>O2 · Membrana N° {n}</div>
+                <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr 1fr',gap:'1rem'}}>
+                  <div><label style={labelStyle}>Cond. pre lavado (µS/cm)</label>
+                    <input type="number" value={semestral5m4m['o2m'+n+'Pre']} onChange={e => setS5m4m('o2m'+n+'Pre', e.target.value)} style={inputStyle} /></div>
+                  <div><label style={labelStyle}>Cond. post lavado (µS/cm)</label>
+                    <input type="number" value={semestral5m4m['o2m'+n+'Post']} onChange={e => setS5m4m('o2m'+n+'Post', e.target.value)} style={inputStyle} /></div>
+                  <div><label style={labelStyle}>Flujo post lavado (Lpm)</label>
+                    <input type="number" value={semestral5m4m['o2m'+n+'Flujo']} onChange={e => setS5m4m('o2m'+n+'Flujo', e.target.value)} style={inputStyle} /></div>
+                </div>
+              </div>
+            ))}
+
+            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>O2 · Datos de la osmosis</div>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:'1rem',marginBottom:'1rem'}}>
+                <div><label style={labelStyle}>Conductividad de entrada (µS/cm)</label>
+                  <input type="number" value={semestral5m4m.o2cde} onChange={e => setS5m4m('o2cde', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Conductividad de salida (µS/cm)</label>
+                  <input type="number" value={semestral5m4m.o2cds} onChange={e => setS5m4m('o2cds', e.target.value)} style={inputStyle} /></div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr 1fr',gap:'1rem'}}>
+                <div><label style={labelStyle}>Flujo Producto (lpm)</label>
+                  <input type="number" value={semestral5m4m.o2fp} onChange={e => setS5m4m('o2fp', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Flujo Descarte (lpm)</label>
+                  <input type="number" value={semestral5m4m.o2fd} onChange={e => setS5m4m('o2fd', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Presión Descarte (psi)</label>
+                  <input type="number" value={semestral5m4m.o2pd} onChange={e => setS5m4m('o2pd', e.target.value)} style={inputStyle} /></div>
+              </div>
+              {rr5m4mo2 !== null && (
+                <div style={{marginTop:'1rem',padding:'12px 16px',borderRadius:8,background:rr5m4mo2Fuera?'#FCEBEB':'#EAF3DE',color:rr5m4mo2Fuera?'#A32D2D':'#3B6D11',fontWeight:600,fontSize:14}}>
+                  RR Osmosis 2: {(Math.round(rr5m4mo2*100)/100).toString().replace('.',',')}%{rr5m4mo2Fuera ? ' — Fuera de rango (menor a 97%)' : ' — Dentro de parámetros'}
+                </div>
+              )}
+            </div>
+            {rr5m4mo2Fuera && (
+              <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+                <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Recomendación Osmosis 2 <span style={{color:'#aaa',fontWeight:400}}>(RR fuera de rango)</span></div>
+                <textarea value={semestral5m4m.o2recomendacion} onChange={e => setS5m4m('o2recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
+              </div>
+            )}
+
+            <button onClick={handleGenerarSemestral5m4m} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
             </button>
           </>}
