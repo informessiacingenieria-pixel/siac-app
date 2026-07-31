@@ -1267,7 +1267,7 @@ const handleGenerarSemestral5m4m = async () => {
     pasoActual = 'guardando en Firestore'
     await addDoc(collection(db, 'informes_semestrales'), {
       uid: 'gerencia', tecnico: 'Baldomero Urriola', email: user.email,
-      cliente: semestral5m4m.cliente, fechaInforme: fechaInformeTexto,
+      cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
       tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
     })
     setExitoSemestral(true)
