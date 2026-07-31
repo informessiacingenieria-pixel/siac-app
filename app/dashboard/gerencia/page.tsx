@@ -1237,7 +1237,7 @@ const rr5m4mo2Fuera = rr5m4mo2 !== null && rr5m4mo2 < 97
 
 // Validación
 const validarSemestral5m4m = () => {
-  if (!semestral5m4m.cliente) return 'Selecciona un cliente'
+  if (!semestral.cliente) return 'Selecciona un cliente'
   if (!semestral5m4m.diaInforme || !semestral5m4m.mesInforme || !semestral5m4m.anioInforme) return 'Completa la fecha del informe'
   const campos = [
     // Osmosis 1: 5 membranas
@@ -3588,7 +3588,7 @@ const handleGenerarSemestral5m4m = async () => {
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
             </button>
           </>}
-          
+
           {CENTROS_5M_4M.includes(semestral.cliente) && <>
             <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
               <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Fecha del informe</div>
