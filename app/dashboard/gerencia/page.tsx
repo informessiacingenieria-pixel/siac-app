@@ -21,6 +21,7 @@ import { generarPdfSemestral5s2s2oBlob } from '../../../lib/InformeSemestral_5s2
 import { generarPdfSemestral5s3s2oBlob } from '../../../lib/InformeSemestral_5s3s2o'
 import { generarPdfSemestral5m4mBlob } from '../../../lib/InformeSemestral_5m_4m'
 import { generarPdfSemestral6ot4s2oBlob } from '../../../lib/InformeSemestral_6ot4s2o'
+import { generarPdfSemestral6m6m2oBlob } from '../../../lib/InformeSemestral_6m6m2o'
 import { LUGARES_SERVICIO, CINTAS_REACTIVAS } from '../../../lib/informesConfig'
 
 const CENTROS = [
@@ -301,6 +302,29 @@ const semestral6ot4mVacio = {
   o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '',
 }
 
+const CENTROS_6M_6M = ['CD Ñuñoa','CD Unidial','Hosp. Puerto Montt']
+
+const semestral6m6mVacio = {
+  cliente: '',
+  diaInforme: '', mesInforme: '', anioInforme: '',
+  // Osmosis 1: 6 membranas
+  o1m1Pre: '', o1m1Post: '', o1m1Flujo: '',
+  o1m2Pre: '', o1m2Post: '', o1m2Flujo: '',
+  o1m3Pre: '', o1m3Post: '', o1m3Flujo: '',
+  o1m4Pre: '', o1m4Post: '', o1m4Flujo: '',
+  o1m5Pre: '', o1m5Post: '', o1m5Flujo: '',
+  o1m6Pre: '', o1m6Post: '', o1m6Flujo: '',
+  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '',
+  // Osmosis 2: 6 membranas
+  o2m1Pre: '', o2m1Post: '', o2m1Flujo: '',
+  o2m2Pre: '', o2m2Post: '', o2m2Flujo: '',
+  o2m3Pre: '', o2m3Post: '', o2m3Flujo: '',
+  o2m4Pre: '', o2m4Post: '', o2m4Flujo: '',
+  o2m5Pre: '', o2m5Post: '', o2m5Flujo: '',
+  o2m6Pre: '', o2m6Post: '', o2m6Flujo: '',
+  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '',
+}
+
 const CENTROS_YA_IMPLEMENTADOS = [
   'CD Vidacare',
   'CD Pacifico',
@@ -317,6 +341,7 @@ const CENTROS_YA_IMPLEMENTADOS = [
   ...CENTROS_5S_3S_2O,
   ...CENTROS_5M_4M,
   ...CENTROS_6ot_4M,
+  ...CENTROS_6M_6M,
 ]
 
 export default function GerenciaPage() {
@@ -387,6 +412,7 @@ export default function GerenciaPage() {
   const [semestral13, setSemestral13] = useState<any>(semestral13Vacio)
   const [semestral5m4m, setSemestral5m4m] = useState<any>(semestral5m4mVacio)
   const [semestral6ot4m, setSemestral6ot4m] = useState<any>(semestral6ot4mVacio)
+  const [semestral6m6m, setSemestral6m6m] = useState<any>(semestral6m6mVacio)
   
 
   const router = useRouter()
@@ -1357,6 +1383,59 @@ const handleGenerarSemestral5m4m = async () => {
   }
 }
 
+// Helper para actualizar estado
+const setS6m6m = (field: string, val: any) => setSemestral6m6m((prev: any) => ({ ...prev, [field]: val }))
+
+// Cálculos de RR
+const rr6m6mo1 = semestral6m6m.o1cde && semestral6m6m.o1cds ? calcularRR(semestral6m6m.o1cde, semestral6m6m.o1cds) : null
+const rr6m6mo2 = semestral6m6m.o2cde && semestral6m6m.o2cds ? calcularRR(semestral6m6m.o2cde, semestral6m6m.o2cds) : null
+const rr6m6mo1Fuera = rr6m6mo1 !== null && rr6m6mo1 < 97
+const rr6m6mo2Fuera = rr6m6mo2 !== null && rr6m6mo2 < 97
+
+// Validación
+const validarSemestral6m6m = () => {
+  if (!semestral.cliente) return 'Selecciona un cliente'
+  if (!semestral6m6m.diaInforme || !semestral6m6m.mesInforme || !semestral6m6m.anioInforme) return 'Completa la fecha del informe'
+  const campos = [
+    // Osmosis 1: 6 membranas
+    'o1m1Pre','o1m1Post','o1m1Flujo','o1m2Pre','o1m2Post','o1m2Flujo','o1m3Pre','o1m3Post','o1m3Flujo','o1m4Pre','o1m4Post','o1m4Flujo','o1m5Pre','o1m5Post','o1m5Flujo','o1m6Pre','o1m6Post','o1m6Flujo','o1cde','o1cds','o1fp','o1fd','o1pd',
+    // Osmosis 2: 6 membranas
+    'o2m1Pre','o2m1Post','o2m1Flujo','o2m2Pre','o2m2Post','o2m2Flujo','o2m3Pre','o2m3Post','o2m3Flujo','o2m4Pre','o2m4Post','o2m4Flujo','o2m5Pre','o2m5Post','o2m5Flujo','o2m6Pre','o2m6Post','o2m6Flujo','o2cde','o2cds','o2fp','o2fd','o2pd'
+  ]
+  for (const campo of campos) {
+    if (!semestral6m6m[campo]) return 'Completa todos los datos de las membranas y osmosis'
+  }
+  return null
+}
+
+// Generar PDF
+const handleGenerarSemestral6m6m = async () => {
+  const error = validarSemestral6m6m()
+  if (error) { alert(error); return }
+  setGenerandoSemestral(true)
+  let pasoActual = 'inicio'
+  try {
+    pasoActual = 'generando PDF'
+    const datosPdf = { ...semestral6m6m, cliente: semestral.cliente, tecnicoResponsable: 'Baldomero Urriola' }
+    const blob = await generarPdfSemestral6m6m2oBlob(datosPdf)
+    pasoActual = 'subiendo PDF'
+    const pdfUrl = await subirPdf(blob)
+    const fechaInformeTexto = `${String(semestral6m6m.diaInforme).padStart(2,'0')}/${String(semestral6m6m.mesInforme).padStart(2,'0')}/${semestral6m6m.anioInforme}`
+    pasoActual = 'guardando en Firestore'
+    await addDoc(collection(db, 'informes_semestrales'), {
+      uid: 'gerencia', tecnico: 'Baldomero Urriola', email: user.email,
+      cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
+      tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
+    })
+    setExitoSemestral(true)
+    setTimeout(() => setExitoSemestral(false), 4000)
+    setSemestral6m6m(semestral6m6mVacio)
+  } catch (e: any) {
+    alert('Error en "' + pasoActual + '": ' + (e?.message || 'Error desconocido'))
+  } finally {
+    setGenerandoSemestral(false)
+  }
+}
   
 
   const registrosFiltrados = registros.filter(r => {
@@ -3889,6 +3968,119 @@ const handleGenerarSemestral5m4m = async () => {
             )}
 
             <button onClick={handleGenerarSemestral6ot4m} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
+              {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
+            </button>
+          </>}
+          {CENTROS_6M_6M.includes(semestral.cliente) && <>
+            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Fecha del informe</div>
+              <div style={{display:'flex',gap:6,maxWidth:360}}>
+                <select value={semestral6m6m.diaInforme} onChange={e => setS6m6m('diaInforme', e.target.value)} style={{...inputStyle, width:'30%'}}>
+                  <option value="">Día</option>
+                  {DIAS_DISPONIBLES.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+                <select value={semestral6m6m.mesInforme} onChange={e => setS6m6m('mesInforme', e.target.value)} style={{...inputStyle, width:'40%'}}>
+                  <option value="">Mes</option>
+                  {MESES_NOMBRE.map((m,i) => <option key={i} value={i+1}>{m}</option>)}
+                </select>
+                <select value={semestral6m6m.anioInforme} onChange={e => setS6m6m('anioInforme', e.target.value)} style={{...inputStyle, width:'30%'}}>
+                  <option value="">Año</option>
+                  {ANIOS_DISPONIBLES.map(a => <option key={a} value={a}>{a}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 1 (6 membranas)</div>
+
+            {[1,2,3,4,5,6].map(n => (
+              <div key={'s6m6mo1m'+n} style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+                <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>O1 · Membrana N° {n}</div>
+                <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr 1fr',gap:'1rem'}}>
+                  <div><label style={labelStyle}>Cond. pre lavado (µS/cm)</label>
+                    <input type="number" value={semestral6m6m['o1m'+n+'Pre']} onChange={e => setS6m6m('o1m'+n+'Pre', e.target.value)} style={inputStyle} /></div>
+                  <div><label style={labelStyle}>Cond. post lavado (µS/cm)</label>
+                    <input type="number" value={semestral6m6m['o1m'+n+'Post']} onChange={e => setS6m6m('o1m'+n+'Post', e.target.value)} style={inputStyle} /></div>
+                  <div><label style={labelStyle}>Flujo post lavado (Lpm)</label>
+                    <input type="number" value={semestral6m6m['o1m'+n+'Flujo']} onChange={e => setS6m6m('o1m'+n+'Flujo', e.target.value)} style={inputStyle} /></div>
+                </div>
+              </div>
+            ))}
+
+            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>O1 · Datos de la osmosis</div>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:'1rem',marginBottom:'1rem'}}>
+                <div><label style={labelStyle}>Conductividad de entrada (µS/cm)</label>
+                  <input type="number" value={semestral6m6m.o1cde} onChange={e => setS6m6m('o1cde', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Conductividad de salida (µS/cm)</label>
+                  <input type="number" value={semestral6m6m.o1cds} onChange={e => setS6m6m('o1cds', e.target.value)} style={inputStyle} /></div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr 1fr',gap:'1rem'}}>
+                <div><label style={labelStyle}>Flujo Producto (lpm)</label>
+                  <input type="number" value={semestral6m6m.o1fp} onChange={e => setS6m6m('o1fp', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Flujo Descarte (lpm)</label>
+                  <input type="number" value={semestral6m6m.o1fd} onChange={e => setS6m6m('o1fd', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Presión Descarte (psi)</label>
+                  <input type="number" value={semestral6m6m.o1pd} onChange={e => setS6m6m('o1pd', e.target.value)} style={inputStyle} /></div>
+              </div>
+              {rr6m6mo1 !== null && (
+                <div style={{marginTop:'1rem',padding:'12px 16px',borderRadius:8,background:rr6m6mo1Fuera?'#FCEBEB':'#EAF3DE',color:rr6m6mo1Fuera?'#A32D2D':'#3B6D11',fontWeight:600,fontSize:14}}>
+                  RR Osmosis 1: {(Math.round(rr6m6mo1*100)/100).toString().replace('.',',')}%{rr6m6mo1Fuera ? ' — Fuera de rango (menor a 97%)' : ' — Dentro de parámetros'}
+                </div>
+              )}
+            </div>
+            {rr6m6mo1Fuera && (
+              <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+                <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Recomendación Osmosis 1 <span style={{color:'#aaa',fontWeight:400}}>(RR fuera de rango)</span></div>
+                <textarea value={semestral6m6m.o1recomendacion} onChange={e => setS6m6m('o1recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
+              </div>
+            )}
+
+            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 2 (6 membranas)</div>
+
+            {[1,2,3,4,5,6].map(n => (
+              <div key={'s6m6mo2m'+n} style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+                <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>O2 · Membrana N° {n}</div>
+                <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr 1fr',gap:'1rem'}}>
+                  <div><label style={labelStyle}>Cond. pre lavado (µS/cm)</label>
+                    <input type="number" value={semestral6m6m['o2m'+n+'Pre']} onChange={e => setS6m6m('o2m'+n+'Pre', e.target.value)} style={inputStyle} /></div>
+                  <div><label style={labelStyle}>Cond. post lavado (µS/cm)</label>
+                    <input type="number" value={semestral6m6m['o2m'+n+'Post']} onChange={e => setS6m6m('o2m'+n+'Post', e.target.value)} style={inputStyle} /></div>
+                  <div><label style={labelStyle}>Flujo post lavado (Lpm)</label>
+                    <input type="number" value={semestral6m6m['o2m'+n+'Flujo']} onChange={e => setS6m6m('o2m'+n+'Flujo', e.target.value)} style={inputStyle} /></div>
+                </div>
+              </div>
+            ))}
+
+            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>O2 · Datos de la osmosis</div>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:'1rem',marginBottom:'1rem'}}>
+                <div><label style={labelStyle}>Conductividad de entrada (µS/cm)</label>
+                  <input type="number" value={semestral6m6m.o2cde} onChange={e => setS6m6m('o2cde', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Conductividad de salida (µS/cm)</label>
+                  <input type="number" value={semestral6m6m.o2cds} onChange={e => setS6m6m('o2cds', e.target.value)} style={inputStyle} /></div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr 1fr',gap:'1rem'}}>
+                <div><label style={labelStyle}>Flujo Producto (lpm)</label>
+                  <input type="number" value={semestral6m6m.o2fp} onChange={e => setS6m6m('o2fp', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Flujo Descarte (lpm)</label>
+                  <input type="number" value={semestral6m6m.o2fd} onChange={e => setS6m6m('o2fd', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Presión Descarte (psi)</label>
+                  <input type="number" value={semestral6m6m.o2pd} onChange={e => setS6m6m('o2pd', e.target.value)} style={inputStyle} /></div>
+              </div>
+              {rr6m6mo2 !== null && (
+                <div style={{marginTop:'1rem',padding:'12px 16px',borderRadius:8,background:rr6m6mo2Fuera?'#FCEBEB':'#EAF3DE',color:rr6m6mo2Fuera?'#A32D2D':'#3B6D11',fontWeight:600,fontSize:14}}>
+                  RR Osmosis 2: {(Math.round(rr6m6mo2*100)/100).toString().replace('.',',')}%{rr6m6mo2Fuera ? ' — Fuera de rango (menor a 97%)' : ' — Dentro de parámetros'}
+                </div>
+              )}
+            </div>
+            {rr6m6mo2Fuera && (
+              <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+                <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Recomendación Osmosis 2 <span style={{color:'#aaa',fontWeight:400}}>(RR fuera de rango)</span></div>
+                <textarea value={semestral6m6m.o2recomendacion} onChange={e => setS6m6m('o2recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
+              </div>
+            )}
+
+            <button onClick={handleGenerarSemestral6m6m} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
             </button>
           </>}
