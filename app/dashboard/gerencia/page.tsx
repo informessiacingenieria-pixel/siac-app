@@ -1459,8 +1459,8 @@ const handleGenerarSemestral6m6m = async () => {
 const setS6m = (field: string, val: any) => setSemestral6m((prev: any) => ({ ...prev, [field]: val }))
 
 // Cálculos de RR
-const rr6mo1 = semestral6m.o1cde && semestral6m.o1cds ? calcularRR(semestral6m.o1cde, semestral6m.o1cds) : null
-const rr6mo1Fuera = rr6mo1 !== null && rr6mo1 < 97
+const rr6m = semestral6m.o1cde && semestral6m.o1cds ? calcularRR(semestral6m.o1cde, semestral6m.o1cds) : null
+const rr6mFuera = rr6m !== null && rr6m < 97
 
 // Validación
 const validarSemestral6m = () => {
@@ -4202,13 +4202,13 @@ const handleGenerarSemestral6m = async () => {
                 <div><label style={labelStyle}>Presión Descarte (psi)</label>
                   <input type="number" value={semestral6m.o1pd} onChange={e => setS6m('o1pd', e.target.value)} style={inputStyle} /></div>
               </div>
-              {rr6mo1 !== null && (
-                <div style={{marginTop:'1rem',padding:'12px 16px',borderRadius:8,background:rr6mo1Fuera?'#FCEBEB':'#EAF3DE',color:rr6mo1Fuera?'#A32D2D':'#3B6D11',fontWeight:600,fontSize:14}}>
-                  RR: {(Math.round(rr6mo1*100)/100).toString().replace('.',',')}%{rr6mo1Fuera ? ' — Fuera de rango (menor a 97%)' : ' — Dentro de parámetros'}
+              {rr6m !== null && (
+                <div style={{marginTop:'1rem',padding:'12px 16px',borderRadius:8,background:rr6mFuera?'#FCEBEB':'#EAF3DE',color:rr6mo1Fuera?'#A32D2D':'#3B6D11',fontWeight:600,fontSize:14}}>
+                  RR: {(Math.round(rr6m*100)/100).toString().replace('.',',')}%{rr6mFuera ? ' — Fuera de rango (menor a 97%)' : ' — Dentro de parámetros'}
                 </div>
               )}
             </div>
-            {rr6mo1Fuera && (
+            {rr6mFuera && (
               <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
                 <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Recomendación <span style={{color:'#aaa',fontWeight:400}}>(RR fuera de rango)</span></div>
                 <textarea value={semestral6m.o1recomendacion} onChange={e => setS6m('o1recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
