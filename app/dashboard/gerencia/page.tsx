@@ -1483,7 +1483,40 @@ const handleGenerarSemestral6m = async () => {
   let pasoActual = 'inicio'
   try {
     pasoActual = 'generando PDF'
-    const datosPdf = { ...semestral6m, cliente: semestral.cliente, tecnicoResponsable: 'Baldomero Urriola' }
+    // ✅ MAPEAR o1* → sin prefijo
+    const datosPdf = {
+      cliente: semestral.cliente,
+      diaInforme: semestral6m.diaInforme,
+      mesInforme: semestral6m.mesInforme,
+      anioInforme: semestral6m.anioInforme,
+      // Membranas
+      m1Pre: semestral6m.o1m1Pre,
+      m1Post: semestral6m.o1m1Post,
+      m1Flujo: semestral6m.o1m1Flujo,
+      m2Pre: semestral6m.o1m2Pre,
+      m2Post: semestral6m.o1m2Post,
+      m2Flujo: semestral6m.o1m2Flujo,
+      m3Pre: semestral6m.o1m3Pre,
+      m3Post: semestral6m.o1m3Post,
+      m3Flujo: semestral6m.o1m3Flujo,
+      m4Pre: semestral6m.o1m4Pre,
+      m4Post: semestral6m.o1m4Post,
+      m4Flujo: semestral6m.o1m4Flujo,
+      m5Pre: semestral6m.o1m5Pre,
+      m5Post: semestral6m.o1m5Post,
+      m5Flujo: semestral6m.o1m5Flujo,
+      m6Pre: semestral6m.o1m6Pre,
+      m6Post: semestral6m.o1m6Post,
+      m6Flujo: semestral6m.o1m6Flujo,
+      // Osmosis
+      cde: semestral6m.o1cde,
+      cds: semestral6m.o1cds,
+      fp: semestral6m.o1fp,
+      fd: semestral6m.o1fd,
+      pd: semestral6m.o1pd,
+      recomendacion: semestral6m.o1recomendacion || '',
+      tecnicoResponsable: 'Baldomero Urriola',
+    }
     const blob = await generarPdfSemestral6s1oBlob(datosPdf)
     pasoActual = 'subiendo PDF'
     const pdfUrl = await subirPdf(blob)
