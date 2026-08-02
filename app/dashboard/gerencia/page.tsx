@@ -4151,6 +4151,7 @@ const handleGenerarSemestral6m = async () => {
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
             </button>
           </>}
+
           {CENTROS_6M.includes(semestral.cliente) && <>
             <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
               <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Fecha del informe</div>
@@ -4203,7 +4204,7 @@ const handleGenerarSemestral6m = async () => {
                   <input type="number" value={semestral6m.o1pd} onChange={e => setS6m('o1pd', e.target.value)} style={inputStyle} /></div>
               </div>
               {rr6m !== null && (
-                <div style={{marginTop:'1rem',padding:'12px 16px',borderRadius:8,background:rr6mFuera?'#FCEBEB':'#EAF3DE',color:rr6mo1Fuera?'#A32D2D':'#3B6D11',fontWeight:600,fontSize:14}}>
+                <div style={{marginTop:'1rem',padding:'12px 16px',borderRadius:8,background:rr6mFuera?'#FCEBEB':'#EAF3DE',color:rr6mFuera?'#A32D2D':'#3B6D11',fontWeight:600,fontSize:14}}>
                   RR: {(Math.round(rr6m*100)/100).toString().replace('.',',')}%{rr6mFuera ? ' — Fuera de rango (menor a 97%)' : ' — Dentro de parámetros'}
                 </div>
               )}
