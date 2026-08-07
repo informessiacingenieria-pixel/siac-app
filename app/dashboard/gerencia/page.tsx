@@ -5091,7 +5091,6 @@ const handleGenerarSemestral8m5s = async () => {
             )}
           </div>
         </>}
-      </div>
 
       {/* TAB TODOS LOS INFORMES SEMESTRALES */}
         {tab === 'todossemestrales' && <>
@@ -5163,6 +5162,7 @@ const handleGenerarSemestral8m5s = async () => {
             )}
           </div>
         </>}
+      </div>
 
       {/* MOBILE BOTTOM NAV */}
       {isMobile && (
