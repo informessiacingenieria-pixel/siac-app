@@ -508,6 +508,9 @@ export default function GerenciaPage() {
   const [generandoSemestral, setGenerandoSemestral] = useState(false)
   const [exitoSemestral, setExitoSemestral] = useState(false)
   const [submenuSemestralOpen, setSubmenuSemestralOpen] = useState(false)
+  const [filtroTecnicoSemestral, setFiltroTecnicoSemestral] = useState('')
+  const [filtroCentroSemestral, setFiltroCentroSemestral] = useState('')
+  const [filtroMesSemestral, setFiltroMesSemestral] = useState('')
 
   // Estado informes semestral 2 osmosis (CD Pacifico)
   const [semestral2, setSemestral2] = useState<any>(semestral2Vacio)
@@ -1920,6 +1923,18 @@ const handleGenerarSemestral8m5s = async () => {
   const centrosUnicos = [...new Set(registros.map(r => r.centro))].filter(Boolean)
   const tecnicosInformesUnicos = [...new Set(todosInformes.map(i => i.tecnico))].filter(Boolean)
   const centrosInformesUnicos = [...new Set(todosInformes.map(i => i.cliente))].filter(Boolean)
+  const tecnicosSemestralesUnicos = Array.from(new Set(semestrales.map(s => s.tecnicoResponsable).filter(Boolean))).sort()
+  const centrosSemestralesUnicos = Array.from(new Set(semestrales.map(s => s.cliente).filter(Boolean))).sort()
+
+  const semestralesFiltrados = semestrales.filter(s => {
+    if (filtroTecnicoSemestral && s.tecnicoResponsable !== filtroTecnicoSemestral) return false
+    if (filtroCentroSemestral && s.cliente !== filtroCentroSemestral) return false
+    if (filtroMesSemestral) {
+      const mesDoc = String(s.fechaInforme).split('/')[1]
+      if (mesDoc !== filtroMesSemestral) return false
+    }
+    return true
+  })
 
   const formatRepuestos = (reps: any[]) => {
     if (!reps || reps.length === 0) return 'Sin repuestos'
@@ -2235,14 +2250,15 @@ const handleGenerarSemestral8m5s = async () => {
             <div onClick={() => goTab('misinformes')} style={subItem(tab==='misinformes')}>📋 Mis informes</div>
             <div onClick={() => goTab('todosinformes')} style={subItem(tab==='todosinformes')}>📊 Todos los informes</div>
           </>}
-
-          <div onClick={() => setSubmenuSemestralOpen(!submenuSemestralOpen)} style={navItem(tab==='semestral'||tab==='missemestrales')}>
+          <div onClick={() => setSubmenuSemestralOpen(!submenuSemestralOpen)} style={navItem(tab==='semestral'||tab==='missemestrales'||tab==='todossemestrales')}>
+        
             <span style={{fontSize:18,flexShrink:0}}>📊</span>
             {sidebarOpen && <><span>Informes Semestrales</span><span style={{marginLeft:'auto',fontSize:11}}>{submenuSemestralOpen?'▲':'▼'}</span></>}
           </div>
           {submenuSemestralOpen && sidebarOpen && <>
             <div onClick={() => goTab('semestral')} style={subItem(tab==='semestral')}>➕ Registrar informe</div>
             <div onClick={() => goTab('missemestrales')} style={subItem(tab==='missemestrales')}>📋 Mis informes</div>
+            <div onClick={() => goTab('todossemestrales')} style={subItem(tab==='todossemestrales')}>📊 Todos los informes</div>
           </>}
 
           <div style={{marginTop:'auto',padding:'1rem',borderTop:'1px solid rgba(255,255,255,0.15)'}}>
@@ -5076,6 +5092,77 @@ const handleGenerarSemestral8m5s = async () => {
           </div>
         </>}
       </div>
+
+      {/* TAB TODOS LOS INFORMES SEMESTRALES */}
+        {tab === 'todossemestrales' && <>
+          <h1 style={{fontSize:isMobile?20:22,fontWeight:700,marginBottom:4,color:'#1a1a2e'}}>Todos los informes semestrales</h1>
+          <p style={{color:'#888',marginBottom:'1.25rem',fontSize:14}}>Informes semestrales de todos los técnicos</p>
+          <div style={{background:'#fff',borderRadius:12,padding:'1rem',border:'1px solid #eef0f5'}}>
+            <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr 1fr',gap:10,marginBottom:'1rem'}}>
+              <div>
+                <label style={{fontSize:12,color:'#888',display:'block',marginBottom:4}}>Técnico</label>
+                <select value={filtroTecnicoSemestral} onChange={e => setFiltroTecnicoSemestral(e.target.value)} style={{width:'100%',padding:'9px',border:'1px solid #ddd',borderRadius:8,fontSize:13}}>
+                  <option value="">Todos los técnicos</option>
+                  {tecnicosSemestralesUnicos.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{fontSize:12,color:'#888',display:'block',marginBottom:4}}>Centro</label>
+                <select value={filtroCentroSemestral} onChange={e => setFiltroCentroSemestral(e.target.value)} style={{width:'100%',padding:'9px',border:'1px solid #ddd',borderRadius:8,fontSize:13}}>
+                  <option value="">Todos los centros</option>
+                  {centrosSemestralesUnicos.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{fontSize:12,color:'#888',display:'block',marginBottom:4}}>Mes</label>
+                <select value={filtroMesSemestral} onChange={e => setFiltroMesSemestral(e.target.value)} style={{width:'100%',padding:'9px',border:'1px solid #ddd',borderRadius:8,fontSize:13}}>
+                  <option value="">Todos los meses</option>
+                  {Array.from({length:12},(_,i) => (
+                    <option key={i+1} value={String(i+1).padStart(2,'0')}>{MESES_NOMBRE[i]}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div style={{fontSize:13,color:'#888',marginBottom:'1rem'}}>{semestralesFiltrados.length} informes encontrados</div>
+            {isMobile ? (
+              <div style={{display:'flex',flexDirection:'column',gap:10}}>
+                {semestralesFiltrados.map(inf => (
+                  <div key={inf.id} style={{background:'#f7f9fc',borderRadius:10,padding:'12px'}}>
+                    <div style={{fontSize:13,fontWeight:600,color:'#1a1a2e',marginBottom:4}}>{inf.cliente}</div>
+                    <div style={{fontSize:12,color:'#888',marginBottom:8}}>{inf.fechaInforme} · {inf.tecnicoResponsable}</div>
+                    <div style={{display:'flex',gap:8}}>
+                      <a href={inf.pdfUrl} target="_blank" rel="noopener noreferrer" style={{flex:1,display:'block',textAlign:'center',padding:'7px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',borderRadius:6,fontSize:12,textDecoration:'none'}}>📥 Descargar</a>
+                      <button onClick={() => eliminarSemestral(inf.id)} style={{padding:'7px 12px',background:'#FCEBEB',color:'#c0392b',border:'none',borderRadius:6,fontSize:12,cursor:'pointer'}}>🗑️</button>
+                    </div>
+                  </div>
+                ))}
+                {semestralesFiltrados.length===0 && <p style={{textAlign:'center',color:'#aaa',padding:'1rem'}}>No hay informes con esos filtros</p>}
+              </div>
+            ) : (
+              <table style={{width:'100%',borderCollapse:'collapse',fontSize:13}}>
+                <thead><tr>{['Cliente','Fecha informe','Técnico','',''].map(h => (
+                  <th key={h} style={{textAlign:'left',padding:'8px',color:'#aaa',borderBottom:'1px solid #f0f0f0',fontWeight:500}}>{h}</th>
+                ))}</tr></thead>
+                <tbody>
+                  {semestralesFiltrados.map(inf => (
+                    <tr key={inf.id}>
+                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{inf.cliente}</td>
+                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{inf.fechaInforme}</td>
+                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>{inf.tecnicoResponsable}</td>
+                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>
+                        <a href={inf.pdfUrl} target="_blank" rel="noopener noreferrer" style={{padding:'4px 10px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',borderRadius:6,fontSize:11,textDecoration:'none'}}>📥 Descargar</a>
+                      </td>
+                      <td style={{padding:'9px 8px',borderBottom:'1px solid #f8f8f8'}}>
+                        <button onClick={() => eliminarSemestral(inf.id)} style={{padding:'4px 10px',background:'#FCEBEB',color:'#c0392b',border:'none',borderRadius:6,fontSize:11,cursor:'pointer'}}>🗑️ Eliminar</button>
+                      </td>
+                    </tr>
+                  ))}
+                  {semestralesFiltrados.length===0 && <tr><td colSpan={5} style={{padding:'2rem',textAlign:'center',color:'#aaa'}}>No hay informes con esos filtros</td></tr>}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </>}
 
       {/* MOBILE BOTTOM NAV */}
       {isMobile && (
