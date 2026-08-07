@@ -511,6 +511,7 @@ export default function GerenciaPage() {
   const [filtroTecnicoSemestral, setFiltroTecnicoSemestral] = useState('')
   const [filtroCentroSemestral, setFiltroCentroSemestral] = useState('')
   const [filtroMesSemestral, setFiltroMesSemestral] = useState('')
+  const [showMasServicios, setShowMasServicios] = useState(false)
 
   // Estado informes semestral 2 osmosis (CD Pacifico)
   const [semestral2, setSemestral2] = useState<any>(semestral2Vacio)
@@ -1952,6 +1953,17 @@ const handleGenerarSemestral8m5s = async () => {
     padding:'8px 4px', cursor:'pointer', borderTop: active?'2px solid #2196f3':'2px solid transparent',
     background: active?'#f0f7ff':'transparent', color: active?'#1a3a6b':'#888', fontSize:10, gap:2
   })
+
+  const sheetItem: React.CSSProperties = {
+    display:'flex', alignItems:'center', gap:14,
+    padding:'16px 4px', borderBottom:'1px solid #f0f0f0',
+    fontSize:17, cursor:'pointer'
+  }
+
+  const sheetSectionLabel: React.CSSProperties = {
+    fontSize:12, fontWeight:700, color:'#888',
+    letterSpacing:0.5, margin:'18px 4px 6px'
+  }
 
   const goTab = (t: string) => { setTab(t); if(isMobile) setSidebarOpen(false) }
 
@@ -5164,25 +5176,51 @@ const handleGenerarSemestral8m5s = async () => {
         </>}
       </div>
 
-      {/* MOBILE BOTTOM NAV */}
+            {/* MOBILE BOTTOM NAV */}
       {isMobile && (
-        <div style={{position:'fixed',bottom:0,left:0,right:0,background:'#fff',borderTop:'1px solid #eee',display:'flex',zIndex:100,boxShadow:'0 -2px 10px rgba(0,0,0,0.08)'}}>
-          <div onClick={() => goTab('inicio')} style={navTab(tab==='inicio')}>
-            <span style={{fontSize:18}}>🏠</span><span>Inicio</span>
+        <>
+          <div style={{position:'fixed',bottom:0,left:0,right:0,background:'#fff',borderTop:'1px solid #eee',display:'flex',zIndex:100,boxShadow:'0 -2px 10px rgba(0,0,0,0.08)'}}>
+            <div onClick={() => goTab('inicio')} style={navTab(tab==='inicio')}>
+              <span style={{fontSize:18}}>🏠</span><span>Inicio</span>
+            </div>
+            <div onClick={() => setShowMasServicios(true)} style={navTab(showMasServicios)}>
+              <span style={{fontSize:18}}>➕</span><span>Registrar servicio</span>
+            </div>
           </div>
-          <div onClick={() => goTab('registro')} style={navTab(tab==='registro')}>
-            <span style={{fontSize:18}}>➕</span><span>Visita</span>
-          </div>
-          <div onClick={() => { goTab('registros'); setFiltroEstado('') }} style={navTab(tab==='registros')}>
-            <span style={{fontSize:18}}>📋</span><span>Registros</span>
-          </div>
-          <div onClick={() => goTab('informes')} style={navTab(tab==='informes')}>
-            <span style={{fontSize:18}}>🧪</span><span>Informe</span>
-          </div>
-          <div onClick={() => goTab('todosinformes')} style={navTab(tab==='todosinformes')}>
-            <span style={{fontSize:18}}>📊</span><span>Informes</span>
-          </div>
-        </div>
+
+        {/* SHEET "Registrar servicio" */}
+          {showMasServicios && (
+            <div
+              onClick={() => setShowMasServicios(false)}
+              style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.4)',zIndex:200,display:'flex',alignItems:'flex-end'}}
+            >
+              <div
+                onClick={(e) => e.stopPropagation()}
+                style={{background:'#fff',width:'100%',borderTopLeftRadius:20,borderTopRightRadius:20,padding:'12px 20px 32px',maxHeight:'80vh',overflowY:'auto'}}
+              >
+                <div style={{width:40,height:5,background:'#ddd',borderRadius:3,margin:'0 auto 20px'}} />
+                <h2 style={{fontSize:22,fontWeight:700,marginBottom:16}}>Registrar servicio</h2>
+
+                <div onClick={() => { goTab('registro'); setShowMasServicios(false) }} style={sheetItem}>
+                  <span style={{fontSize:20}}>➕</span><span>Nueva visita</span>
+                </div>
+                <div onClick={() => { goTab('registros'); setFiltroEstado(''); setShowMasServicios(false) }} style={sheetItem}>
+                  <span style={{fontSize:20}}>📋</span><span>Registros</span>
+                </div>
+
+                <div style={sheetSectionLabel}>INFORMES DESINFECCIÓN</div>
+                <div onClick={() => { goTab('informes'); setShowMasServicios(false) }} style={sheetItem}>
+                  <span style={{fontSize:20}}>🧪</span><span>Registrar informe</span>
+                </div>
+
+                <div style={sheetSectionLabel}>INFORMES SEMESTRALES</div>
+                <div onClick={() => { goTab('todosinformes'); setShowMasServicios(false) }} style={sheetItem}>
+                  <span style={{fontSize:20}}>📊</span><span>Registrar / ver informes</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   )
