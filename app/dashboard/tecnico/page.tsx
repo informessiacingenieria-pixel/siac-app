@@ -499,6 +499,7 @@ export default function TecnicoPage() {
 
   const [submenuVisitasOpen, setSubmenuVisitasOpen] = useState(false)
   const [submenuInformesOpen, setSubmenuInformesOpen] = useState(false)
+  const [menuMasAbierto, setMenuMasAbierto] = useState(false)
 
   // Estado informe semestral
   const [semestral, setSemestral] = useState<any>(semestralVacio)
@@ -2261,6 +2262,14 @@ export default function TecnicoPage() {
             <span style={{fontSize:18,flexShrink:0}}>🧪</span>
             {sidebarOpen && <><span>Informes Desinfección</span><span style={{marginLeft:'auto',fontSize:11}}>{submenuInformesOpen?'▲':'▼'}</span></>}
           </div>
+          <div onClick={() => setSubmenuSemestralOpen(!submenuSemestralOpen)} style={navItem(tab==='semestral'||tab==='missemestrales')}>
+            <span style={{fontSize:18,flexShrink:0}}>📊</span>
+            {sidebarOpen && <><span>Informes Semestrales</span><span style={{marginLeft:'auto',fontSize:11}}>{submenuSemestralOpen?'▲':'▼'}</span></>}
+          </div>
+          {submenuSemestralOpen && sidebarOpen && <>
+            <div onClick={() => goTab('semestral')} style={subItem(tab==='semestral')}>➕ Registrar informe</div>
+            <div onClick={() => goTab('missemestrales')} style={subItem(tab==='missemestrales')}>📋 Mis informes</div>
+          </>}
           {submenuInformesOpen && sidebarOpen && <>
             <div onClick={() => goTab('informes')} style={subItem(tab==='informes')}>➕ Registrar informe</div>
             <div onClick={() => goTab('misinformes')} style={subItem(tab==='misinformes')}>📋 Mis informes</div>
@@ -5029,7 +5038,6 @@ export default function TecnicoPage() {
       </div>
 
       
-
       {/* MOBILE BOTTOM NAV */}
       {isMobile && (
         <div style={{position:'fixed',bottom:0,left:0,right:0,background:'#fff',borderTop:'1px solid #eee',display:'flex',zIndex:100,boxShadow:'0 -2px 10px rgba(0,0,0,0.08)'}}>
@@ -5039,14 +5047,38 @@ export default function TecnicoPage() {
           <div onClick={() => goTab('registro')} style={navTab(tab==='registro')}>
             <span style={{fontSize:18}}>➕</span><span>Visita</span>
           </div>
-          <div onClick={() => goTab('historial')} style={navTab(tab==='historial')}>
-            <span style={{fontSize:18}}>📋</span><span>Registros</span>
+          <div onClick={() => setMenuMasAbierto(true)} style={navTab(['historial','informes','misinformes','semestral','missemestrales'].includes(tab))}>
+            <span style={{fontSize:18}}>☰</span><span>Más servicios</span>
           </div>
-          <div onClick={() => goTab('informes')} style={navTab(tab==='informes')}>
-            <span style={{fontSize:18}}>🧪</span><span>Informe</span>
-          </div>
-          <div onClick={() => goTab('misinformes')} style={navTab(tab==='misinformes')}>
-            <span style={{fontSize:18}}>📄</span><span>Mis inf.</span>
+        </div>
+      )}
+
+      {/* MENU MÁS SERVICIOS (mobile) */}
+      {isMobile && menuMasAbierto && (
+        <div onClick={() => setMenuMasAbierto(false)} style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.4)',zIndex:200,display:'flex',alignItems:'flex-end'}}>
+          <div onClick={e => e.stopPropagation()} style={{background:'#fff',width:'100%',borderRadius:'16px 16px 0 0',padding:'1rem',maxHeight:'75vh',overflowY:'auto'}}>
+            <div style={{width:40,height:4,background:'#ddd',borderRadius:2,margin:'0 auto 1rem'}} />
+            <div style={{fontWeight:700,fontSize:16,marginBottom:12,color:'#1a1a2e'}}>Más servicios</div>
+
+            <div onClick={() => { goTab('historial'); setMenuMasAbierto(false) }} style={{padding:'12px 8px',display:'flex',alignItems:'center',gap:10,borderBottom:'1px solid #f0f0f0',cursor:'pointer'}}>
+              <span style={{fontSize:18}}>📋</span><span>Mis registros</span>
+            </div>
+
+            <div style={{padding:'14px 8px 6px',fontSize:11,color:'#aaa',fontWeight:700,letterSpacing:0.5}}>INFORMES DESINFECCIÓN</div>
+            <div onClick={() => { goTab('informes'); setMenuMasAbierto(false) }} style={{padding:'12px 8px',display:'flex',alignItems:'center',gap:10,borderBottom:'1px solid #f0f0f0',cursor:'pointer'}}>
+              <span style={{fontSize:18}}>🧪</span><span>Registrar informe</span>
+            </div>
+            <div onClick={() => { goTab('misinformes'); setMenuMasAbierto(false) }} style={{padding:'12px 8px',display:'flex',alignItems:'center',gap:10,borderBottom:'1px solid #f0f0f0',cursor:'pointer'}}>
+              <span style={{fontSize:18}}>📄</span><span>Mis informes</span>
+            </div>
+
+            <div style={{padding:'14px 8px 6px',fontSize:11,color:'#aaa',fontWeight:700,letterSpacing:0.5}}>INFORMES SEMESTRALES</div>
+            <div onClick={() => { goTab('semestral'); setMenuMasAbierto(false) }} style={{padding:'12px 8px',display:'flex',alignItems:'center',gap:10,borderBottom:'1px solid #f0f0f0',cursor:'pointer'}}>
+              <span style={{fontSize:18}}>📊</span><span>Registrar informe</span>
+            </div>
+            <div onClick={() => { goTab('missemestrales'); setMenuMasAbierto(false) }} style={{padding:'12px 8px',display:'flex',alignItems:'center',gap:10,cursor:'pointer'}}>
+              <span style={{fontSize:18}}>📄</span><span>Mis informes</span>
+            </div>
           </div>
         </div>
       )}
