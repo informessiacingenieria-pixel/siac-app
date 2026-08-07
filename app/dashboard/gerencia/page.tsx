@@ -453,7 +453,7 @@ const CENTROS_YA_IMPLEMENTADOS = [
   ...CENTROS_6T_3S,
   ...CENTROS_6T_4S,
   ...CENTROS_7M_4S,
-  ...CENTROS_8M_4S,
+  ...CENTROS_8M_5S,
 ]
 
 export default function GerenciaPage() {
