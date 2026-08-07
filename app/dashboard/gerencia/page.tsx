@@ -589,6 +589,15 @@ export default function GerenciaPage() {
     return () => document.removeEventListener('wheel', bloquearScroll)
   }, [])
 
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => {
+      if (!u) { router.push('/'); return }
+      if (u.email !== 'informessiacingenieria@gmail.com') { router.push('/dashboard/tecnico'); return }
+      setUser(u)
+    })
+    return () => unsub()
+  }, [])
+
   const handleLogout = async () => { await signOut(auth); router.push('/') }
 
   const cambiarEstado = async (id: string, nuevoEstado: string) => {
