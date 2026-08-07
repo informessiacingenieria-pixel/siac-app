@@ -5207,7 +5207,7 @@ const handleGenerarSemestral8m5s = async () => {
                   <span style={{fontSize:20}}>➕</span><span>Nueva visita</span>
                 </div>
                 <div onClick={() => { goTab('registros'); setFiltroEstado(''); setShowMasServicios(false) }} style={sheetItem}>
-                  <span style={{fontSize:20}}>📋</span><span>Registros</span>
+                  <span style={{fontSize:20}}>📋</span><span>Mis Visitas</span>
                 </div>
                 <div onClick={() => { goTab('TODAS_LAS_VISITAS_TAB'); setShowMasServicios(false) }} style={sheetItem}>
                   <span style={{fontSize:20}}>🗂️</span><span>Todas las visitas</span>
@@ -5221,7 +5221,7 @@ const handleGenerarSemestral8m5s = async () => {
                   <span style={{fontSize:20}}>📄</span><span>Mis informes de desinfección</span>
                 </div>
                 <div onClick={() => { goTab('TODOS_INFORMES_DESINFECCION_TAB'); setShowMasServicios(false) }} style={sheetItem}>
-                  <span style={{fontSize:20}}>📑</span><span>Todos los informes de desinfección</span>
+                  <span style={{fontSize:20}}>🗂️</span><span>Todos los informes de desinfección</span>
                 </div>
 
                 <div style={sheetSectionLabel}>INFORMES SEMESTRALES</div>
@@ -5232,7 +5232,7 @@ const handleGenerarSemestral8m5s = async () => {
                   <span style={{fontSize:20}}>📄</span><span>Mis informes semestrales</span>
                 </div>
                 <div onClick={() => { goTab('TODOS_INFORMES_SEMESTRALES_TAB'); setShowMasServicios(false) }} style={sheetItem}>
-                  <span style={{fontSize:20}}>📑</span><span>Todos los informes semestrales</span>
+                  <span style={{fontSize:20}}>🗂️</span><span>Todos los informes semestrales</span>
                 </div>
               </div>
             </div>
