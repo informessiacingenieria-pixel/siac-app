@@ -55,7 +55,7 @@ const TECNICOS: Record<string,string> = {
   'mlazo@siac-ingenieria.cl': 'Matias Lazo',
   'imiranda@siac-ingenieria.cl': 'Isaias Miranda',
   'mmeza@siac-ingenieria.cl': 'Marcelo Meza',
-  'jfigueroa@siac-ingenieria.cl': 'Jaime Figueroa',
+  'jaimitofigueroa@gmail.com': 'Jaime Figueroa',
   'gf.cuvertino@gmail.com': 'Gian Cuvertino',
 }
 
