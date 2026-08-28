@@ -123,7 +123,8 @@ const semestral3Vacio = {
   m2Pre: '', m2Post: '', m2Flujo: '',
   m3Pre: '', m3Post: '', m3Flujo: '',
   cde: '', cds: '', fp: '', fd: '', pd: '', recomendacion: '',
-  observaciones: '',
+  hayObservaciones: null,   // ← AGREGAR (null = todavía no responde)
+  observaciones: '', 
 }
 
 const CENTROS_3S_OTRO = ['DAM Quilpué','HBTL Esterilización','HBTL Sedile','HBTL UTI 1']
@@ -3460,19 +3461,13 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral3.recomendacion} onChange={e => setS3('recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-              <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
-                <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'0.75rem',fontSize:14}}>¿Hay observaciones?</div>
-                <div style={{display:'flex',gap:16}}>
-                  <label style={{display:'flex',alignItems:'center',gap:6,fontSize:14,cursor:'pointer'}}>
-                    <input type="radio" name="obs3s1o" checked={mostrarObs3s1o} onChange={() => setMostrarObs3s1o(true)} />
-                    Sí
-                  </label>
-                  <label style={{display:'flex',alignItems:'center',gap:6,fontSize:14,cursor:'pointer'}}>
-                    <input type="radio" name="obs3s1o" checked={!mostrarObs3s1o} onChange={() => { setMostrarObs3s1o(false); setS3('observaciones', '') }} />
-                    No
-                  </label>
+              <div style={{marginBottom:'1rem'}}>
+                <label style={labelStyle}>¿Hay observaciones?</label>
+                <div style={{display:'flex',gap:10}}>
+                  <button onClick={() => setS3('hayObservaciones', true)} style={{flex:1,padding:'10px',border:`2px solid ${semestral3.hayObservaciones===true?'#1a6fa8':'#ddd'}`,borderRadius:8,background:semestral3.hayObservaciones===true?'#e8f4fd':'#fff',color:semestral3.hayObservaciones===true?'#1a6fa8':'#666',fontSize:13,cursor:'pointer',fontWeight:semestral3.hayObservaciones===true?600:400}}>✅ Sí</button>
+                  <button onClick={() => { setS3('hayObservaciones', false); setS3('observaciones', '') }} style={{flex:1,padding:'10px',border:`2px solid ${semestral3.hayObservaciones===false?'#ef5350':'#ddd'}`,borderRadius:8,background:semestral3.hayObservaciones===false?'#FCEBEB':'#fff',color:semestral3.hayObservaciones===false?'#c0392b':'#666',fontSize:13,cursor:'pointer',fontWeight:semestral3.hayObservaciones===false?600:400}}>❌ No</button>
                 </div>
-                {mostrarObs3s1o && (
+                {semestral3.hayObservaciones === true && (
                   <textarea
                     value={semestral3.observaciones}
                     onChange={e => setS3('observaciones', e.target.value)}
@@ -3482,7 +3477,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                   />
                 )}
               </div>
-
+      
             <button onClick={handleGenerarSemestral3} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
             </button>
