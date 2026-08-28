@@ -26,6 +26,7 @@ import { generarPdfSemestral6t3s2oBlob } from '../../../lib/InformeSemestral_6t3
 import { generarPdfSemestral6t4s2oBlob } from '../../../lib/InformeSemestral_6t4s2o'
 import { generarPdfSemestral7m4s2oBlob } from '../../../lib/InformeSemestral_7m4s2o'
 import { generarPdfSemestral8m5s2oBlob } from '../../../lib/InformeSemestral_8m5s2o'
+import { generarPdfSemestral6sCarmenBlob } from '../../../lib/InformeSemestral_6sCarmen'
 import { LUGARES_SERVICIO, CINTAS_REACTIVAS } from '../../../lib/informesConfig'
 
 const CENTROS = [
@@ -441,6 +442,21 @@ const semestral8m5sVacio = {
   o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '',
 }
 
+const CENTROS_6sCarmen= ['Hosp. El Carmen Hemodiálisis']
+
+const semestral6sCarmenVacio = {
+  cliente: '',
+  diaInforme: '', mesInforme: '', anioInforme: '',
+  // Osmosis 1: 6 membranas
+  o1m1Pre: '', o1m1Post: '', o1m1Flujo: '',
+  o1m2Pre: '', o1m2Post: '', o1m2Flujo: '',
+  o1m3Pre: '', o1m3Post: '', o1m3Flujo: '',
+  o1m4Pre: '', o1m4Post: '', o1m4Flujo: '',
+  o1m5Pre: '', o1m5Post: '', o1m5Flujo: '',
+  o1m6Pre: '', o1m6Post: '', o1m6Flujo: '',
+  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '',
+}
+
 const CENTROS_YA_IMPLEMENTADOS = [
   'CD Vidacare',
   'CD Pacifico',
@@ -463,6 +479,7 @@ const CENTROS_YA_IMPLEMENTADOS = [
   ...CENTROS_6T_4S,
   ...CENTROS_7M_4S,
   ...CENTROS_8M_5S,
+  ...CENTROS_6sCarmen,
 ]
 
 
@@ -531,6 +548,7 @@ export default function TecnicoPage() {
   const [semestral6t4s, setSemestral6t4s] = useState<any>(semestral6t4sVacio)
   const [semestral7m4s, setSemestral7m4s] = useState<any>(semestral7m4sVacio)
   const [semestral8m5s, setSemestral8m5s] = useState<any>(semestral8m5sVacio)
+  const [semestral6sCarmen, setSemestral6sCarmen] = useState<any>(semestral6sCarmenVacio)
     
 
   const router = useRouter()
@@ -2033,6 +2051,84 @@ export default function TecnicoPage() {
       setGenerandoSemestral(false)
     }
   }
+
+  // Generar PDF
+
+// Helper para actualizar estado
+const setS6sCarmen = (field: string, val: any) => setSemestral6sCarmen((prev: any) => ({ ...prev, [field]: val }))
+
+// Cálculo de RR
+const rr6sCarmenO1 = semestral6sCarmen.o1cde && semestral6sCarmen.o1cds ? calcularRR(semestral6sCarmen.o1cde, semestral6sCarmen.o1cds) : null
+const rr6sCarmenO1Fuera = rr6sCarmenO1 !== null && rr6sCarmenO1 < 97
+
+// Validación
+const validarSemestral6sCarmen = () => {
+  if (!semestral.cliente) return 'Selecciona un cliente'
+  if (!semestral6sCarmen.diaInforme || !semestral6sCarmen.mesInforme || !semestral6sCarmen.anioInforme) return 'Completa la fecha del informe'
+  const campos = [
+    'o1m1Pre','o1m1Post','o1m1Flujo','o1m2Pre','o1m2Post','o1m2Flujo',
+    'o1m3Pre','o1m3Post','o1m3Flujo','o1m4Pre','o1m4Post','o1m4Flujo',
+    'o1m5Pre','o1m5Post','o1m5Flujo','o1m6Pre','o1m6Post','o1m6Flujo',
+    'o1cde','o1cds','o1fp','o1fd','o1pd'
+  ]
+  for (const campo of campos) {
+    if (!semestral6sCarmen[campo]) return 'Completa todos los datos de las membranas y osmosis'
+  }
+  return null
+}
+
+const handleGenerarSemestral6sCarmen = async () => {
+  const error = validarSemestral6sCarmen()
+  if (error) { alert(error); return }
+  const nombreTecnico = TECNICOS[user.email] || 'Técnico SIAC'
+  setGenerandoSemestral(true)
+  let pasoActual = 'inicio'
+  try {
+    pasoActual = 'generando PDF'
+    const datosPdf = {
+      cliente: semestral.cliente,
+      diaInforme: semestral6sCarmen.diaInforme,
+      mesInforme: semestral6sCarmen.mesInforme,
+      anioInforme: semestral6sCarmen.anioInforme,
+      m1Pre: semestral6sCarmen.o1m1Pre, m1Post: semestral6sCarmen.o1m1Post, m1Flujo: semestral6sCarmen.o1m1Flujo,
+      m2Pre: semestral6sCarmen.o1m2Pre, m2Post: semestral6sCarmen.o1m2Post, m2Flujo: semestral6sCarmen.o1m2Flujo,
+      m3Pre: semestral6sCarmen.o1m3Pre, m3Post: semestral6sCarmen.o1m3Post, m3Flujo: semestral6sCarmen.o1m3Flujo,
+      m4Pre: semestral6sCarmen.o1m4Pre, m4Post: semestral6sCarmen.o1m4Post, m4Flujo: semestral6sCarmen.o1m4Flujo,
+      m5Pre: semestral6sCarmen.o1m5Pre, m5Post: semestral6sCarmen.o1m5Post, m5Flujo: semestral6sCarmen.o1m5Flujo,
+      m6Pre: semestral6sCarmen.o1m6Pre, m6Post: semestral6sCarmen.o1m6Post, m6Flujo: semestral6sCarmen.o1m6Flujo,
+      cde: semestral6sCarmen.o1cde, cds: semestral6sCarmen.o1cds,
+      fp: semestral6sCarmen.o1fp, fd: semestral6sCarmen.o1fd, pd: semestral6sCarmen.o1pd,
+      recomendacion: semestral6sCarmen.o1recomendacion,
+      tecnicoResponsable: nombreTecnico,
+    }
+    const blob = await generarPdfSemestral6sCarmenBlob(datosPdf)
+    pasoActual = 'subiendo PDF'
+    const pdfUrl = await subirPdf(blob)
+    const fechaInformeTexto = `${String(semestral6sCarmen.diaInforme).padStart(2,'0')}/${String(semestral6sCarmen.mesInforme).padStart(2,'0')}/${semestral6sCarmen.anioInforme}`
+    pasoActual = 'guardando en Firestore'
+    await addDoc(collection(db, 'informes_semestrales'), {
+      uid: user.uid, tecnico: nombreTecnico, email: user.email,
+      cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
+      tecnicoResponsable: nombreTecnico, pdfUrl, creadoEn: Timestamp.now(),
+    })
+    pasoActual = 'enviando correo'
+    await fetch('/api/enviar-informe-semestral', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pdfUrl, tecnicoEmail: user.email, tecnicoNombre: nombreTecnico, cliente: semestral.cliente,
+        diaInforme: semestral6sCarmen.diaInforme, mesInforme: semestral6sCarmen.mesInforme, anioInforme: semestral6sCarmen.anioInforme,
+      }),
+    })
+    setExitoSemestral(true)
+    setTimeout(() => setExitoSemestral(false), 4000)
+    setSemestral6sCarmen(semestral6sCarmenVacio)
+  } catch (e: any) {
+    alert('Error en "' + pasoActual + '": ' + (e?.message || 'Error desconocido'))
+  } finally {
+    setGenerandoSemestral(false)
+  }
+}
 
 
   const nombreTecnico = user ? (TECNICOS[user.email] || user.email) : ''
@@ -4993,6 +5089,74 @@ export default function TecnicoPage() {
             )}
 
             <button onClick={handleGenerarSemestral8m5s} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
+              {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
+            </button>
+          </>}
+          {CENTROS_6sCarmen.includes(semestral.cliente) && <>
+            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Fecha del informe</div>
+              <div style={{display:'flex',gap:6,maxWidth:360}}>
+                <select value={semestral6sCarmen.diaInforme} onChange={e => setS6sCarmen('diaInforme', e.target.value)} style={{...inputStyle, width:'30%'}}>
+                  <option value="">Día</option>
+                  {DIAS_DISPONIBLES.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+                <select value={semestral6sCarmen.mesInforme} onChange={e => setS6sCarmen('mesInforme', e.target.value)} style={{...inputStyle, width:'40%'}}>
+                  <option value="">Mes</option>
+                  {MESES_NOMBRE.map((m,i) => <option key={i} value={i+1}>{m}</option>)}
+                </select>
+                <select value={semestral6sCarmen.anioInforme} onChange={e => setS6sCarmen('anioInforme', e.target.value)} style={{...inputStyle, width:'30%'}}>
+                  <option value="">Año</option>
+                  {ANIOS_DISPONIBLES.map(a => <option key={a} value={a}>{a}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Ósmosis — Membranas (6)</div>
+
+            {[1,2,3,4,5,6].map(n => (
+              <div key={'s6sCarmenm'+n} style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+                <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Membrana N° {n}</div>
+                <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr 1fr',gap:'1rem'}}>
+                  <div><label style={labelStyle}>Cond. pre lavado (µS/cm)</label>
+                    <input type="number" value={semestral6sCarmen['o1m'+n+'Pre']} onChange={e => setS6sCarmen('o1m'+n+'Pre', e.target.value)} style={inputStyle} /></div>
+                  <div><label style={labelStyle}>Cond. post lavado (µS/cm)</label>
+                    <input type="number" value={semestral6sCarmen['o1m'+n+'Post']} onChange={e => setS6sCarmen('o1m'+n+'Post', e.target.value)} style={inputStyle} /></div>
+                  <div><label style={labelStyle}>Flujo post lavado (Lpm)</label>
+                    <input type="number" value={semestral6sCarmen['o1m'+n+'Flujo']} onChange={e => setS6sCarmen('o1m'+n+'Flujo', e.target.value)} style={inputStyle} /></div>
+                </div>
+              </div>
+            ))}
+
+            <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+              <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Datos de la ósmosis</div>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:'1rem',marginBottom:'1rem'}}>
+                <div><label style={labelStyle}>Conductividad de entrada (µS/cm)</label>
+                  <input type="number" value={semestral6sCarmen.o1cde} onChange={e => setS6sCarmen('o1cde', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Conductividad de salida (µS/cm)</label>
+                  <input type="number" value={semestral6sCarmen.o1cds} onChange={e => setS6sCarmen('o1cds', e.target.value)} style={inputStyle} /></div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr 1fr',gap:'1rem'}}>
+                <div><label style={labelStyle}>Flujo Producto (lpm)</label>
+                  <input type="number" value={semestral6sCarmen.o1fp} onChange={e => setS6sCarmen('o1fp', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Flujo Descarte (lpm)</label>
+                  <input type="number" value={semestral6sCarmen.o1fd} onChange={e => setS6sCarmen('o1fd', e.target.value)} style={inputStyle} /></div>
+                <div><label style={labelStyle}>Presión Descarte (psi)</label>
+                  <input type="number" value={semestral6sCarmen.o1pd} onChange={e => setS6sCarmen('o1pd', e.target.value)} style={inputStyle} /></div>
+              </div>
+              {rr6sCarmenO1 !== null && (
+                <div style={{marginTop:'1rem',padding:'12px 16px',borderRadius:8,background:rr6sCarmenO1Fuera?'#FCEBEB':'#EAF3DE',color:rr6sCarmenO1Fuera?'#A32D2D':'#3B6D11',fontWeight:600,fontSize:14}}>
+                  RR: {(Math.round(rr6sCarmenO1*100)/100).toString().replace('.',',')}%{rr6sCarmenO1Fuera ? ' — Fuera de rango (menor a 97%)' : ' — Dentro de parámetros'}
+                </div>
+              )}
+            </div>
+            {rr6sCarmenO1Fuera && (
+              <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+                <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'1rem',fontSize:14}}>Recomendación <span style={{color:'#aaa',fontWeight:400}}>(RR fuera de rango)</span></div>
+                <textarea value={semestral6sCarmen.o1recomendacion} onChange={e => setS6sCarmen('o1recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
+              </div>
+            )}
+
+            <button onClick={handleGenerarSemestral6sCarmen} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
             </button>
           </>}
