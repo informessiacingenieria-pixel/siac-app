@@ -123,6 +123,7 @@ const semestral3Vacio = {
   m2Pre: '', m2Post: '', m2Flujo: '',
   m3Pre: '', m3Post: '', m3Flujo: '',
   cde: '', cds: '', fp: '', fd: '', pd: '', recomendacion: '',
+  observaciones: '',
 }
 
 const CENTROS_3S_OTRO = ['DAM Quilpué','HBTL Esterilización','HBTL Sedile','HBTL UTI 1']
@@ -530,6 +531,7 @@ export default function GerenciaPage() {
   const [filtroCentroSemestral, setFiltroCentroSemestral] = useState('')
   const [filtroMesSemestral, setFiltroMesSemestral] = useState('')
   const [showMasServicios, setShowMasServicios] = useState(false)
+  const [mostrarObs3s1o, setMostrarObs3s1o] = useState(false)
 
   // Estado informes semestral 2 osmosis (CD Pacifico)
   const [semestral2, setSemestral2] = useState<any>(semestral2Vacio)
@@ -3458,6 +3460,28 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral3.recomendacion} onChange={e => setS3('recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
+              <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
+                <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'0.75rem',fontSize:14}}>¿Hay observaciones?</div>
+                <div style={{display:'flex',gap:16}}>
+                  <label style={{display:'flex',alignItems:'center',gap:6,fontSize:14,cursor:'pointer'}}>
+                    <input type="radio" name="obs3s1o" checked={mostrarObs3s1o} onChange={() => setMostrarObs3s1o(true)} />
+                    Sí
+                  </label>
+                  <label style={{display:'flex',alignItems:'center',gap:6,fontSize:14,cursor:'pointer'}}>
+                    <input type="radio" name="obs3s1o" checked={!mostrarObs3s1o} onChange={() => { setMostrarObs3s1o(false); setS3('observaciones', '') }} />
+                    No
+                  </label>
+                </div>
+                {mostrarObs3s1o && (
+                  <textarea
+                    value={semestral3.observaciones}
+                    onChange={e => setS3('observaciones', e.target.value)}
+                    placeholder="Escribe la observación..."
+                    rows={3}
+                    style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical',marginTop:'0.75rem'}}
+                  />
+                )}
+              </div>
 
             <button onClick={handleGenerarSemestral3} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
