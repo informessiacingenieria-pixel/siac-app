@@ -3207,7 +3207,7 @@ const handleGenerarSemestral6sCarmen = async () => {
               </div>
             </div>
 
-            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Membranas (3)</div>
+            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 1 (3 membranas)</div>
 
             {[1,2,3].map(n => (
               <div key={'m'+n} style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
@@ -4660,7 +4660,7 @@ const handleGenerarSemestral6sCarmen = async () => {
               </div>
             </div>
 
-            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Membranas (6)</div>
+            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 1 (6 membranas)</div>
 
             {[1,2,3,4,5,6].map(n => (
               <div key={'s6mo1m'+n} style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
@@ -4728,7 +4728,7 @@ const handleGenerarSemestral6sCarmen = async () => {
               </div>
             </div>
 
-            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Ósmosis 1 — Membranas (6)</div>
+            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 1 (6 membranas)</div>
 
             {[1,2,3,4,5,6].map(n => (
               <div key={'s6t3so1m'+n} style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
@@ -4773,7 +4773,7 @@ const handleGenerarSemestral6sCarmen = async () => {
               </div>
             )}
 
-            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Ósmosis 2 — Membranas (3, agua blanda)</div>
+            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 2 · agua blanda (3 membranas)</div>
 
             {[1,2,3].map(n => (
               <div key={'s6t3so2m'+n} style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
@@ -4841,7 +4841,7 @@ const handleGenerarSemestral6sCarmen = async () => {
               </div>
             </div>
 
-            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Ósmosis 1 — Membranas (6)</div>
+            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 1 (6 membranas)</div>
 
             {[1,2,3,4,5,6].map(n => (
               <div key={'s6t4so1m'+n} style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
@@ -4886,7 +4886,7 @@ const handleGenerarSemestral6sCarmen = async () => {
               </div>
             )}
 
-            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Ósmosis 2 — Membranas (4)</div>
+            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 2 (4 membranas)</div>
 
             {[1,2,3,4].map(n => (
               <div key={'s6t4so2m'+n} style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
@@ -4954,7 +4954,7 @@ const handleGenerarSemestral6sCarmen = async () => {
               </div>
             </div>
 
-            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Ósmosis 1 — Membranas (7)</div>
+            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 1 (7 membranas)</div>
 
             {[1,2,3,4,5,6,7].map(n => (
               <div key={'s7m4so1m'+n} style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
@@ -4999,7 +4999,7 @@ const handleGenerarSemestral6sCarmen = async () => {
               </div>
             )}
 
-            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Ósmosis 2 — Membranas (4)</div>
+            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 2 (4 membranas)</div>
 
             {[1,2,3,4].map(n => (
               <div key={'s7m4so2m'+n} style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
@@ -5067,7 +5067,7 @@ const handleGenerarSemestral6sCarmen = async () => {
               </div>
             </div>
 
-            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Ósmosis 1 — Membranas (8)</div>
+            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 1 (8 membranas)</div>
 
             {[1,2,3,4,5,6,7,8].map(n => (
               <div key={'s8m5so1m'+n} style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
@@ -5112,7 +5112,7 @@ const handleGenerarSemestral6sCarmen = async () => {
               </div>
             )}
 
-            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Ósmosis 2 — Membranas (5)</div>
+            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 2 (5 membranas)</div>
 
             {[1,2,3,4,5].map(n => (
               <div key={'s8m5so2m'+n} style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
@@ -5180,7 +5180,7 @@ const handleGenerarSemestral6sCarmen = async () => {
               </div>
             </div>
 
-            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Ósmosis — Membranas (6)</div>
+            <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 1 (6 membranas)</div>
 
             {[1,2,3,4,5,6].map(n => (
               <div key={'s6sCarmenm'+n} style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
