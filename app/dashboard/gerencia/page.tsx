@@ -5356,13 +5356,16 @@ const handleGenerarSemestral6sCarmen = async () => {
             <div onClick={() => goTab('inicio')} style={navTab(tab==='inicio')}>
               <span style={{fontSize:18}}>🏠</span><span>Inicio</span>
             </div>
-            <div onClick={() => setShowMasServicios(true)} style={navTab(showMasServicios)}>
-              <span style={{fontSize:18}}>➕</span><span>Registrar servicio</span>
+            <div onClick={() => goTab('registro')} style={navTab(tab==='registro')}>
+              <span style={{fontSize:18}}>➕</span><span>Visita</span>
+            </div>
+            <div onClick={() => setShowMasServicios(true)} style={navTab(showMasServicios || ['registros','informes','misinformes','todosinformes','semestral','missemestrales','todossemestrales'].includes(tab))}>
+              <span style={{fontSize:18}}>☰</span><span>Más servicios</span>
             </div>
           </div>
 
 
-        {/* SHEET "Registrar servicio" */}
+        {/* SHEET "Más servicios" */}
           {showMasServicios && (
             <div
               onClick={() => setShowMasServicios(false)}
@@ -5373,39 +5376,35 @@ const handleGenerarSemestral6sCarmen = async () => {
                 style={{background:'#fff',width:'100%',borderTopLeftRadius:20,borderTopRightRadius:20,padding:'12px 20px 32px',maxHeight:'80vh',overflowY:'auto'}}
               >
                 <div style={{width:40,height:5,background:'#ddd',borderRadius:3,margin:'0 auto 20px'}} />
-                <h2 style={{fontSize:22,fontWeight:700,marginBottom:16}}>Registrar servicio</h2>
+                <h2 style={{fontSize:22,fontWeight:700,marginBottom:16}}>Más servicios</h2>
 
-                <div style={sheetSectionLabel}>VISITAS</div>
-                <div onClick={() => { goTab('registro'); setShowMasServicios(false) }} style={sheetItem}>
-                  <span style={{fontSize:20}}>➕</span><span>Nueva visita</span>
-                </div>
-                <div onClick={() => { goTab('registros'); setFiltroEstado(''); setShowMasServicios(false) }} style={sheetItem}>
-                  <span style={{fontSize:20}}>📋</span><span>Mis Visitas</span>
-                </div>
-                <div onClick={() => { goTab('TODAS_LAS_VISITAS_TAB'); setShowMasServicios(false) }} style={sheetItem}>
-                  <span style={{fontSize:20}}>🗂️</span><span>Todas las visitas</span>
-                </div>
+                <div style={sheetSectionLabel}>REVISIONES</div>
+                {[{e:'',icon:'📋',label:'Todas'},{e:'Pendiente',icon:'⏳',label:'Pendientes'},{e:'En revisión',icon:'🔎',label:'En revisión'},{e:'Cobrado',icon:'✅',label:'Cobradas'}].map(item => (
+                  <div key={item.e} onClick={() => { irARevisiones(item.e); setShowMasServicios(false) }} style={sheetItem}>
+                    <span style={{fontSize:20}}>{item.icon}</span><span>{item.label}</span>
+                  </div>
+                ))}
 
                 <div style={sheetSectionLabel}>INFORMES DESINFECCIÓN</div>
                 <div onClick={() => { goTab('informes'); setShowMasServicios(false) }} style={sheetItem}>
-                  <span style={{fontSize:20}}>🧪</span><span>Registrar informe de desinfección</span>
+                  <span style={{fontSize:20}}>🧪</span><span>Registrar informe</span>
                 </div>
-                <div onClick={() => { goTab('MIS_INFORMES_DESINFECCION_TAB'); setShowMasServicios(false) }} style={sheetItem}>
-                  <span style={{fontSize:20}}>📄</span><span>Mis informes de desinfección</span>
+                <div onClick={() => { goTab('misinformes'); setShowMasServicios(false) }} style={sheetItem}>
+                  <span style={{fontSize:20}}>📄</span><span>Mis informes</span>
                 </div>
-                <div onClick={() => { goTab('TODOS_INFORMES_DESINFECCION_TAB'); setShowMasServicios(false) }} style={sheetItem}>
-                  <span style={{fontSize:20}}>🗂️</span><span>Todos los informes de desinfección</span>
+                <div onClick={() => { goTab('todosinformes'); setShowMasServicios(false) }} style={sheetItem}>
+                  <span style={{fontSize:20}}>🗂️</span><span>Todos los informes</span>
                 </div>
 
                 <div style={sheetSectionLabel}>INFORMES SEMESTRALES</div>
-                <div onClick={() => { goTab('todosinformes'); setShowMasServicios(false) }} style={sheetItem}>
-                  <span style={{fontSize:20}}>📊</span><span>Registrar informe semestral</span>
+                <div onClick={() => { goTab('semestral'); setShowMasServicios(false) }} style={sheetItem}>
+                  <span style={{fontSize:20}}>📊</span><span>Registrar informe</span>
                 </div>
-                <div onClick={() => { goTab('MIS_INFORMES_SEMESTRALES_TAB'); setShowMasServicios(false) }} style={sheetItem}>
-                  <span style={{fontSize:20}}>📄</span><span>Mis informes semestrales</span>
+                <div onClick={() => { goTab('missemestrales'); setShowMasServicios(false) }} style={sheetItem}>
+                  <span style={{fontSize:20}}>📄</span><span>Mis informes</span>
                 </div>
-                <div onClick={() => { goTab('TODOS_INFORMES_SEMESTRALES_TAB'); setShowMasServicios(false) }} style={sheetItem}>
-                  <span style={{fontSize:20}}>🗂️</span><span>Todos los informes semestrales</span>
+                <div onClick={() => { goTab('todossemestrales'); setShowMasServicios(false) }} style={sheetItem}>
+                  <span style={{fontSize:20}}>🗂️</span><span>Todos los informes</span>
                 </div>
               </div>
             </div>
