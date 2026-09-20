@@ -123,8 +123,6 @@ const semestral3Vacio = {
   m2Pre: '', m2Post: '', m2Flujo: '',
   m3Pre: '', m3Post: '', m3Flujo: '',
   cde: '', cds: '', fp: '', fd: '', pd: '', recomendacion: '', observacion: '',
-  hayObservaciones: null,   // ← AGREGAR (null = todavía no responde)
-  observaciones: '', 
 }
 
 const CENTROS_3S_OTRO = ['DAM Quilpué','HBTL Esterilización','HBTL Sedile','HBTL UTI 1']
@@ -3491,23 +3489,6 @@ const handleGenerarSemestral6sCarmen = async () => {
               </div>
             )}
             <BloqueObservacion titulo="Observación" valor={semestral3.observacion} onChange={v => setS3('observacion', v)} />
-              <div style={{marginBottom:'1rem'}}>
-                <label style={labelStyle}>¿Hay observaciones?</label>
-                <div style={{display:'flex',gap:10}}>
-                  <button onClick={() => setS3('hayObservaciones', true)} style={{flex:1,padding:'10px',border:`2px solid ${semestral3.hayObservaciones===true?'#1a6fa8':'#ddd'}`,borderRadius:8,background:semestral3.hayObservaciones===true?'#e8f4fd':'#fff',color:semestral3.hayObservaciones===true?'#1a6fa8':'#666',fontSize:13,cursor:'pointer',fontWeight:semestral3.hayObservaciones===true?600:400}}>✅ Sí</button>
-                  <button onClick={() => { setS3('hayObservaciones', false); setS3('observaciones', '') }} style={{flex:1,padding:'10px',border:`2px solid ${semestral3.hayObservaciones===false?'#ef5350':'#ddd'}`,borderRadius:8,background:semestral3.hayObservaciones===false?'#FCEBEB':'#fff',color:semestral3.hayObservaciones===false?'#c0392b':'#666',fontSize:13,cursor:'pointer',fontWeight:semestral3.hayObservaciones===false?600:400}}>❌ No</button>
-                </div>
-                {semestral3.hayObservaciones === true && (
-                  <textarea
-                    value={semestral3.observaciones}
-                    onChange={e => setS3('observaciones', e.target.value)}
-                    placeholder="Escribe la observación..."
-                    rows={3}
-                    style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical',marginTop:'0.75rem'}}
-                  />
-                )}
-              </div>
-      
             <button onClick={handleGenerarSemestral3} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
             </button>
