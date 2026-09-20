@@ -484,7 +484,7 @@ const CENTROS_YA_IMPLEMENTADOS = [
 
 
 function BloqueObservacion({ titulo, valor, onChange }: { titulo: string, valor: string, onChange: (v: string) => void }) {
-  const [si, setSi] = useState(valor !== '')
+  const [si, setSi] = useState<boolean | null>(valor !== '' ? true : null)
   const btn = (activo: boolean) => ({
     padding: '9px 26px', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer',
     border: activo ? '1.5px solid #2196f3' : '1.5px solid #ddd',
@@ -493,11 +493,11 @@ function BloqueObservacion({ titulo, valor, onChange }: { titulo: string, valor:
   return (
     <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
       <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'0.75rem',fontSize:14}}>{titulo}</div>
-      <div style={{display:'flex',gap:10,marginBottom: si ? '1rem' : 0}}>
-        <div onClick={() => setSi(true)} style={btn(si)}>Sí</div>
-        <div onClick={() => { setSi(false); onChange('') }} style={btn(!si)}>No</div>
+      <div style={{display:'flex',gap:10,marginBottom: si === true ? '1rem' : 0}}>
+        <div onClick={() => setSi(true)} style={btn(si === true)}>Sí</div>
+        <div onClick={() => { setSi(false); onChange('') }} style={btn(si === false)}>No</div>
       </div>
-      {si && (
+      {si === true && (
         <textarea value={valor} onChange={e => onChange(e.target.value)}
           placeholder="Escribe la observación. Aparecerá al final del informe como 'Observación: ...'"
           rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
