@@ -81,7 +81,7 @@ const semestralVacio = {
   o1CondPre1: '', o1CondPost1: '', o1Flujo1: '',
   o1CondPre2: '', o1CondPost2: '', o1Flujo2: '',
   cde1: '', cds1: '', fp1: '', fd1: '', pd1: '',
-  recomendacion: '', observacion: '',
+  recomendacion: '', observacion: '', hayObservacion: null,
 }
 
 const semestral2Vacio = {
@@ -90,13 +90,13 @@ const semestral2Vacio = {
   // Osmosis 1 (2 membranas)
   o1m1Pre: '', o1m1Post: '', o1m1Flujo: '',
   o1m2Pre: '', o1m2Post: '', o1m2Flujo: '',
-  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '',
+  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '', o1hayObservacion: null,
   // Osmosis 2 (4 membranas)
   o2m1Pre: '', o2m1Post: '', o2m1Flujo: '',
   o2m2Pre: '', o2m2Post: '', o2m2Flujo: '',
   o2m3Pre: '', o2m3Post: '', o2m3Flujo: '',
   o2m4Pre: '', o2m4Post: '', o2m4Flujo: '',
-  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '',
+  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '', o2hayObservacion: null,
 }
 
 const CENTROS_3S1O = ['CD Cendial Salamanca',
@@ -122,7 +122,7 @@ const semestral3Vacio = {
   m1Pre: '', m1Post: '', m1Flujo: '',
   m2Pre: '', m2Post: '', m2Flujo: '',
   m3Pre: '', m3Post: '', m3Flujo: '',
-  cde: '', cds: '', fp: '', fd: '', pd: '', recomendacion: '', observacion: '',
+  cde: '', cds: '', fp: '', fd: '', pd: '', recomendacion: '', observacion: '', hayObservacion: null,
 }
 
 const CENTROS_3S_OTRO = ['DAM Quilpué','HBTL Esterilización','HBTL Sedile','HBTL UTI 1']
@@ -136,7 +136,7 @@ const semestral4Vacio = {
   cde: '',
   cds1: '', fp1: '', fd1: '', pd1: '',
   cds2: '', fp2: '', fd2: '', pd2: '',
-  recomendacion: '', observacion: '',
+  recomendacion: '', observacion: '', hayObservacion: null,
 }
 
 const semestral5Vacio = {
@@ -145,11 +145,11 @@ const semestral5Vacio = {
   o1m1Pre: '', o1m1Post: '', o1m1Flujo: '',
   o1m2Pre: '', o1m2Post: '', o1m2Flujo: '',
   o1m3Pre: '', o1m3Post: '', o1m3Flujo: '',
-  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '',
+  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '', o1hayObservacion: null,
   o2m1Pre: '', o2m1Post: '', o2m1Flujo: '',
   o2m2Pre: '', o2m2Post: '', o2m2Flujo: '',
   o2m3Pre: '', o2m3Post: '', o2m3Flujo: '',
-  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '',
+  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '', o2hayObservacion: null,
 }
 
 const CENTROS_3S_2S = ['Davila UCI','Municipalidad Puerto Montt']
@@ -160,10 +160,10 @@ const semestral6Vacio = {
   o1m1Pre: '', o1m1Post: '', o1m1Flujo: '',
   o1m2Pre: '', o1m2Post: '', o1m2Flujo: '',
   o1m3Pre: '', o1m3Post: '', o1m3Flujo: '',
-  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '',
+  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '', o1hayObservacion: null,
   o2m1Pre: '', o2m1Post: '', o2m1Flujo: '',
   o2m2Pre: '', o2m2Post: '', o2m2Flujo: '',
-  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '',
+  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '', o2hayObservacion: null,
 }
 
 const CENTROS_4S1O = ['CD Nueva Vida Los Angeles','Hosp. Lautaro Antiguo','Hosp. Luis Calvo Mackenna Diálisis','Red Dialisis']
@@ -175,7 +175,7 @@ const semestral7Vacio = {
   m2Pre: '', m2Post: '', m2Flujo: '',
   m3Pre: '', m3Post: '', m3Flujo: '',
   m4Pre: '', m4Post: '', m4Flujo: '',
-  cde: '', cds: '', fp: '', fd: '', pd: '', recomendacion: '', observacion: '',
+  cde: '', cds: '', fp: '', fd: '', pd: '', recomendacion: '', observacion: '', hayObservacion: null,
 }
 
 const semestral8Vacio = {
@@ -185,10 +185,10 @@ const semestral8Vacio = {
   o1m2Pre: '', o1m2Post: '', o1m2Flujo: '',
   o1m3Pre: '', o1m3Post: '', o1m3Flujo: '',
   o1m4Pre: '', o1m4Post: '', o1m4Flujo: '',
-  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '',
+  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '', o1hayObservacion: null,
   o2m1Pre: '', o2m1Post: '', o2m1Flujo: '',
   o2m2Pre: '', o2m2Post: '', o2m2Flujo: '',
-  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '',
+  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '', o2hayObservacion: null,
 }
 
 const CENTROS_4S_3S = ['CD Mendoza','Hosp. Curacautin']
@@ -200,11 +200,11 @@ const semestral9Vacio = {
   o1m2Pre: '', o1m2Post: '', o1m2Flujo: '',
   o1m3Pre: '', o1m3Post: '', o1m3Flujo: '',
   o1m4Pre: '', o1m4Post: '', o1m4Flujo: '',
-  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '',
+  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '', o1hayObservacion: null,
   o2m1Pre: '', o2m1Post: '', o2m1Flujo: '',
   o2m2Pre: '', o2m2Post: '', o2m2Flujo: '',
   o2m3Pre: '', o2m3Post: '', o2m3Flujo: '',
-  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '',
+  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '', o2hayObservacion: null,
 }
 
 const semestral10Vacio = {
@@ -214,12 +214,12 @@ const semestral10Vacio = {
   o1m2Pre: '', o1m2Post: '', o1m2Flujo: '',
   o1m3Pre: '', o1m3Post: '', o1m3Flujo: '',
   o1m4Pre: '', o1m4Post: '', o1m4Flujo: '',
-  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '',
+  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '', o1hayObservacion: null,
   o2m1Pre: '', o2m1Post: '', o2m1Flujo: '',
   o2m2Pre: '', o2m2Post: '', o2m2Flujo: '',
   o2m3Pre: '', o2m3Post: '', o2m3Flujo: '',
   o2m4Pre: '', o2m4Post: '', o2m4Flujo: '',
-  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '',
+  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '', o2hayObservacion: null,
 }
 
 const CENTROS_5S1O = ['CD Interdial','CD Vidadial Lanco','CD Vidadial Paillaco']
@@ -232,7 +232,7 @@ const semestral11Vacio = {
   m3Pre: '', m3Post: '', m3Flujo: '',
   m4Pre: '', m4Post: '', m4Flujo: '',
   m5Pre: '', m5Post: '', m5Flujo: '',
-  cde: '', cds: '', fp: '', fd: '', pd: '', recomendacion: '', observacion: '',
+  cde: '', cds: '', fp: '', fd: '', pd: '', recomendacion: '', observacion: '', hayObservacion: null,
 }
 
 const CENTROS_5S_2S_2O = ['Hosp. Luis Calvo Mackenna Estéril']
@@ -245,10 +245,10 @@ const semestral12Vacio = {
   o1m3Pre: '', o1m3Post: '', o1m3Flujo: '',
   o1m4Pre: '', o1m4Post: '', o1m4Flujo: '',
   o1m5Pre: '', o1m5Post: '', o1m5Flujo: '',
-  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '',
+  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '', o1hayObservacion: null,
   o2m1Pre: '', o2m1Post: '', o2m1Flujo: '',
   o2m2Pre: '', o2m2Post: '', o2m2Flujo: '',
-  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '',
+  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '', o2hayObservacion: null,
 }
 
 const CENTROS_5S_3S_2O = ['DAM Santiago', 'Hosp. Calbuco', 'Hosp. San Jose']
@@ -261,11 +261,11 @@ const semestral13Vacio = {
   o1m3Pre: '', o1m3Post: '', o1m3Flujo: '',
   o1m4Pre: '', o1m4Post: '', o1m4Flujo: '',
   o1m5Pre: '', o1m5Post: '', o1m5Flujo: '',
-  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '',
+  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '', o1hayObservacion: null,
   o2m1Pre: '', o2m1Post: '', o2m1Flujo: '',
   o2m2Pre: '', o2m2Post: '', o2m2Flujo: '',
   o2m3Pre: '', o2m3Post: '', o2m3Flujo: '',
-  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '',
+  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '', o2hayObservacion: null,
 }
 
 const CENTROS_5M_4M = ['Davila Cron']
@@ -279,13 +279,13 @@ const semestral5m4mVacio = {
   o1m3Pre: '', o1m3Post: '', o1m3Flujo: '',
   o1m4Pre: '', o1m4Post: '', o1m4Flujo: '',
   o1m5Pre: '', o1m5Post: '', o1m5Flujo: '',
-  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '',
+  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '', o1hayObservacion: null,
   // Osmosis 2: 4 membranas
   o2m1Pre: '', o2m1Post: '', o2m1Flujo: '',
   o2m2Pre: '', o2m2Post: '', o2m2Flujo: '',
   o2m3Pre: '', o2m3Post: '', o2m3Flujo: '',
   o2m4Pre: '', o2m4Post: '', o2m4Flujo: '',
-  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '',
+  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '', o2hayObservacion: null,
 }
 
 const CENTROS_6ot_4M = ['CD La Reina']
@@ -300,13 +300,13 @@ const semestral6ot4mVacio = {
   o1m4Pre: '', o1m4Post: '', o1m4Flujo: '',
   o1m5Pre: '', o1m5Post: '', o1m5Flujo: '',
   o1m6Pre: '', o1m6Post: '', o1m6Flujo: '',
-  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '',
+  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '', o1hayObservacion: null,
   // Osmosis 2: 4 membranas
   o2m1Pre: '', o2m1Post: '', o2m1Flujo: '',
   o2m2Pre: '', o2m2Post: '', o2m2Flujo: '',
   o2m3Pre: '', o2m3Post: '', o2m3Flujo: '',
   o2m4Pre: '', o2m4Post: '', o2m4Flujo: '',
-  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '',
+  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '', o2hayObservacion: null,
 }
 
 const CENTROS_6M_6M = ['CD Ñuñoa','CD Unidial','Hosp. Puerto Montt']
@@ -321,7 +321,7 @@ const semestral6m6mVacio = {
   o1m4Pre: '', o1m4Post: '', o1m4Flujo: '',
   o1m5Pre: '', o1m5Post: '', o1m5Flujo: '',
   o1m6Pre: '', o1m6Post: '', o1m6Flujo: '',
-  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '',
+  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '', o1hayObservacion: null,
   // Osmosis 2: 6 membranas
   o2m1Pre: '', o2m1Post: '', o2m1Flujo: '',
   o2m2Pre: '', o2m2Post: '', o2m2Flujo: '',
@@ -329,7 +329,7 @@ const semestral6m6mVacio = {
   o2m4Pre: '', o2m4Post: '', o2m4Flujo: '',
   o2m5Pre: '', o2m5Post: '', o2m5Flujo: '',
   o2m6Pre: '', o2m6Post: '', o2m6Flujo: '',
-  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '',
+  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '', o2hayObservacion: null,
 }
 
 const CENTROS_6M = ['CD Vespucio','Hosp. Maipú','Hosp. Purranque','Hosp. Valdivia']
@@ -344,7 +344,7 @@ const semestral6mVacio = {
   o1m4Pre: '', o1m4Post: '', o1m4Flujo: '',
   o1m5Pre: '', o1m5Post: '', o1m5Flujo: '',
   o1m6Pre: '', o1m6Post: '', o1m6Flujo: '',
-  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '',
+  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '', o1hayObservacion: null,
 }
 
 const CENTROS_6T_3S = ['Premio Nobel']
@@ -359,12 +359,12 @@ const semestral6t3sVacio = {
   o1m4Pre: '', o1m4Post: '', o1m4Flujo: '',
   o1m5Pre: '', o1m5Post: '', o1m5Flujo: '',
   o1m6Pre: '', o1m6Post: '', o1m6Flujo: '',
-  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '',
+  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '', o1hayObservacion: null,
   // Osmosis 2: 3 membranas
   o2m1Pre: '', o2m1Post: '', o2m1Flujo: '',
   o2m2Pre: '', o2m2Post: '', o2m2Flujo: '',
   o2m3Pre: '', o2m3Post: '', o2m3Flujo: '',
-  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '',
+  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '', o2hayObservacion: null,
 }
 
 const CENTROS_6T_4S = ['CD Dialsur','CD Ñuñoa Quinta Normal','Diamar','HBTL Diálisis','Hosp. Osorno Diálisis','Hosp. San Camilo']
@@ -379,13 +379,13 @@ const semestral6t4sVacio = {
   o1m4Pre: '', o1m4Post: '', o1m4Flujo: '',
   o1m5Pre: '', o1m5Post: '', o1m5Flujo: '',
   o1m6Pre: '', o1m6Post: '', o1m6Flujo: '',
-  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '',
+  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '', o1hayObservacion: null,
   // Osmosis 2: 6 membranas
   o2m1Pre: '', o2m1Post: '', o2m1Flujo: '',
   o2m2Pre: '', o2m2Post: '', o2m2Flujo: '',
   o2m3Pre: '', o2m3Post: '', o2m3Flujo: '',
   o2m4Pre: '', o2m4Post: '', o2m4Flujo: '',
-  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '',
+  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '', o2hayObservacion: null,
 }
 
 const CENTROS_7M_4S = ['CD Chacabuco']
@@ -401,13 +401,13 @@ const semestral7m4sVacio = {
   o1m5Pre: '', o1m5Post: '', o1m5Flujo: '',
   o1m6Pre: '', o1m6Post: '', o1m6Flujo: '',
   o1m7Pre: '', o1m7Post: '', o1m7Flujo: '',
-  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '',
+  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '', o1hayObservacion: null,
   // Osmosis 2: 4 membranas
   o2m1Pre: '', o2m1Post: '', o2m1Flujo: '',
   o2m2Pre: '', o2m2Post: '', o2m2Flujo: '',
   o2m3Pre: '', o2m3Post: '', o2m3Flujo: '',
   o2m4Pre: '', o2m4Post: '', o2m4Flujo: '',
-  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '',
+  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '', o2hayObservacion: null,
 }
 
 const CENTROS_8M_5S = ['HCUCH Diálisis']
@@ -424,14 +424,14 @@ const semestral8m5sVacio = {
   o1m6Pre: '', o1m6Post: '', o1m6Flujo: '',
   o1m7Pre: '', o1m7Post: '', o1m7Flujo: '',
   o1m8Pre: '', o1m8Post: '', o1m8Flujo: '',
-  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '',
+  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '', o1hayObservacion: null,
   // Osmosis 2: 4 membranas
   o2m1Pre: '', o2m1Post: '', o2m1Flujo: '',
   o2m2Pre: '', o2m2Post: '', o2m2Flujo: '',
   o2m3Pre: '', o2m3Post: '', o2m3Flujo: '',
   o2m4Pre: '', o2m4Post: '', o2m4Flujo: '',
   o2m5Pre: '', o2m5Post: '', o2m5Flujo: '',
-  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '',
+  o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '', o2observacion: '', o2hayObservacion: null,
 }
 
 const CENTROS_6sCarmen= ['Hosp. El Carmen Hemodiálisis']
@@ -446,7 +446,7 @@ const semestral6sCarmenVacio = {
   o1m4Pre: '', o1m4Post: '', o1m4Flujo: '',
   o1m5Pre: '', o1m5Post: '', o1m5Flujo: '',
   o1m6Pre: '', o1m6Post: '', o1m6Flujo: '',
-  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '',
+  o1cde: '', o1cds: '', o1fp: '', o1fd: '', o1pd: '', o1recomendacion: '', o1observacion: '', o1hayObservacion: null,
 }
 
 const CENTROS_YA_IMPLEMENTADOS = [
@@ -474,8 +474,8 @@ const CENTROS_YA_IMPLEMENTADOS = [
   ...CENTROS_6sCarmen,
 ]
 
-function BloqueObservacion({ titulo, valor, onChange }: { titulo: string, valor: string, onChange: (v: string) => void }) {
-  const [si, setSi] = useState<boolean | null>(valor !== '' ? true : null)
+function BloqueObservacion({ titulo, respuesta, valor, onRespuesta, onChange }: { titulo: string, respuesta: boolean | null, valor: string, onRespuesta: (v: boolean) => void, onChange: (v: string) => void }) {
+  const si = respuesta
   const btn = (activo: boolean) => ({
     padding: '9px 26px', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer',
     border: activo ? '1.5px solid #2196f3' : '1.5px solid #ddd',
@@ -485,8 +485,8 @@ function BloqueObservacion({ titulo, valor, onChange }: { titulo: string, valor:
     <div style={{background:'#fff',borderRadius:12,padding:'1.25rem',border:'1px solid #eef0f5',marginBottom:'1rem'}}>
       <div style={{fontWeight:600,color:'#1a1a2e',marginBottom:'0.75rem',fontSize:14}}>{titulo}</div>
       <div style={{display:'flex',gap:10,marginBottom: si === true ? '1rem' : 0}}>
-        <div onClick={() => setSi(true)} style={btn(si === true)}>Sí</div>
-        <div onClick={() => { setSi(false); onChange('') }} style={btn(si === false)}>No</div>
+        <div onClick={() => onRespuesta(true)} style={btn(si === true)}>Sí</div>
+        <div onClick={() => { onRespuesta(false); onChange('') }} style={btn(si === false)}>No</div>
       </div>
       {si === true && (
         <textarea value={valor} onChange={e => onChange(e.target.value)}
@@ -862,6 +862,7 @@ export default function GerenciaPage() {
     for (const campo of campos) {
       if (!semestral7[campo]) return 'Completa todos los datos de las membranas y la osmosis'
     }
+    if (semestral7.hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
     return null
   }
 
@@ -909,6 +910,8 @@ export default function GerenciaPage() {
     for (const campo of campos) {
       if (!semestral10[campo]) return 'Completa todos los datos de las membranas y las osmosis'
     }
+    if (semestral10.o1hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 1 (Sí o No)'
+    if (semestral10.o2hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 2 (Sí o No)'
     return null
   }
 
@@ -956,6 +959,8 @@ export default function GerenciaPage() {
     for (const campo of campos) {
       if (!semestral9[campo]) return 'Completa todos los datos de las membranas y las osmosis'
     }
+    if (semestral9.o1hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 1 (Sí o No)'
+    if (semestral9.o2hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 2 (Sí o No)'
     return null
   }
 
@@ -1003,6 +1008,8 @@ export default function GerenciaPage() {
     for (const campo of campos) {
       if (!semestral8[campo]) return 'Completa todos los datos de las membranas y las osmosis'
     }
+    if (semestral8.o1hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 1 (Sí o No)'
+    if (semestral8.o2hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 2 (Sí o No)'
     return null
   }
 
@@ -1052,6 +1059,8 @@ export default function GerenciaPage() {
     for (const campo of campos) {
       if (!semestral2[campo]) return 'Completa todos los datos de las membranas y las osmosis'
     }
+    if (semestral2.o1hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 1 (Sí o No)'
+    if (semestral2.o2hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 2 (Sí o No)'
     return null
   }
 
@@ -1099,6 +1108,8 @@ export default function GerenciaPage() {
     for (const campo of campos) {
       if (!semestral6[campo]) return 'Completa todos los datos de las membranas y las osmosis'
     }
+    if (semestral6.o1hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 1 (Sí o No)'
+    if (semestral6.o2hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 2 (Sí o No)'
     return null
   }
 
@@ -1146,6 +1157,8 @@ export default function GerenciaPage() {
     for (const campo of campos) {
       if (!semestral5[campo]) return 'Completa todos los datos de las membranas y las osmosis'
     }
+    if (semestral5.o1hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 1 (Sí o No)'
+    if (semestral5.o2hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 2 (Sí o No)'
     return null
   }
 
@@ -1189,6 +1202,7 @@ export default function GerenciaPage() {
     for (const campo of campos) {
       if (!semestral4[campo]) return 'Completa todos los datos de las membranas y las salidas'
     }
+    if (semestral4.hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
     return null
   }
 
@@ -1231,6 +1245,7 @@ export default function GerenciaPage() {
     for (const campo of campos) {
       if (!semestral3[campo]) return 'Completa todos los datos de las membranas y la osmosis'
     }
+    if (semestral3.hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
     return null
   }
 
@@ -1281,6 +1296,7 @@ export default function GerenciaPage() {
     for (const campo of campos) {
       if (!semestral[campo]) return 'Completa todos los datos de las membranas y la osmosis'
     }
+    if (semestral.hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
     return null
   }
 
@@ -1323,6 +1339,7 @@ export default function GerenciaPage() {
     for (const campo of campos) {
       if (!semestral11[campo]) return 'Completa todos los datos de las membranas y la osmosis'
     }
+    if (semestral11.hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
     return null
   }
 
@@ -1370,6 +1387,8 @@ const validarSemestral12 = () => {
   for (const campo of campos) {
     if (!semestral12[campo]) return 'Completa todos los datos de las membranas y las osmosis'
   }
+  if (semestral12.o1hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 1 (Sí o No)'
+  if (semestral12.o2hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 2 (Sí o No)'
   return null
 }
 
@@ -1417,6 +1436,8 @@ const validarSemestral13 = () => {
   for (const campo of campos) {
     if (!semestral13[campo]) return 'Completa todos los datos de las membranas y las osmosis'
   }
+  if (semestral13.o1hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 1 (Sí o No)'
+  if (semestral13.o2hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 2 (Sí o No)'
   return null
 }
 
@@ -1470,6 +1491,7 @@ const validarSemestral6ot4m = () => {
   for (const campo of campos) {
     if (!semestral6ot4m[campo]) return 'Completa todos los datos de las membranas y osmosis'
   }
+  if (semestral.hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
   return null
 }
 
@@ -1524,6 +1546,7 @@ const validarSemestral5m4m = () => {
   for (const campo of campos) {
     if (!semestral5m4m[campo]) return 'Completa todos los datos de las membranas y osmosis'
   }
+  if (semestral.hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
   return null
 }
 
@@ -1578,6 +1601,7 @@ const validarSemestral6m6m = () => {
   for (const campo of campos) {
     if (!semestral6m6m[campo]) return 'Completa todos los datos de las membranas y osmosis'
   }
+  if (semestral.hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
   return null
 }
 
@@ -1627,6 +1651,7 @@ const validarSemestral6m = () => {
   for (const campo of campos) {
     if (!semestral6m[campo]) return 'Completa todos los datos de las membranas y la osmosis'
   }
+  if (semestral.hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
   return null
 }
 
@@ -1714,6 +1739,7 @@ const validarSemestral6t3s = () => {
   for (const campo of campos) {
     if (!semestral6t3s[campo]) return 'Completa todos los datos de las membranas y osmosis'
   }
+  if (semestral.hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
   return null
 }
 
@@ -1768,6 +1794,7 @@ const validarSemestral6t4s = () => {
   for (const campo of campos) {
     if (!semestral6t4s[campo]) return 'Completa todos los datos de las membranas y osmosis'
   }
+  if (semestral.hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
   return null
 }
 
@@ -1822,6 +1849,7 @@ const validarSemestral7m4s = () => {
   for (const campo of campos) {
     if (!semestral7m4s[campo]) return 'Completa todos los datos de las membranas y osmosis'
   }
+  if (semestral.hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
   return null
 }
 
@@ -1876,6 +1904,7 @@ const validarSemestral8m5s = () => {
   for (const campo of campos) {
     if (!semestral8m5s[campo]) return 'Completa todos los datos de las membranas y osmosis'
   }
+  if (semestral.hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
   return null
 }
 
@@ -1928,6 +1957,7 @@ const validarSemestral6sCarmen = () => {
   for (const campo of campos) {
     if (!semestral6sCarmen[campo]) return 'Completa todos los datos de las membranas y osmosis'
   }
+  if (semestral.hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
   return null
 }
 
@@ -3090,7 +3120,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                   rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación" valor={semestral.observacion} onChange={v => setS('observacion', v)} />
+            <BloqueObservacion titulo="Observación" respuesta={semestral.hayObservacion} valor={semestral.observacion} onRespuesta={v => setS('hayObservacion', v)} onChange={v => setS('observacion', v)} />
 
             <button onClick={handleGenerarSemestral} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
@@ -3159,7 +3189,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral5.o1recomendacion} onChange={e => setS5('o1recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 1" valor={semestral5.o1observacion} onChange={v => setS5('o1observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 1" respuesta={semestral5.o1hayObservacion} valor={semestral5.o1observacion} onRespuesta={v => setS5('o1hayObservacion', v)} onChange={v => setS5('o1observacion', v)} />
 
             <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 2 · agua blanda (3 membranas)</div>
 
@@ -3205,7 +3235,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral5.o2recomendacion} onChange={e => setS5('o2recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 2" valor={semestral5.o2observacion} onChange={v => setS5('o2observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 2" respuesta={semestral5.o2hayObservacion} valor={semestral5.o2observacion} onRespuesta={v => setS5('o2hayObservacion', v)} onChange={v => setS5('o2observacion', v)} />
 
             <button onClick={handleGenerarSemestral5} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
@@ -3303,7 +3333,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral4.recomendacion} onChange={e => setS4('recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación" valor={semestral4.observacion} onChange={v => setS4('observacion', v)} />
+            <BloqueObservacion titulo="Observación" respuesta={semestral4.hayObservacion} valor={semestral4.observacion} onRespuesta={v => setS4('hayObservacion', v)} onChange={v => setS4('observacion', v)} />
 
             <button onClick={handleGenerarSemestral4} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
@@ -3372,7 +3402,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral2.o1recomendacion} onChange={e => setS2('o1recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 1" valor={semestral2.o1observacion} onChange={v => setS2('o1observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 1" respuesta={semestral2.o1hayObservacion} valor={semestral2.o1observacion} onRespuesta={v => setS2('o1hayObservacion', v)} onChange={v => setS2('o1observacion', v)} />
 
             <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 2 · agua blanda (4 membranas)</div>
 
@@ -3418,7 +3448,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral2.o2recomendacion} onChange={e => setS2('o2recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 2" valor={semestral2.o2observacion} onChange={v => setS2('o2observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 2" respuesta={semestral2.o2hayObservacion} valor={semestral2.o2observacion} onRespuesta={v => setS2('o2hayObservacion', v)} onChange={v => setS2('o2observacion', v)} />
 
             <button onClick={handleGenerarSemestral2} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
@@ -3488,7 +3518,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral3.recomendacion} onChange={e => setS3('recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación" valor={semestral3.observacion} onChange={v => setS3('observacion', v)} />
+            <BloqueObservacion titulo="Observación" respuesta={semestral3.hayObservacion} valor={semestral3.observacion} onRespuesta={v => setS3('hayObservacion', v)} onChange={v => setS3('observacion', v)} />
             <button onClick={handleGenerarSemestral3} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
             </button>
@@ -3557,7 +3587,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral6.o1recomendacion} onChange={e => setS6('o1recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 1" valor={semestral6.o1observacion} onChange={v => setS6('o1observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 1" respuesta={semestral6.o1hayObservacion} valor={semestral6.o1observacion} onRespuesta={v => setS6('o1hayObservacion', v)} onChange={v => setS6('o1observacion', v)} />
 
             <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 2 (2 membranas)</div>
 
@@ -3603,7 +3633,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral6.o2recomendacion} onChange={e => setS6('o2recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 2" valor={semestral6.o2observacion} onChange={v => setS6('o2observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 2" respuesta={semestral6.o2hayObservacion} valor={semestral6.o2observacion} onRespuesta={v => setS6('o2hayObservacion', v)} onChange={v => setS6('o2observacion', v)} />
 
             <button onClick={handleGenerarSemestral6} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
@@ -3674,7 +3704,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral7.recomendacion} onChange={e => setS7('recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación" valor={semestral7.observacion} onChange={v => setS7('observacion', v)} />
+            <BloqueObservacion titulo="Observación" respuesta={semestral7.hayObservacion} valor={semestral7.observacion} onRespuesta={v => setS7('hayObservacion', v)} onChange={v => setS7('observacion', v)} />
 
             <button onClick={handleGenerarSemestral7} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
@@ -3743,7 +3773,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral8.o1recomendacion} onChange={e => setS8('o1recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 1" valor={semestral8.o1observacion} onChange={v => setS8('o1observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 1" respuesta={semestral8.o1hayObservacion} valor={semestral8.o1observacion} onRespuesta={v => setS8('o1hayObservacion', v)} onChange={v => setS8('o1observacion', v)} />
 
             <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 2 (2 membranas)</div>
 
@@ -3789,7 +3819,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral8.o2recomendacion} onChange={e => setS8('o2recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 2" valor={semestral8.o2observacion} onChange={v => setS8('o2observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 2" respuesta={semestral8.o2hayObservacion} valor={semestral8.o2observacion} onRespuesta={v => setS8('o2hayObservacion', v)} onChange={v => setS8('o2observacion', v)} />
 
             <button onClick={handleGenerarSemestral8} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
@@ -3858,7 +3888,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral9.o1recomendacion} onChange={e => setS9('o1recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 1" valor={semestral9.o1observacion} onChange={v => setS9('o1observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 1" respuesta={semestral9.o1hayObservacion} valor={semestral9.o1observacion} onRespuesta={v => setS9('o1hayObservacion', v)} onChange={v => setS9('o1observacion', v)} />
 
             <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 2 (3 membranas)</div>
 
@@ -3904,7 +3934,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral9.o2recomendacion} onChange={e => setS9('o2recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 2" valor={semestral9.o2observacion} onChange={v => setS9('o2observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 2" respuesta={semestral9.o2hayObservacion} valor={semestral9.o2observacion} onRespuesta={v => setS9('o2hayObservacion', v)} onChange={v => setS9('o2observacion', v)} />
 
             <button onClick={handleGenerarSemestral9} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
@@ -3973,7 +4003,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral10.o1recomendacion} onChange={e => setS10('o1recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 1" valor={semestral10.o1observacion} onChange={v => setS10('o1observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 1" respuesta={semestral10.o1hayObservacion} valor={semestral10.o1observacion} onRespuesta={v => setS10('o1hayObservacion', v)} onChange={v => setS10('o1observacion', v)} />
 
             <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 2 (4 membranas)</div>
 
@@ -4019,7 +4049,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral10.o2recomendacion} onChange={e => setS10('o2recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 2" valor={semestral10.o2observacion} onChange={v => setS10('o2observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 2" respuesta={semestral10.o2hayObservacion} valor={semestral10.o2observacion} onRespuesta={v => setS10('o2hayObservacion', v)} onChange={v => setS10('o2observacion', v)} />
 
             <button onClick={handleGenerarSemestral10} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
@@ -4089,7 +4119,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral11.recomendacion} onChange={e => setS11('recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación" valor={semestral11.observacion} onChange={v => setS11('observacion', v)} />
+            <BloqueObservacion titulo="Observación" respuesta={semestral11.hayObservacion} valor={semestral11.observacion} onRespuesta={v => setS11('hayObservacion', v)} onChange={v => setS11('observacion', v)} />
 
             <button onClick={handleGenerarSemestral11} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
@@ -4158,7 +4188,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral12.o1recomendacion} onChange={e => setS12('o1recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 1" valor={semestral12.o1observacion} onChange={v => setS12('o1observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 1" respuesta={semestral12.o1hayObservacion} valor={semestral12.o1observacion} onRespuesta={v => setS12('o1hayObservacion', v)} onChange={v => setS12('o1observacion', v)} />
 
             <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 2 · agua blanda (2 membranas)</div>
 
@@ -4204,7 +4234,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral12.o2recomendacion} onChange={e => setS12('o2recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 2" valor={semestral12.o2observacion} onChange={v => setS12('o2observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 2" respuesta={semestral12.o2hayObservacion} valor={semestral12.o2observacion} onRespuesta={v => setS12('o2hayObservacion', v)} onChange={v => setS12('o2observacion', v)} />
 
             <button onClick={handleGenerarSemestral12} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
@@ -4273,7 +4303,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral13.o1recomendacion} onChange={e => setS13('o1recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 1" valor={semestral13.o1observacion} onChange={v => setS13('o1observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 1" respuesta={semestral13.o1hayObservacion} valor={semestral13.o1observacion} onRespuesta={v => setS13('o1hayObservacion', v)} onChange={v => setS13('o1observacion', v)} />
 
             <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 2 · agua blanda (3 membranas)</div>
 
@@ -4319,7 +4349,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral13.o2recomendacion} onChange={e => setS13('o2recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 2" valor={semestral13.o2observacion} onChange={v => setS13('o2observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 2" respuesta={semestral13.o2hayObservacion} valor={semestral13.o2observacion} onRespuesta={v => setS13('o2hayObservacion', v)} onChange={v => setS13('o2observacion', v)} />
 
             <button onClick={handleGenerarSemestral13} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
@@ -4389,7 +4419,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral5m4m.o1recomendacion} onChange={e => setS5m4m('o1recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 1" valor={semestral5m4m.o1observacion} onChange={v => setS5m4m('o1observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 1" respuesta={semestral5m4m.o1hayObservacion} valor={semestral5m4m.o1observacion} onRespuesta={v => setS5m4m('o1hayObservacion', v)} onChange={v => setS5m4m('o1observacion', v)} />
 
             <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 2 (4 membranas)</div>
 
@@ -4435,7 +4465,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral5m4m.o2recomendacion} onChange={e => setS5m4m('o2recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 2" valor={semestral5m4m.o2observacion} onChange={v => setS5m4m('o2observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 2" respuesta={semestral5m4m.o2hayObservacion} valor={semestral5m4m.o2observacion} onRespuesta={v => setS5m4m('o2hayObservacion', v)} onChange={v => setS5m4m('o2observacion', v)} />
 
             <button onClick={handleGenerarSemestral5m4m} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
@@ -4504,7 +4534,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral6ot4m.o1recomendacion} onChange={e => setS6ot4m('o1recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 1" valor={semestral6ot4m.o1observacion} onChange={v => setS6ot4m('o1observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 1" respuesta={semestral6ot4m.o1hayObservacion} valor={semestral6ot4m.o1observacion} onRespuesta={v => setS6ot4m('o1hayObservacion', v)} onChange={v => setS6ot4m('o1observacion', v)} />
 
             <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 2 · agua blanda (4 membranas)</div>
 
@@ -4550,7 +4580,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral6ot4m.o2recomendacion} onChange={e => setS6ot4m('o2recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 2" valor={semestral6ot4m.o2observacion} onChange={v => setS6ot4m('o2observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 2" respuesta={semestral6ot4m.o2hayObservacion} valor={semestral6ot4m.o2observacion} onRespuesta={v => setS6ot4m('o2hayObservacion', v)} onChange={v => setS6ot4m('o2observacion', v)} />
 
             <button onClick={handleGenerarSemestral6ot4m} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
@@ -4619,7 +4649,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral6m6m.o1recomendacion} onChange={e => setS6m6m('o1recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 1" valor={semestral6m6m.o1observacion} onChange={v => setS6m6m('o1observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 1" respuesta={semestral6m6m.o1hayObservacion} valor={semestral6m6m.o1observacion} onRespuesta={v => setS6m6m('o1hayObservacion', v)} onChange={v => setS6m6m('o1observacion', v)} />
 
             <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 2 (6 membranas)</div>
 
@@ -4665,7 +4695,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral6m6m.o2recomendacion} onChange={e => setS6m6m('o2recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 2" valor={semestral6m6m.o2observacion} onChange={v => setS6m6m('o2observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 2" respuesta={semestral6m6m.o2hayObservacion} valor={semestral6m6m.o2observacion} onRespuesta={v => setS6m6m('o2hayObservacion', v)} onChange={v => setS6m6m('o2observacion', v)} />
 
             <button onClick={handleGenerarSemestral6m6m} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
@@ -4735,7 +4765,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral6m.o1recomendacion} onChange={e => setS6m('o1recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 1" valor={semestral6m.o1observacion} onChange={v => setS6m('o1observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 1" respuesta={semestral6m.o1hayObservacion} valor={semestral6m.o1observacion} onRespuesta={v => setS6m('o1hayObservacion', v)} onChange={v => setS6m('o1observacion', v)} />
 
             <button onClick={handleGenerarSemestral6m} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
@@ -4804,7 +4834,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral6t3s.o1recomendacion} onChange={e => setS6t3s('o1recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 1" valor={semestral6t3s.o1observacion} onChange={v => setS6t3s('o1observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 1" respuesta={semestral6t3s.o1hayObservacion} valor={semestral6t3s.o1observacion} onRespuesta={v => setS6t3s('o1hayObservacion', v)} onChange={v => setS6t3s('o1observacion', v)} />
 
             <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 2 · agua blanda (3 membranas)</div>
 
@@ -4850,7 +4880,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral6t3s.o2recomendacion} onChange={e => setS6t3s('o2recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 2" valor={semestral6t3s.o2observacion} onChange={v => setS6t3s('o2observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 2" respuesta={semestral6t3s.o2hayObservacion} valor={semestral6t3s.o2observacion} onRespuesta={v => setS6t3s('o2hayObservacion', v)} onChange={v => setS6t3s('o2observacion', v)} />
 
             <button onClick={handleGenerarSemestral6t3s} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
@@ -4919,7 +4949,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral6t4s.o1recomendacion} onChange={e => setS6t4s('o1recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 1" valor={semestral6t4s.o1observacion} onChange={v => setS6t4s('o1observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 1" respuesta={semestral6t4s.o1hayObservacion} valor={semestral6t4s.o1observacion} onRespuesta={v => setS6t4s('o1hayObservacion', v)} onChange={v => setS6t4s('o1observacion', v)} />
 
             <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 2 (4 membranas)</div>
 
@@ -4965,7 +4995,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral6t4s.o2recomendacion} onChange={e => setS6t4s('o2recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 2" valor={semestral6t4s.o2observacion} onChange={v => setS6t4s('o2observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 2" respuesta={semestral6t4s.o2hayObservacion} valor={semestral6t4s.o2observacion} onRespuesta={v => setS6t4s('o2hayObservacion', v)} onChange={v => setS6t4s('o2observacion', v)} />
 
             <button onClick={handleGenerarSemestral6t4s} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
@@ -5034,7 +5064,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral7m4s.o1recomendacion} onChange={e => setS7m4s('o1recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 1" valor={semestral7m4s.o1observacion} onChange={v => setS7m4s('o1observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 1" respuesta={semestral7m4s.o1hayObservacion} valor={semestral7m4s.o1observacion} onRespuesta={v => setS7m4s('o1hayObservacion', v)} onChange={v => setS7m4s('o1observacion', v)} />
 
             <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 2 (4 membranas)</div>
 
@@ -5080,7 +5110,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral7m4s.o2recomendacion} onChange={e => setS7m4s('o2recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 2" valor={semestral7m4s.o2observacion} onChange={v => setS7m4s('o2observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 2" respuesta={semestral7m4s.o2hayObservacion} valor={semestral7m4s.o2observacion} onRespuesta={v => setS7m4s('o2hayObservacion', v)} onChange={v => setS7m4s('o2observacion', v)} />
 
             <button onClick={handleGenerarSemestral7m4s} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
@@ -5149,7 +5179,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral8m5s.o1recomendacion} onChange={e => setS8m5s('o1recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 1" valor={semestral8m5s.o1observacion} onChange={v => setS8m5s('o1observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 1" respuesta={semestral8m5s.o1hayObservacion} valor={semestral8m5s.o1observacion} onRespuesta={v => setS8m5s('o1hayObservacion', v)} onChange={v => setS8m5s('o1observacion', v)} />
 
             <div style={{background:'#e8f4fd',borderRadius:12,padding:'12px 16px',marginBottom:'1rem',fontSize:14,fontWeight:600,color:'#1a3a6b'}}>Osmosis Reversa 2 (5 membranas)</div>
 
@@ -5195,7 +5225,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral8m5s.o2recomendacion} onChange={e => setS8m5s('o2recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 2" valor={semestral8m5s.o2observacion} onChange={v => setS8m5s('o2observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 2" respuesta={semestral8m5s.o2hayObservacion} valor={semestral8m5s.o2observacion} onRespuesta={v => setS8m5s('o2hayObservacion', v)} onChange={v => setS8m5s('o2observacion', v)} />
 
             <button onClick={handleGenerarSemestral8m5s} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
@@ -5264,7 +5294,7 @@ const handleGenerarSemestral6sCarmen = async () => {
                 <textarea value={semestral6sCarmen.o1recomendacion} onChange={e => setS6sCarmen('o1recomendacion', e.target.value)} placeholder="Si lo dejas vacío, dirá 'Recomendación pendiente.'" rows={3} style={{width:'100%',padding:'11px',border:'1.5px solid #ddd',borderRadius:8,fontSize:14,resize:'vertical'}} />
               </div>
             )}
-            <BloqueObservacion titulo="Observación Osmosis 1" valor={semestral6sCarmen.o1observacion} onChange={v => setS6sCarmen('o1observacion', v)} />
+            <BloqueObservacion titulo="Observación Osmosis 1" respuesta={semestral6sCarmen.o1hayObservacion} valor={semestral6sCarmen.o1observacion} onRespuesta={v => setS6sCarmen('o1hayObservacion', v)} onChange={v => setS6sCarmen('o1observacion', v)} />
 
             <button onClick={handleGenerarSemestral6sCarmen} disabled={generandoSemestral} style={{width:isMobile?'100%':'auto',padding:'14px 32px',background:'linear-gradient(135deg, #1a3a6b 0%, #2196f3 100%)',color:'#fff',border:'none',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:'1.5rem'}}>
               {generandoSemestral ? '⏳ Generando informe...' : '📄 Generar informe'}
