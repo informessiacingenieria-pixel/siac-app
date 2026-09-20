@@ -174,7 +174,7 @@ const semestral6Vacio = {
   o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '',
 }
 
-const CENTROS_4S1O = ['CD Interdial','CD Nueva Vida Los Angeles','Hosp. Lautaro Antiguo','Hosp. Luis Calvo Mackenna Diálisis','Red Dialisis']
+const CENTROS_4S1O = ['CD Nueva Vida Los Angeles','Hosp. Lautaro Antiguo','Hosp. Luis Calvo Mackenna Diálisis','Red Dialisis']
 
 const semestral7Vacio = {
   cliente: '',
@@ -230,7 +230,7 @@ const semestral10Vacio = {
   o2cde: '', o2cds: '', o2fp: '', o2fd: '', o2pd: '', o2recomendacion: '',
 }
 
-const CENTROS_5S1O = ['CD Vidadial Lanco','CD Vidadial Paillaco']
+const CENTROS_5S1O = ['CD Interdial','CD Vidadial Lanco','CD Vidadial Paillaco']
 
 const semestral11Vacio = {
   cliente: '',
