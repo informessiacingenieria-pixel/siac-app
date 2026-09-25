@@ -1842,6 +1842,7 @@ const handleGenerarSemestral6m = async () => {
       fd: semestral6m.o1fd,
       pd: semestral6m.o1pd,
       recomendacion: semestral6m.o1recomendacion || '',
+      observacion: semestral6m.o1observacion || '',
       tecnicoResponsable: 'Baldomero Urriola',
     }
     const blob = await generarPdfSemestral6s1oBlob(datosPdf)
@@ -2179,6 +2180,7 @@ const handleGenerarSemestral6sCarmen = async () => {
       cde: semestral6sCarmen.o1cde, cds: semestral6sCarmen.o1cds,
       fp: semestral6sCarmen.o1fp, fd: semestral6sCarmen.o1fd, pd: semestral6sCarmen.o1pd,
       recomendacion: semestral6sCarmen.o1recomendacion,
+      observacion: semestral6sCarmen.o1observacion || '',
       tecnicoResponsable: 'Baldomero Urriola',
     }
     const blob = await generarPdfSemestral6sCarmenBlob(datosPdf)
