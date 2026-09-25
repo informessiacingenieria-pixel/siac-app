@@ -1608,7 +1608,8 @@ const validarSemestral6ot4m = () => {
   for (const campo of campos) {
     if (!semestral6ot4m[campo]) return 'Completa todos los datos de las membranas y osmosis'
   }
-  if (semestral.hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
+  if (semestral6ot4m.o1hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 1 (Sí o No)'
+  if (semestral6ot4m.o2hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 2 (Sí o No)'
   return null
 }
 
@@ -1672,7 +1673,8 @@ const validarSemestral5m4m = () => {
   for (const campo of campos) {
     if (!semestral5m4m[campo]) return 'Completa todos los datos de las membranas y osmosis'
   }
-  if (semestral.hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
+  if (semestral5m4m.o1hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 1 (Sí o No)'
+  if (semestral5m4m.o2hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 2 (Sí o No)'
   return null
 }
 
@@ -1736,7 +1738,8 @@ const validarSemestral6m6m = () => {
   for (const campo of campos) {
     if (!semestral6m6m[campo]) return 'Completa todos los datos de las membranas y osmosis'
   }
-  if (semestral.hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
+  if (semestral6m6m.o1hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 1 (Sí o No)'
+  if (semestral6m6m.o2hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 2 (Sí o No)'
   return null
 }
 
@@ -1795,7 +1798,7 @@ const validarSemestral6m = () => {
   for (const campo of campos) {
     if (!semestral6m[campo]) return 'Completa todos los datos de las membranas y la osmosis'
   }
-  if (semestral.hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
+  if (semestral6m.o1hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
   return null
 }
 
@@ -1892,7 +1895,8 @@ const validarSemestral6t3s = () => {
   for (const campo of campos) {
     if (!semestral6t3s[campo]) return 'Completa todos los datos de las membranas y osmosis'
   }
-  if (semestral.hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
+  if (semestral6t3s.o1hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 1 (Sí o No)'
+  if (semestral6t3s.o2hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 2 (Sí o No)'
   return null
 }
 
@@ -1956,7 +1960,8 @@ const validarSemestral6t4s = () => {
   for (const campo of campos) {
     if (!semestral6t4s[campo]) return 'Completa todos los datos de las membranas y osmosis'
   }
-  if (semestral.hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
+  if (semestral6t4s.o1hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 1 (Sí o No)'
+  if (semestral6t4s.o2hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 2 (Sí o No)'
   return null
 }
 
@@ -2020,7 +2025,8 @@ const validarSemestral7m4s = () => {
   for (const campo of campos) {
     if (!semestral7m4s[campo]) return 'Completa todos los datos de las membranas y osmosis'
   }
-  if (semestral.hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
+  if (semestral7m4s.o1hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 1 (Sí o No)'
+  if (semestral7m4s.o2hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 2 (Sí o No)'
   return null
 }
 
@@ -2084,7 +2090,8 @@ const validarSemestral8m5s = () => {
   for (const campo of campos) {
     if (!semestral8m5s[campo]) return 'Completa todos los datos de las membranas y osmosis'
   }
-  if (semestral.hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
+  if (semestral8m5s.o1hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 1 (Sí o No)'
+  if (semestral8m5s.o2hayObservacion === null) return 'Responde si hay observaciones en la Osmosis 2 (Sí o No)'
   return null
 }
 
@@ -2146,7 +2153,7 @@ const validarSemestral6sCarmen = () => {
   for (const campo of campos) {
     if (!semestral6sCarmen[campo]) return 'Completa todos los datos de las membranas y osmosis'
   }
-  if (semestral.hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
+  if (semestral6sCarmen.o1hayObservacion === null) return 'Responde si hay observaciones (Sí o No)'
   return null
 }
 
