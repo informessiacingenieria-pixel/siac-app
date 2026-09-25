@@ -884,6 +884,15 @@ export default function GerenciaPage() {
         cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
         tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
       })
+      pasoActual = 'enviando correo'
+      await fetch('/api/enviar-informe-semestral', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pdfUrl, tecnicoNombre: 'Baldomero Urriola', cliente: semestral.cliente,
+          diaInforme: semestral7.diaInforme, mesInforme: semestral7.mesInforme, anioInforme: semestral7.anioInforme,
+        }),
+      })
       setExitoSemestral(true)
       setTimeout(() => setExitoSemestral(false), 4000)
       setSemestral7(semestral7Vacio)
@@ -932,6 +941,15 @@ export default function GerenciaPage() {
         uid: 'gerencia', tecnico: 'Baldomero Urriola', email: user.email,
         cliente: 'Hosp. Salvador Diálisis', fechaInforme: fechaInformeTexto,
         tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
+      })
+      pasoActual = 'enviando correo'
+      await fetch('/api/enviar-informe-semestral', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pdfUrl, tecnicoNombre: 'Baldomero Urriola', cliente: 'Hosp. Salvador Diálisis',
+          diaInforme: semestral10.diaInforme, mesInforme: semestral10.mesInforme, anioInforme: semestral10.anioInforme,
+        }),
       })
       setExitoSemestral(true)
       setTimeout(() => setExitoSemestral(false), 4000)
@@ -982,6 +1000,15 @@ export default function GerenciaPage() {
         cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
         tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
       })
+      pasoActual = 'enviando correo'
+      await fetch('/api/enviar-informe-semestral', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pdfUrl, tecnicoNombre: 'Baldomero Urriola', cliente: semestral.cliente,
+          diaInforme: semestral9.diaInforme, mesInforme: semestral9.mesInforme, anioInforme: semestral9.anioInforme,
+        }),
+      })
       setExitoSemestral(true)
       setTimeout(() => setExitoSemestral(false), 4000)
       setSemestral9(semestral9Vacio)
@@ -1030,6 +1057,15 @@ export default function GerenciaPage() {
         uid: 'gerencia', tecnico: 'Baldomero Urriola', email: user.email,
         cliente: 'HCUCH Abla. y Panta Estéril', fechaInforme: fechaInformeTexto,
         tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
+      })
+      pasoActual = 'enviando correo'
+      await fetch('/api/enviar-informe-semestral', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pdfUrl, tecnicoNombre: 'Baldomero Urriola', cliente: 'HCUCH Abla. y Panta Estéril',
+          diaInforme: semestral8.diaInforme, mesInforme: semestral8.mesInforme, anioInforme: semestral8.anioInforme,
+        }),
       })
       setExitoSemestral(true)
       setTimeout(() => setExitoSemestral(false), 4000)
@@ -1082,6 +1118,15 @@ export default function GerenciaPage() {
         cliente: 'CD Pacifico', fechaInforme: fechaInformeTexto,
         tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
       })
+      pasoActual = 'enviando correo'
+      await fetch('/api/enviar-informe-semestral', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pdfUrl, tecnicoNombre: 'Baldomero Urriola', cliente: 'CD Pacifico',
+          diaInforme: semestral2.diaInforme, mesInforme: semestral2.mesInforme, anioInforme: semestral2.anioInforme,
+        }),
+      })
       setExitoSemestral(true)
       setTimeout(() => setExitoSemestral(false), 4000)
       setSemestral2(semestral2Vacio)
@@ -1130,6 +1175,15 @@ export default function GerenciaPage() {
         uid: 'gerencia', tecnico: 'Baldomero Urriola', email: user.email,
         cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
         tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
+      })
+      pasoActual = 'enviando correo'
+      await fetch('/api/enviar-informe-semestral', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pdfUrl, tecnicoNombre: 'Baldomero Urriola', cliente: semestral.cliente,
+          diaInforme: semestral6.diaInforme, mesInforme: semestral6.mesInforme, anioInforme: semestral6.anioInforme,
+        }),
       })
       setExitoSemestral(true)
       setTimeout(() => setExitoSemestral(false), 4000)
@@ -1180,6 +1234,15 @@ export default function GerenciaPage() {
         cliente: 'Ctro. Nefro. Puerto Montt', fechaInforme: fechaInformeTexto,
         tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
       })
+      pasoActual = 'enviando correo'
+      await fetch('/api/enviar-informe-semestral', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pdfUrl, tecnicoNombre: 'Baldomero Urriola', cliente: 'Ctro. Nefro. Puerto Montt',
+          diaInforme: semestral5.diaInforme, mesInforme: semestral5.mesInforme, anioInforme: semestral5.anioInforme,
+        }),
+      })
       setExitoSemestral(true)
       setTimeout(() => setExitoSemestral(false), 4000)
       setSemestral5(semestral5Vacio)
@@ -1224,6 +1287,15 @@ export default function GerenciaPage() {
         cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
         tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
       })
+      pasoActual = 'enviando correo'
+      await fetch('/api/enviar-informe-semestral', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pdfUrl, tecnicoNombre: 'Baldomero Urriola', cliente: semestral.cliente,
+          diaInforme: semestral4.diaInforme, mesInforme: semestral4.mesInforme, anioInforme: semestral4.anioInforme,
+        }),
+      })
       setExitoSemestral(true)
       setTimeout(() => setExitoSemestral(false), 4000)
       setSemestral4(semestral4Vacio)
@@ -1266,6 +1338,15 @@ export default function GerenciaPage() {
         uid: 'gerencia', tecnico: 'Baldomero Urriola', email: user.email,
         cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
         tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
+      })
+      pasoActual = 'enviando correo'
+      await fetch('/api/enviar-informe-semestral', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pdfUrl, tecnicoNombre: 'Baldomero Urriola', cliente: semestral.cliente,
+          diaInforme: semestral3.diaInforme, mesInforme: semestral3.mesInforme, anioInforme: semestral3.anioInforme,
+        }),
       })
       setExitoSemestral(true)
       setTimeout(() => setExitoSemestral(false), 4000)
@@ -1318,6 +1399,15 @@ export default function GerenciaPage() {
         cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
         tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
       })
+      pasoActual = 'enviando correo'
+      await fetch('/api/enviar-informe-semestral', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pdfUrl, tecnicoNombre: 'Baldomero Urriola', cliente: semestral.cliente,
+          diaInforme: semestral.diaInforme, mesInforme: semestral.mesInforme, anioInforme: semestral.anioInforme,
+        }),
+      })
       setExitoSemestral(true)
       setTimeout(() => setExitoSemestral(false), 4000)
       setSemestral(semestralVacio)
@@ -1360,6 +1450,15 @@ export default function GerenciaPage() {
         uid: 'gerencia', tecnico: 'Baldomero Urriola', email: user.email,
         cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
         tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
+      })
+      pasoActual = 'enviando correo'
+      await fetch('/api/enviar-informe-semestral', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pdfUrl, tecnicoNombre: 'Baldomero Urriola', cliente: semestral.cliente,
+          diaInforme: semestral11.diaInforme, mesInforme: semestral11.mesInforme, anioInforme: semestral11.anioInforme,
+        }),
       })
       setExitoSemestral(true)
       setTimeout(() => setExitoSemestral(false), 4000)
@@ -1410,6 +1509,15 @@ const handleGenerarSemestral12 = async () => {
       cliente: 'Hosp. Luis Calvo Mackenna Estéril', fechaInforme: fechaInformeTexto,
       tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
     })
+    pasoActual = 'enviando correo'
+    await fetch('/api/enviar-informe-semestral', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pdfUrl, tecnicoNombre: 'Baldomero Urriola', cliente: 'Hosp. Luis Calvo Mackenna Estéril',
+        diaInforme: semestral12.diaInforme, mesInforme: semestral12.mesInforme, anioInforme: semestral12.anioInforme,
+      }),
+    })
     setExitoSemestral(true)
     setTimeout(() => setExitoSemestral(false), 4000)
     setSemestral12(semestral12Vacio)
@@ -1458,6 +1566,15 @@ const handleGenerarSemestral13 = async () => {
       uid: 'gerencia', tecnico: 'Baldomero Urriola', email: user.email,
       cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
       tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
+    })
+    pasoActual = 'enviando correo'
+    await fetch('/api/enviar-informe-semestral', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pdfUrl, tecnicoNombre: 'Baldomero Urriola', cliente: semestral.cliente,
+        diaInforme: semestral13.diaInforme, mesInforme: semestral13.mesInforme, anioInforme: semestral13.anioInforme,
+      }),
     })
     setExitoSemestral(true)
     setTimeout(() => setExitoSemestral(false), 4000)
@@ -1514,6 +1631,15 @@ const handleGenerarSemestral6ot4m = async () => {
       cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
       tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
     })
+    pasoActual = 'enviando correo'
+    await fetch('/api/enviar-informe-semestral', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pdfUrl, tecnicoNombre: 'Baldomero Urriola', cliente: semestral.cliente,
+        diaInforme: semestral6ot4m.diaInforme, mesInforme: semestral6ot4m.mesInforme, anioInforme: semestral6ot4m.anioInforme,
+      }),
+    })
     setExitoSemestral(true)
     setTimeout(() => setExitoSemestral(false), 4000)
     setSemestral6ot4m(semestral6ot4mVacio)
@@ -1569,6 +1695,15 @@ const handleGenerarSemestral5m4m = async () => {
       cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
       tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
     })
+    pasoActual = 'enviando correo'
+    await fetch('/api/enviar-informe-semestral', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pdfUrl, tecnicoNombre: 'Baldomero Urriola', cliente: semestral.cliente,
+        diaInforme: semestral5m4m.diaInforme, mesInforme: semestral5m4m.mesInforme, anioInforme: semestral5m4m.anioInforme,
+      }),
+    })
     setExitoSemestral(true)
     setTimeout(() => setExitoSemestral(false), 4000)
     setSemestral5m4m(semestral5m4mVacio)
@@ -1623,6 +1758,15 @@ const handleGenerarSemestral6m6m = async () => {
       uid: 'gerencia', tecnico: 'Baldomero Urriola', email: user.email,
       cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
       tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
+    })
+    pasoActual = 'enviando correo'
+    await fetch('/api/enviar-informe-semestral', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pdfUrl, tecnicoNombre: 'Baldomero Urriola', cliente: semestral.cliente,
+        diaInforme: semestral6m6m.diaInforme, mesInforme: semestral6m6m.mesInforme, anioInforme: semestral6m6m.anioInforme,
+      }),
     })
     setExitoSemestral(true)
     setTimeout(() => setExitoSemestral(false), 4000)
@@ -1707,6 +1851,15 @@ const handleGenerarSemestral6m = async () => {
       cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
       tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
     })
+    pasoActual = 'enviando correo'
+    await fetch('/api/enviar-informe-semestral', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pdfUrl, tecnicoNombre: 'Baldomero Urriola', cliente: semestral.cliente,
+        diaInforme: semestral6m.diaInforme, mesInforme: semestral6m.mesInforme, anioInforme: semestral6m.anioInforme,
+      }),
+    })
     setExitoSemestral(true)
     setTimeout(() => setExitoSemestral(false), 4000)
     setSemestral6m(semestral6mVacio)
@@ -1761,6 +1914,15 @@ const handleGenerarSemestral6t3s = async () => {
       uid: 'gerencia', tecnico: 'Baldomero Urriola', email: user.email,
       cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
       tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
+    })
+    pasoActual = 'enviando correo'
+    await fetch('/api/enviar-informe-semestral', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pdfUrl, tecnicoNombre: 'Baldomero Urriola', cliente: semestral.cliente,
+        diaInforme: semestral6t3s.diaInforme, mesInforme: semestral6t3s.mesInforme, anioInforme: semestral6t3s.anioInforme,
+      }),
     })
     setExitoSemestral(true)
     setTimeout(() => setExitoSemestral(false), 4000)
@@ -1817,6 +1979,15 @@ const handleGenerarSemestral6t4s = async () => {
       cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
       tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
     })
+    pasoActual = 'enviando correo'
+    await fetch('/api/enviar-informe-semestral', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pdfUrl, tecnicoNombre: 'Baldomero Urriola', cliente: semestral.cliente,
+        diaInforme: semestral6t4s.diaInforme, mesInforme: semestral6t4s.mesInforme, anioInforme: semestral6t4s.anioInforme,
+      }),
+    })
     setExitoSemestral(true)
     setTimeout(() => setExitoSemestral(false), 4000)
     setSemestral6t4s(semestral6t4sVacio)
@@ -1872,6 +2043,15 @@ const handleGenerarSemestral7m4s = async () => {
       cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
       tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
     })
+    pasoActual = 'enviando correo'
+    await fetch('/api/enviar-informe-semestral', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pdfUrl, tecnicoNombre: 'Baldomero Urriola', cliente: semestral.cliente,
+        diaInforme: semestral7m4s.diaInforme, mesInforme: semestral7m4s.mesInforme, anioInforme: semestral7m4s.anioInforme,
+      }),
+    })
     setExitoSemestral(true)
     setTimeout(() => setExitoSemestral(false), 4000)
     setSemestral7m4s(semestral7m4sVacio)
@@ -1926,6 +2106,15 @@ const handleGenerarSemestral8m5s = async () => {
       uid: 'gerencia', tecnico: 'Baldomero Urriola', email: user.email,
       cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
       tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
+    })
+    pasoActual = 'enviando correo'
+    await fetch('/api/enviar-informe-semestral', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pdfUrl, tecnicoNombre: 'Baldomero Urriola', cliente: semestral.cliente,
+        diaInforme: semestral8m5s.diaInforme, mesInforme: semestral8m5s.mesInforme, anioInforme: semestral8m5s.anioInforme,
+      }),
     })
     setExitoSemestral(true)
     setTimeout(() => setExitoSemestral(false), 4000)
@@ -1994,6 +2183,15 @@ const handleGenerarSemestral6sCarmen = async () => {
       uid: 'gerencia', tecnico: 'Baldomero Urriola', email: user.email,
       cliente: semestral.cliente, fechaInforme: fechaInformeTexto,
       tecnicoResponsable: 'Baldomero Urriola', pdfUrl, creadoEn: Timestamp.now(),
+    })
+    pasoActual = 'enviando correo'
+    await fetch('/api/enviar-informe-semestral', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pdfUrl, tecnicoEmail: user.email, tecnicoNombre: 'Baldomero Urriola', cliente: semestral.cliente,
+        diaInforme: semestral6sCarmen.diaInforme, mesInforme: semestral6sCarmen.mesInforme, anioInforme: semestral6sCarmen.anioInforme,
+      }),
     })
     setExitoSemestral(true)
     setTimeout(() => setExitoSemestral(false), 4000)
